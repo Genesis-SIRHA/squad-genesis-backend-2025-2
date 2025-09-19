@@ -1,15 +1,18 @@
 package model;
 
-import org.apache.catalina.Group;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.validation.constraints.NotBlank;
 import java.util.List;
+import java.util.Objects;
 
 @Document(collection = "courses")
 public class Course {
     @Id
     private String id;
+    @NotBlank
     private String code;
+    @NotBlank
     private String name;
     private List<Group> groups;
 
