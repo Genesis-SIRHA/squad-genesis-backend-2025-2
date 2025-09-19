@@ -64,8 +64,8 @@ Back Proyecto DOSW
 ![img.png](docs/UML/diagramaClases.png)
 ## Pasando a Codigo:
 
-
-
+### Jacoco build
+![img.png](docs/Img/jacoco build.png)
 
 
 
