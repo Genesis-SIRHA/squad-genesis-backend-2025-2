@@ -1,5 +1,6 @@
 package services;
 
+import dto.RequestDTO;
 import dto.RequestResponse;
 import dto.RequestStats;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,6 @@ import model.Request;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -47,9 +47,15 @@ public class RequestService {
     }
     
 
-    public RequestResponse createRequest(Request request) {
+    public RequestResponse createRequest(RequestDTO requestDTO) {
+        Request request = new Request();
         request.setCreatedAt(LocalDateTime.now());
-        request.setUpdatedAt(LocalDateTime.now());
+        request.setStatus("PENDING");
+        request.setType(request.getType());
+        request.setStudentId(request.getStudentId());
+        request.setIsExceptional(request.getIsExceptional());
+        request.setRequestDetails(request.getRequestDetails());
+
         return RequestResponse.fromRequest(requestRepository.save(request));
     }
 
@@ -57,10 +63,9 @@ public class RequestService {
         return requestRepository.findById(id)
             .map(request -> {
                 request.setStatus(status);
-                request.setUpdatedAt(LocalDateTime.now());
                 return requestRepository.save(request);
             })
-            .orElseThrow(() -> new RuntimeException("Solicitud no encontrada con id: " + id));
+            .orElseThrow(() -> new RuntimeException("Request not found with id: " + id));
     }
 
 
