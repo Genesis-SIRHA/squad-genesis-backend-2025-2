@@ -13,6 +13,7 @@ import services.strategy.StudentStrategy;
 import repositories.RequestRepository;
 import model.Request;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -76,6 +77,29 @@ public class RequestService {
         long rejected = requestRepository.countByStatus("REJECTED");
         
         return new RequestStats(total, pending, approved, rejected);
+    }
+    public Request respondToRequest(String requestId, RequestDetails responseDetails) {
+        Request request = repository.findById(requestId);
+
+        if (request != null) {
+            if (request.getRequestDetails() != null) {
+                RequestDetails existingDetails = request.getRequestDetails();
+                existingDetails.setAnswerAt(LocalDate.now());
+                existingDetails.setManagedBy(responseDetails.getManagedBy());
+                existingDetails.setAnswer(responseDetails.getAnswer());
+            } else {
+                responseDetails.setRequestId(requestId);
+                responseDetails.setCreatedAt(new Date().toString());
+                request.setRequestDetails(responseDetails);
+            }
+
+            request.setStatus(responseDetails.getAnswer());
+            repository.update(requestId, request);
+            responseDetails.insert();
+
+            return request;
+        }
+        return null;
     }
 
 }
