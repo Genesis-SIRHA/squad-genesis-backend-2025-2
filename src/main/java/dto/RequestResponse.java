@@ -1,7 +1,7 @@
 package dto;
 
 import model.Request;
-import model.RequestDetails;
+import model.Group;
 
 public record RequestResponse(
         String id,
@@ -10,17 +10,27 @@ public record RequestResponse(
         String createdAt,
         String type,
         Boolean isExceptional,
-        RequestDetailsResponse requestDetails) {
+        String description,
+        GroupResponse originGroup,
+        GroupResponse destinationGroup,
+        String answer,
+        String managedBy,
+        String answerAt) {
 
     public static RequestResponse fromRequest(Request request) {
         return new RequestResponse(
             request.getId(),
+            request.getStudentId(),
             request.getStatus(),
             request.getCreatedAt().toString(),
             request.getType(),
-            request.getStudentId(),
             request.getIsExceptional(),
-            RequestDetailsResponse.fromRequestDetails(request.getRequestDetails())
+            request.getDescription(),
+            request.getOriginGroup() != null ? GroupResponse.fromModel(request.getOriginGroup()) : null,
+            request.getDestinationGroup() != null ? GroupResponse.fromModel(request.getDestinationGroup()) : null,
+            request.getAnswer(),
+            request.getManagedBy(),
+            request.getAnswerAt() != null ? request.getAnswerAt().toString() : null
         );
     }
 }

@@ -14,7 +14,7 @@ public class AdministrativeStrategy implements QueryStrategy {
 
     public List<Request> queryRequests(String userId) {
         List<Request> result = requestRepository.findAllAvailable();
-        result.addAll(requestRepository.findAllOwned(userId));
+        result.addAll(requestRepository.findOwnedBy(userId));
         return result;
     }
 

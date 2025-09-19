@@ -3,8 +3,10 @@ package services;
 import dto.RequestDTO;
 import dto.RequestResponse;
 import dto.RequestStats;
+import model.RequestDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import repositories.CourseRepository;
 import services.strategy.AdministrativeStrategy;
 import services.strategy.AdministratorStrategy;
 import services.strategy.QueryStrategy;
@@ -23,11 +25,13 @@ import java.util.Map;
 public class RequestService {
     
     private final RequestRepository requestRepository;
+    private final CourseRepository courseRepository ;
     private final Map<String, QueryStrategy> strategyMap;
 
     @Autowired
-    public RequestService(RequestRepository requestRepository) {
+    public RequestService(RequestRepository requestRepository,CourseRepository courseRepository) {
         this.requestRepository = requestRepository;
+        this.courseRepository = courseRepository;
         this.strategyMap = Map.of(
             "STUDENT", new StudentStrategy(requestRepository),
             "ADMINISTRATIVE", new AdministrativeStrategy(requestRepository),
@@ -49,13 +53,22 @@ public class RequestService {
     
 
     public RequestResponse createRequest(RequestDTO requestDTO) {
+
         Request request = new Request();
         request.setCreatedAt(LocalDateTime.now());
         request.setStatus("PENDING");
-        request.setType(request.getType());
-        request.setStudentId(request.getStudentId());
-        request.setIsExceptional(request.getIsExceptional());
-        request.setRequestDetails(request.getRequestDetails());
+        request.setType(requestDTO.type());
+        request.setStudentId(requestDTO.studentId());
+        request.setIsExceptional(requestDTO.isExceptional());
+
+        request.setAnswerAt(LocalDate.now());
+        request.setManagedBy(requestDTO.studentId());
+        request.setAnswer(requestDTO.description());
+        request.setAnswerDate(LocalDate.now());
+
+        ;
+        request.setOriginGroup(courseRepository.findByCode(requestDTO.originGroupId()));
+        request.setDestinationGroup(courseRepository.findByCode(requestDTO.destinationGroupId()));
 
         return RequestResponse.fromRequest(requestRepository.save(request));
     }
@@ -75,31 +88,6 @@ public class RequestService {
         long pending = requestRepository.countByStatus("PENDING");
         long approved = requestRepository.countByStatus("APPROVED");
         long rejected = requestRepository.countByStatus("REJECTED");
-        
         return new RequestStats(total, pending, approved, rejected);
     }
-    public Request respondToRequest(String requestId, RequestDetails responseDetails) {
-        Request request = repository.findById(requestId);
-
-        if (request != null) {
-            if (request.getRequestDetails() != null) {
-                RequestDetails existingDetails = request.getRequestDetails();
-                existingDetails.setAnswerAt(LocalDate.now());
-                existingDetails.setManagedBy(responseDetails.getManagedBy());
-                existingDetails.setAnswer(responseDetails.getAnswer());
-            } else {
-                responseDetails.setRequestId(requestId);
-                responseDetails.setCreatedAt(new Date().toString());
-                request.setRequestDetails(responseDetails);
-            }
-
-            request.setStatus(responseDetails.getAnswer());
-            repository.update(requestId, request);
-            responseDetails.insert();
-
-            return request;
-        }
-        return null;
-    }
-
 }

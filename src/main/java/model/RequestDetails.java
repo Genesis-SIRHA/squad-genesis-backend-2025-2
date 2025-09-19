@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 public class RequestDetails {
     @Id
@@ -20,10 +21,18 @@ public class RequestDetails {
     private Group originGroup;
     private Group destinationGroup;
 
-    public RequestDetails(String id, String answer, String description) {
-        this.requestId = id;
+    public RequestDetails(String requestId, String description, Group originGroup, Group destinationGroup) {
+        this.id = UUID.randomUUID().toString();
+        this.requestId = requestId;
         this.createdAt = LocalDate.now();
         this.description = description;
+        this.answer = answer;
+    }
+    
+    public RequestDetails() {
+        this.id = UUID.randomUUID().toString();
+        this.requestId = this.id;
+        this.createdAt = LocalDate.now();
     }
 
     public String getId() {
