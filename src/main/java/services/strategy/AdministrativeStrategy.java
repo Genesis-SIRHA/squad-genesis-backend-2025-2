@@ -1,5 +1,6 @@
 package services.strategy;
 
+import model.Request;
 import repositories.RequestRepository;
 
 import java.util.List;

@@ -65,12 +65,6 @@ public class RequestController {
         return ResponseEntity.ok(requestService.updateRequestStatus(id, status));
     }
 
-    @GetMapping("/search")
-    @Operation(summary = "Search requests", description = "Searches requests by description")
-    public ResponseEntity<List<Request>> searchRequests(@RequestParam String q) {
-        return ResponseEntity.ok(requestService.searchRequests(q));
-    }
-
     @GetMapping("/stats")
     @Operation(summary = "Get request statistics", description = "Retrieves statistics about requests")
     public ResponseEntity<RequestService.RequestStats> getRequestStats() {

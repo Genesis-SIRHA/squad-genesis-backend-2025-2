@@ -1,5 +1,8 @@
 package services.strategy;
 
+import model.Request;
+import repositories.RequestRepository;
+
 import java.util.List;
 
 public class StudentStrategy implements QueryStrategy {

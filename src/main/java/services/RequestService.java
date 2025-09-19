@@ -7,7 +7,7 @@ import services.strategy.AdministratorStrategy;
 import services.strategy.QueryStrategy;
 import services.strategy.StudentStrategy;
 
-import repositories.Wuwu;
+import repositories.RequestRepository;
 import model.Request;
 import java.util.Comparator;
 import java.util.Date;
@@ -17,16 +17,16 @@ import java.util.Map;
 @Service
 public class RequestService {
     
-    private final Wuwu wuwu;
+    private final RequestRepository requestRepository;
     private final Map<String, QueryStrategy> strategyMap;
 
     @Autowired
-    public RequestService(Wuwu wuwu) {
-        this.wuwu = wuwu;
+    public RequestService(RequestRepository requestRepository) {
+        this.requestRepository = requestRepository;
         this.strategyMap = Map.of(
-            "STUDENT", new StudentStrategy(wuwu),
-            "ADMINISTRATIVE", new AdministrativeStrategy(wuwu),
-            "ADMINISTRATOR", new AdministratorStrategy(wuwu)
+            "STUDENT", new StudentStrategy(requestRepository),
+            "ADMINISTRATIVE", new AdministrativeStrategy(requestRepository),
+            "ADMINISTRATOR", new AdministratorStrategy(requestRepository)
         );
     }
 
@@ -47,32 +47,32 @@ public class RequestService {
         // Asegurarse de que las fechas estén establecidas
         request.setCreatedAt(new Date());
         request.setUpdatedAt(new Date());
-        return wuwu.save(request);
+        return requestRepository.save(request);
     }
 
     public Request updateRequestStatus(String id, String status) {
-        return wuwu.findById(id)
+        return requestRepository.findById(id)
             .map(request -> {
                 request.setStatus(status);
                 request.setUpdatedAt(new Date());
-                return wuwu.save(request);
+                return requestRepository.save(request);
             })
             .orElseThrow(() -> new RuntimeException("Solicitud no encontrada con id: " + id));
     }
 
 
     public RequestStats getRequestStats() {
-        long total = wuwu.count();
-        long pending = wuwu.countByStatus("PENDING");
-        long approved = wuwu.countByStatus("APPROVED");
-        long rejected = wuwu.countByStatus("REJECTED");
+        long total = requestRepository.count();
+        long pending = requestRepository.countByStatus("PENDING");
+        long approved = requestRepository.countByStatus("APPROVED");
+        long rejected = requestRepository.countByStatus("REJECTED");
         
         return new RequestStats(total, pending, approved, rejected);
     }
 
     public List<Request> getRecentRequests() {
         Date oneWeekAgo = new Date(System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000);
-        return wuwu.findRecentRequests(oneWeekAgo);
+        return requestRepository.findRecentRequests(oneWeekAgo);
     }
 
     public static record RequestStats(

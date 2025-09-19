@@ -1,5 +1,8 @@
 package services.strategy;
 
+import model.Request;
+import repositories.RequestRepository;
+
 import java.util.List;
 
 public class AdministratorStrategy implements QueryStrategy {
@@ -8,6 +11,6 @@ public class AdministratorStrategy implements QueryStrategy {
         this.requestRepository = requestRepository;
     }
     public List<Request> queryRequests(String userId) {
-        return requestRepository.queryExceptionionalRequest();
+        return requestRepository.queryExceptionRequest();
     }
 }
