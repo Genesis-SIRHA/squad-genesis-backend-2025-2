@@ -6,7 +6,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 import java.util.UUID;
-
 @Document(collection = "request_details")
 public class RequestDetails {
     @Id
@@ -29,7 +28,7 @@ public class RequestDetails {
         this.description = description;
         this.answer = answer;
     }
-    
+
     public RequestDetails() {
         this.id = UUID.randomUUID().toString();
         this.requestId = this.id;
@@ -55,7 +54,7 @@ public class RequestDetails {
     public String getManagedBy() {
         return managedBy;
     }
-    
+
     public void setManagedBy(String managedBy) {
         this.managedBy = managedBy;
     }
@@ -75,7 +74,7 @@ public class RequestDetails {
     public LocalDate getAnswerDate() {
         return answerAt;
     }
-    
+
     public void setAnswerDate(LocalDate answerDate) {
         this.answerAt = answerDate;
     }
