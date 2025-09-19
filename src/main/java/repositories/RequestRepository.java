@@ -10,6 +10,9 @@ public interface RequestRepository extends MongoRepository<Request, String> {
     @Query("{ 'status': 'PENDING' }")
     List<Request> findAllAvailable();
 
+    @Query("{ 'managedBy': ?0 }")
+    List<Request> findOwnedBy(String professorId);
+
     @Query("{ 'status': 'EXCEPTIONAL' }")
     List<Request> queryExceptionRequest();
 

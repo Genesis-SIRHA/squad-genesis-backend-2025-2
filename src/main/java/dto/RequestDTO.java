@@ -1,22 +1,26 @@
 package dto;
 
 import jakarta.validation.constraints.NotNull;
-import model.Group;
 import model.Request;
 
+import java.util.UUID;
+
 public record RequestDTO(
-        @NotNull()
         String id,
-        String studentId,
+        @NotNull String studentId,
         String type,
         Boolean isExceptional,
         String status,
-        String createdAt,
-        String requestId,
-        String originGroup,
-        String destinationGroup,
-        String description
-) {
+        String description,
+        String originGroupId,
+        String destinationGroupId,
+        String answer,
+        String managedBy
+) { 
+    public RequestDTO {
+        if (isExceptional == null) isExceptional = false;
+        if (status == null) status = "PENDING";
+    }
     public static RequestDTO fromRequest(Request request) {
         return new RequestDTO(
                 request.getId(),
@@ -24,11 +28,24 @@ public record RequestDTO(
                 request.getType(),
                 request.getIsExceptional(),
                 request.getStatus(),
-                request.getCreatedAt().toString(),
-                request.getRequestDetails().getRequestId(),
-                null,
-                null,
-                request.getDescription()
+                request.getDescription(),
+                request.getOriginGroup() != null ? request.getOriginGroup().getGroupCode() : null,
+                request.getDestinationGroup() != null ? request.getDestinationGroup().getGroupCode() : null,
+                request.getAnswer(),
+                request.getManagedBy()
         );
+    }
+    
+    public Request toEntity() {
+        Request request = new Request();
+        request.setId(this.id != null ? this.id : UUID.randomUUID().toString());
+        request.setStudentId(this.studentId);
+        request.setType(this.type);
+        request.setIsExceptional(this.isExceptional);
+        request.setStatus(this.status);
+        request.setDescription(this.description);
+        request.setAnswer(this.answer);
+        request.setManagedBy(this.managedBy);
+        return request;
     }
 }
