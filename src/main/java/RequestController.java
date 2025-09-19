@@ -47,4 +47,17 @@ public class RequestController {
         // En una implementación real, aquí se eliminaría de la base de datos
         return ResponseEntity.notFound().build();
     }
+
+    @PostMapping("/{id}/respond")
+    @Operation(summary = "Respond to a request", description = "Adds a response to a request")
+    public ResponseEntity<Request> respondToRequest(@PathVariable String id, @RequestBody RequestDetails response) {
+        Request request = requestService.respondToRequest(id, response);
+        if (request != null) {
+            return ResponseEntity.ok(request);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
+
 }
