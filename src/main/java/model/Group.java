@@ -1,10 +1,13 @@
 package model;
 
+import java.util.ArrayList;
+
 public class Group {
     private String groupCode;
     private String professor;
     private int capacity;
     private int enrolled;
+    private ArrayList<Session> schedule;
 
     public Group() {}
 
