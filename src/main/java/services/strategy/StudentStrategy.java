@@ -1,3 +1,5 @@
+package services.strategy;
+
 import java.util.List;
 
 public class StudentStrategy implements QueryStrategy {

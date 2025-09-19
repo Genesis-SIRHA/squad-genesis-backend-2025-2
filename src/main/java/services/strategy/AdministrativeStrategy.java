@@ -1,7 +1,10 @@
-import java.util.List;
-import java.util.ArrayList;
+package services.strategy;
 
-public class AdministrativeStrategy implements QueryStrategy{
+import repositories.RequestRepository;
+
+import java.util.List;
+
+public class AdministrativeStrategy implements QueryStrategy {
     private final RequestRepository requestRepository;
 
     public AdministrativeStrategy(RequestRepository requestRepository) {
@@ -10,7 +13,7 @@ public class AdministrativeStrategy implements QueryStrategy{
 
     public List<Request> queryRequests(String userId) {
         List<Request> result = requestRepository.findAllAvailable();
-        result.addAll(requestRepository.findAllPending(userId));
+        result.addAll(requestRepository.findAllOwned(userId));
         return result;
     }
 
