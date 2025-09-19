@@ -1,5 +1,7 @@
 package services;
 
+import dto.RequestResponse;
+import dto.RequestStats;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import services.strategy.AdministrativeStrategy;
@@ -9,6 +11,8 @@ import services.strategy.StudentStrategy;
 
 import repositories.RequestRepository;
 import model.Request;
+
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -43,18 +47,17 @@ public class RequestService {
     }
     
 
-    public Request createRequest(Request request) {
-        // Asegurarse de que las fechas estén establecidas
-        request.setCreatedAt(new Date());
-        request.setUpdatedAt(new Date());
-        return requestRepository.save(request);
+    public RequestResponse createRequest(Request request) {
+        request.setCreatedAt(LocalDateTime.now());
+        request.setUpdatedAt(LocalDateTime.now());
+        return RequestResponse.fromRequest(requestRepository.save(request));
     }
 
     public Request updateRequestStatus(String id, String status) {
         return requestRepository.findById(id)
             .map(request -> {
                 request.setStatus(status);
-                request.setUpdatedAt(new Date());
+                request.setUpdatedAt(LocalDateTime.now());
                 return requestRepository.save(request);
             })
             .orElseThrow(() -> new RuntimeException("Solicitud no encontrada con id: " + id));
@@ -70,15 +73,4 @@ public class RequestService {
         return new RequestStats(total, pending, approved, rejected);
     }
 
-    public List<Request> getRecentRequests() {
-        Date oneWeekAgo = new Date(System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000);
-        return requestRepository.findRecentRequests(oneWeekAgo);
-    }
-
-    public static record RequestStats(
-            long total,
-            long pending,
-            long approved,
-            long rejected
-    ) {}
 }

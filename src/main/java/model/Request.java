@@ -1,26 +1,27 @@
 package model;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.util.Date;
+
+import java.time.LocalDateTime;
 
 @Document(collection = "requests")
 public class Request {
     @Id
     private String id;
+    @NotBlank(message = "Student ID is required")
     private String studentId;
     private String description;
-    private String status; // Valores posibles: PENDING, APPROVED, REJECTED, EXCEPTIONAL, etc.
-    private Date createdAt;
-    private Date updatedAt;
-    
-    // Constructores
+    private String status;
+    @NotNull(message = "Created at date is required")
+    private LocalDateTime createdAt;
+
     public Request() {
-        this.createdAt = new Date();
-        this.updatedAt = new Date();
+        this.createdAt = LocalDateTime.now();
     }
-    
-    // Getters y Setters
+
     public String getId() {
         return id;
     }
@@ -51,22 +52,14 @@ public class Request {
 
     public void setStatus(String status) {
         this.status = status;
-        this.updatedAt = new Date();
     }
 
-    public Date getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 }

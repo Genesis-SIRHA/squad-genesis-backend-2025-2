@@ -1,3 +1,5 @@
+package model;
+
 import java.time.LocalDate;
 
 public class RequestDetails {
@@ -8,14 +10,10 @@ public class RequestDetails {
     private String managedBy;
     private String answer;
 
-    public RequestDetails(String id, java.time.LocalDate fechaRespuesta, String observaciones) {
+    public RequestDetails(String id, LocalDate fechaRespuesta, String observaciones) {
         this.requestId = id;
-
         this.answerAt = fechaRespuesta;
         this.answer = observaciones;
     }
 
-    public void insert() {
-        // insertar en base de datos
-    }
 }

@@ -1,3 +1,7 @@
+package controller;
+
+import dto.RequestResponse;
+import dto.RequestStats;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,22 +28,10 @@ public class RequestController {
 
     @PostMapping
     @Operation(summary = "Create a new request", description = "Creates a new request with the provided details")
-    public ResponseEntity<Request> createRequest(@RequestBody Request request) {
-        Request createdRequest = requestService.createRequest(request);
-        
-        URI location = ServletUriComponentsBuilder
-            .fromCurrentRequest()
-            .path("/{id}")
-            .buildAndExpand(createdRequest.getId())
-            .toUri();
+    public ResponseEntity<RequestResponse> createRequest(@RequestBody Request request) {
+        RequestResponse createdRequest = requestService.createRequest(request);
             
-        return ResponseEntity.created(location).body(createdRequest);
-    }
-
-    @GetMapping
-    @Operation(summary = "Get all requests", description = "Retrieves a list of all requests")
-    public ResponseEntity<List<Request>> getAllRequests() {
-        return ResponseEntity.ok(requestService.getRecentRequests());
+        return ResponseEntity.ok(createdRequest);
     }
 
     @GetMapping("/user/{userId}")
@@ -67,7 +59,7 @@ public class RequestController {
 
     @GetMapping("/stats")
     @Operation(summary = "Get request statistics", description = "Retrieves statistics about requests")
-    public ResponseEntity<RequestService.RequestStats> getRequestStats() {
+    public ResponseEntity<RequestStats> getRequestStats() {
         return ResponseEntity.ok(requestService.getRequestStats());
     }
 
