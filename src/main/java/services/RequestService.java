@@ -18,6 +18,7 @@ import model.Request;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -90,4 +91,25 @@ public class RequestService {
         long rejected = requestRepository.countByStatus("REJECTED");
         return new RequestStats(total, pending, approved, rejected);
     }
+
+    public Request respondToRequest(String requestId, RequestDetails responseDetails) {
+        Request request = requestRepository.findById(requestId).orElse(null);
+
+        if (request != null) {
+            if (request.getRequestDetails() != null) {
+                RequestDetails existingDetails = request.getRequestDetails();
+                existingDetails.setAnswerDate(LocalDate.now());
+                existingDetails.setManagedBy(responseDetails.getManagedBy());
+                existingDetails.setAnswer(responseDetails.getAnswer());
+            } else {
+                responseDetails.setRequestId(requestId);
+                request.setRequestDetails(responseDetails);
+            }
+
+            request.setStatus(responseDetails.getAnswer());
+            return requestRepository.save(request);
+        }
+        return null;
+    }
+
 }

@@ -86,4 +86,12 @@ public class RequestDetails {
     public Group getDestinationGroup() {
         return destinationGroup;
     }
+
+    public void setAnswer(String answer) {
+        this.answer = answer;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
 }
