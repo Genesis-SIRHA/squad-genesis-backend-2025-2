@@ -1,9 +1,12 @@
 package controller;
 
+import dto.CourseRequest;
+import dto.CourseResponse;
+import dto.GroupRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import model.Course;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import services.CourseService;
@@ -23,13 +26,13 @@ public class CourseController {
 
     @GetMapping
     @Operation(summary = "Get all courses", description = "Retrieves a list of all registered courses")
-    public ResponseEntity<List<Course>> getAllCourses() {
+    public ResponseEntity<List<CourseResponse>> getAllCourses() {
         return ResponseEntity.ok(courseService.getAllCourses());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get course by ID", description = "Retrieve course details by its ID")
-    public ResponseEntity<Course> getCourseById(@PathVariable String id) {
+    public ResponseEntity<CourseResponse> getCourseById(@PathVariable String id) {
         return courseService.getCourseById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -38,20 +41,32 @@ public class CourseController {
     @PostMapping
     @Operation(summary = "Create a new course", description = "Registers a new course with groups")
     @ApiResponse(responseCode = "200", description = "Course created successfully")
-    public ResponseEntity<Course> createCourse(@RequestBody Course course) {
-        return ResponseEntity.ok(courseService.createCourse(course));
+    public ResponseEntity<CourseResponse> createCourse(@Valid @RequestBody CourseRequest courseRequest) {
+        return ResponseEntity.ok(courseService.createCourse(courseRequest));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update course", description = "Updates course details including groups")
-    public ResponseEntity<Course> updateCourse(@PathVariable String id, @RequestBody Course course) {
-        return courseService.updateCourse(id, course)
+    public ResponseEntity<CourseResponse> updateCourse(
+            @PathVariable String id, 
+            @Valid @RequestBody CourseRequest courseRequest) {
+        return courseService.updateCourse(id, courseRequest)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{courseId}/groups")
+    @Operation(summary = "Add group to course", description = "Adds a new group to an existing course")
+    public ResponseEntity<CourseResponse> addGroupToCourse(
+            @PathVariable String courseId,
+            @Valid @RequestBody GroupRequest groupRequest) {
+        return courseService.addGroupToCourse(courseId, groupRequest)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete course", description = "Deletes a course by ID")
+    @Operation(summary = "Delete course", description = "Deletes a course by its ID")
     public ResponseEntity<Void> deleteCourse(@PathVariable String id) {
         courseService.deleteCourse(id);
         return ResponseEntity.noContent().build();
