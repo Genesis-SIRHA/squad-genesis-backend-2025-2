@@ -15,5 +15,4 @@ public interface RequestRepository extends MongoRepository<Request, String> {
 
     long countByStatus(String status);
 
-
 }
