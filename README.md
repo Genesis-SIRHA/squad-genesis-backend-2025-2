@@ -40,10 +40,10 @@ Back Proyecto DOSW
 ![img.png](docs/UML/Diagrama Componentes General.png)
 
 ### Diegrama Componentes Especifico
-
+![img.png](docs/UML/diagramaComponentesEspecifico.png)
 
 ### Diagrama de Bases de Datos
-
+![img.png](docs/UML/diagramaBasesDatos.png)
 
 ### Diagramas de secuencia
 
