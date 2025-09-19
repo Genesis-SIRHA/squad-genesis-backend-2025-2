@@ -49,13 +49,15 @@ public class RequestService {
     
 
     public RequestResponse createRequest(RequestDTO requestDTO) {
+
         Request request = new Request();
         request.setCreatedAt(LocalDateTime.now());
         request.setStatus("PENDING");
-        request.setType(request.getType());
-        request.setStudentId(request.getStudentId());
-        request.setIsExceptional(request.getIsExceptional());
-        request.setRequestDetails(request.getRequestDetails());
+        request.setType(requestDTO.type());
+        request.setStudentId(requestDTO.studentId());
+        request.setIsExceptional(requestDTO.isExceptional());
+
+        request.setRequestDetails(requestDTO.getRequestDetails());
 
         return RequestResponse.fromRequest(requestRepository.save(request));
     }
@@ -101,5 +103,4 @@ public class RequestService {
         }
         return null;
     }
-
 }
