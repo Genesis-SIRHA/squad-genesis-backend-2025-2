@@ -1,3 +1,7 @@
+package services.strategy;
+
+import model.Request;
+
 import java.util.List;
 
 public interface QueryStrategy {
