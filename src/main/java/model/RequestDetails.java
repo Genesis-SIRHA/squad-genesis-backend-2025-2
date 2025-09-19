@@ -1,41 +1,80 @@
+package model;
+
+import jakarta.validation.constraints.NotNull;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.LocalDate;
-import java.util.Date;
 
 public class RequestDetails {
+    @Id
+    private String id;
+    @NotNull(message = "Request id is required")
     private String requestId;
-    private String createdAt;
+    @NotNull(message = "Origin group is required")
+    private LocalDate createdAt;
     private LocalDate answerAt;
     private String managedBy;
     private String answer;
+    private String description;
+    private Group originGroup;
+    private Group destinationGroup;
 
-    public RequestDetails() {
-        this.createdAt = new Date().toString();
+    public RequestDetails(String id, String answer, String description) {
+        this.requestId = id;
+        this.createdAt = LocalDate.now();
+        this.description = description;
     }
 
-    public RequestDetails(String requestId, LocalDate answerAt, String answer) {
-        this.requestId = requestId;
-        this.createdAt = new Date().toString();
-        this.answerAt = answerAt;
-        this.answer = answer;
+    public String getId() {
+        return id;
     }
 
-    public void insert() {
-        // insertar en base de datos
+    public String getRequestId() {
+        return requestId;
     }
 
+    public LocalDate getCreatedAt() {
+        return createdAt;
+    }
 
-    public String getRequestId() { return requestId; }
-    public void setRequestId(String requestId) { this.requestId = requestId; }
+    public LocalDate getAnswerAt() {
+        return answerAt;
+    }
 
-    public String getCreatedAt() { return createdAt; }
-    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+    public String getManagedBy() {
+        return managedBy;
+    }
 
-    public LocalDate getAnswerAt() { return answerAt; }
-    public void setAnswerAt(LocalDate answerAt) { this.answerAt = answerAt; }
+    public void setManagedBy(String managedBy) {
+        this.managedBy = managedBy;
+    }
 
-    public String getManagedBy() { return managedBy; }
-    public void setManagedBy(String managedBy) { this.managedBy = managedBy; }
+    public String getAnswer() {
+        return answer;
+    }
 
-    public String getAnswer() { return answer; }
-    public void setAnswer(String answer) { this.answer = answer; }
+    public String getGestedBy() {
+        return managedBy;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public LocalDate getAnswerDate() {
+        return answerAt;
+    }
+
+    public void setAnswerDate(LocalDate answerDate) {
+        this.answerAt = answerDate;
+    }
+
+    public Group getOriginGroup() {
+        return originGroup;
+    }
+
+    public Group getDestinationGroup() {
+        return destinationGroup;
+    }
 }

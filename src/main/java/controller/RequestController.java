@@ -1,5 +1,6 @@
 package controller;
 
+import dto.RequestDTO;
 import dto.RequestResponse;
 import dto.RequestStats;
 import io.swagger.v3.oas.annotations.Operation;
@@ -7,10 +8,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import services.RequestService;
 
-import java.net.URI;
 import java.util.List;
 import model.Request;
 
@@ -28,7 +27,7 @@ public class RequestController {
 
     @PostMapping
     @Operation(summary = "Create a new request", description = "Creates a new request with the provided details")
-    public ResponseEntity<RequestResponse> createRequest(@RequestBody Request request) {
+    public ResponseEntity<RequestResponse> createRequest(@RequestBody RequestDTO request) {
         RequestResponse createdRequest = requestService.createRequest(request);
             
         return ResponseEntity.ok(createdRequest);
@@ -68,5 +67,16 @@ public class RequestController {
     public ResponseEntity<Void> deleteRequest(@PathVariable String id) {
         requestService.updateRequestStatus(id, "CANCELLED");
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/respond")
+    @Operation(summary = "Respond to a request", description = "Adds a response to a request")
+    public ResponseEntity<Request> respondToRequest(@PathVariable String id, @RequestBody RequestDetails response) {
+        Request request = requestService.respondToRequest(id, response);
+        if (request != null) {
+            return ResponseEntity.ok(request);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

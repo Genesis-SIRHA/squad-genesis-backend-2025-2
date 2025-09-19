@@ -1,5 +1,6 @@
 package services;
 
+import dto.RequestDTO;
 import dto.RequestResponse;
 import dto.RequestStats;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +13,9 @@ import services.strategy.StudentStrategy;
 import repositories.RequestRepository;
 import model.Request;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -47,9 +48,15 @@ public class RequestService {
     }
     
 
-    public RequestResponse createRequest(Request request) {
+    public RequestResponse createRequest(RequestDTO requestDTO) {
+        Request request = new Request();
         request.setCreatedAt(LocalDateTime.now());
-        request.setUpdatedAt(LocalDateTime.now());
+        request.setStatus("PENDING");
+        request.setType(request.getType());
+        request.setStudentId(request.getStudentId());
+        request.setIsExceptional(request.getIsExceptional());
+        request.setRequestDetails(request.getRequestDetails());
+
         return RequestResponse.fromRequest(requestRepository.save(request));
     }
 
@@ -57,10 +64,9 @@ public class RequestService {
         return requestRepository.findById(id)
             .map(request -> {
                 request.setStatus(status);
-                request.setUpdatedAt(LocalDateTime.now());
                 return requestRepository.save(request);
             })
-            .orElseThrow(() -> new RuntimeException("Solicitud no encontrada con id: " + id));
+            .orElseThrow(() -> new RuntimeException("Request not found with id: " + id));
     }
 
 
@@ -71,6 +77,29 @@ public class RequestService {
         long rejected = requestRepository.countByStatus("REJECTED");
         
         return new RequestStats(total, pending, approved, rejected);
+    }
+    public Request respondToRequest(String requestId, RequestDetails responseDetails) {
+        Request request = repository.findById(requestId);
+
+        if (request != null) {
+            if (request.getRequestDetails() != null) {
+                RequestDetails existingDetails = request.getRequestDetails();
+                existingDetails.setAnswerAt(LocalDate.now());
+                existingDetails.setManagedBy(responseDetails.getManagedBy());
+                existingDetails.setAnswer(responseDetails.getAnswer());
+            } else {
+                responseDetails.setRequestId(requestId);
+                responseDetails.setCreatedAt(new Date().toString());
+                request.setRequestDetails(responseDetails);
+            }
+
+            request.setStatus(responseDetails.getAnswer());
+            repository.update(requestId, request);
+            responseDetails.insert();
+
+            return request;
+        }
+        return null;
     }
 
 }

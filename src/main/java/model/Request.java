@@ -17,6 +17,9 @@ public class Request {
     private String status;
     @NotNull(message = "Created at date is required")
     private LocalDateTime createdAt;
+    private String type;
+    private Boolean isExceptional;
+    private RequestDetails requestDetails;
 
     public Request() {
         this.createdAt = LocalDateTime.now();
@@ -61,5 +64,25 @@ public class Request {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+    public String getType() {
+        return type;
+    }
+    public void setType(String type) {
+        this.type = type;
+    }
 
+    public Boolean getIsExceptional() {
+        return isExceptional;
+    }
+    public void setIsExceptional(Boolean isExceptional) {
+        this.isExceptional = isExceptional;
+    }
+
+    public RequestDetails getRequestDetails() {
+        return requestDetails;
+    }
+
+    public void setRequestDetails(RequestDetails requestDetails) {
+        this.requestDetails = requestDetails;
+    }
 }
