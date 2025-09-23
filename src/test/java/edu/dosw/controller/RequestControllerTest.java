@@ -6,6 +6,7 @@ import edu.dosw.dto.RequestResponse;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
+import edu.dosw.model.RequestDetails;
 import edu.dosw.services.RequestService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,5 +135,38 @@ class RequestControllerTest {
     void should_cancel_request() throws Exception {
         mockMvc.perform(delete("/api/requests/req1"))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void respondToRequest_ShouldReturnOk_WhenRequestExists() throws Exception {
+        Request request = new Request();
+        request.setId("123");
+        request.setStatus("APPROVED");
+
+        when(requestService.respondToRequest(any(), any())).thenReturn(request);
+
+        RequestDetails details = new RequestDetails();
+        details.setAnswer("APPROVED");
+        details.setManagedBy("professor1");
+
+        mockMvc.perform(post("/api/requests/123/respond")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(details)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("123"))
+                .andExpect(jsonPath("$.status").value("APPROVED"));
+    }
+
+    @Test
+    void respondToRequest_ShouldReturnNotFound_WhenRequestDoesNotExist() throws Exception {
+        when(requestService.respondToRequest(any(), any())).thenReturn(null);
+
+        RequestDetails details = new RequestDetails();
+        details.setAnswer("REJECTED");
+
+        mockMvc.perform(post("/requests/999/respond")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(details)))
+                .andExpect(status().isNotFound());
     }
 }
