@@ -1,5 +1,6 @@
 package edu.dosw.dto;
 
+import edu.dosw.model.Group;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
@@ -15,4 +16,13 @@ public record GroupRequest(
     
     @Min(value = 0, message = "El número de inscritos no puede ser negativo")
     int enrolled
-) {}
+) {
+    public Group toEntity() {
+        Group group = new Group();
+        group.setGroupCode(groupCode);
+        group.setTeacherId(professor);
+        group.setmaxCapacity(capacity);
+        group.setEnrolled(enrolled);
+        return group;
+    }
+}

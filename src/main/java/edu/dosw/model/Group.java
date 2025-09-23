@@ -16,10 +16,10 @@ public class Group {
 
     public Group() {}
 
-    public Group(String groupCode, String professor, int capacity, int enrolled) {
+    public Group(String groupCode, String professor, int maxCapacity, int enrolled) {
         this.groupCode = groupCode;
         this.teacherId = professor;
-        this.capacity = capacity;
+        this.maxCapacity = maxCapacity;
         this.enrolled = enrolled;
     }
 
@@ -29,8 +29,9 @@ public class Group {
     public String getTeacherId() { return teacherId; }
     public void setTeacherId(String teacherId) { this.teacherId = teacherId; }
 
-    public int getCapacity() { return capacity; }
-    public void setCapacity(int capacity) { this.capacity = capacity; }
+    public int getmaxCapacity() { return maxCapacity; }
+
+    public void setmaxCapacity(int maxCapacity) { this.maxCapacity = maxCapacity; }
 
     public int getEnrolled() { return enrolled; }
     public void setEnrolled(int enrolled) { this.enrolled = enrolled; }
