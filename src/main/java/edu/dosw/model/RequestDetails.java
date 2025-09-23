@@ -94,4 +94,5 @@ public class RequestDetails {
     public void setRequestId(String requestId) {
         this.requestId = requestId;
     }
+
 }
