@@ -69,7 +69,7 @@ class RequestControllerTest {
         Group destinationGroup = new Group("G2", "Profesor B", 30, 5);
 
         Request request = new Request("student123", "Cambio de grupo", "GROUP_CHANGE",
-                originGroup, destinationGroup);
+                originGroup.getGroupCode(), destinationGroup.getGroupCode());
         request.setStatus("PENDING");
 
         when(requestService.fetchRequests("ADMIN", "student123"))

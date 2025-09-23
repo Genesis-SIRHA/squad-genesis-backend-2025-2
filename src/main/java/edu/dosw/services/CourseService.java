@@ -94,7 +94,7 @@ public class CourseService {
     private Group mapToGroup(GroupRequest groupRequest) {
         Group group = new Group();
         group.setGroupCode(groupRequest.groupCode());
-        group.setProfessor(groupRequest.professor());
+        group.setTeacherId(groupRequest.professor());
         group.setCapacity(groupRequest.capacity());
         group.setEnrolled(groupRequest.enrolled());
         return group;

@@ -11,7 +11,7 @@ public record GroupResponse(
     public static GroupResponse fromModel(Group group) {
         return new GroupResponse(
             group.getGroupCode(),
-            group.getProfessor(),
+            group.getTeacherId(),
             group.getCapacity(),
             group.getEnrolled()
         );

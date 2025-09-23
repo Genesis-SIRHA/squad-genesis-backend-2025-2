@@ -5,6 +5,7 @@ import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import edu.dosw.repositories.CourseRepository;
 import edu.dosw.services.strategy.AdministrativeStrategy;
 import edu.dosw.services.strategy.AdministratorStrategy;
 import edu.dosw.services.strategy.QueryStrategy;
@@ -13,6 +14,8 @@ import edu.dosw.services.strategy.StudentStrategy;
 import edu.dosw.repositories.RequestRepository;
 import edu.dosw.model.Request;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
