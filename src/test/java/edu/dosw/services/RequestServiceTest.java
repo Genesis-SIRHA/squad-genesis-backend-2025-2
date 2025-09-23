@@ -1,7 +1,6 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.RequestDTO;
-import edu.dosw.dto.RequestResponse;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
@@ -21,14 +20,16 @@ import static org.mockito.Mockito.*;
 class RequestServiceTest {
 
     private RequestRepository requestRepository;
-    private CourseRepository courseRepository;
+    private CourseService courseService;
     private RequestService requestService;
+    private MembersService membersService;
 
     @BeforeEach
     void setUp() {
         requestRepository = mock(RequestRepository.class);
-        courseRepository = mock(CourseRepository.class);
-        requestService = new RequestService(requestRepository, courseRepository);
+        courseService = mock(CourseService.class);
+        membersService = mock(MembersService.class);
+        requestService = new RequestService(requestRepository, courseService,membersService);
     }
 
     @Test
@@ -57,17 +58,17 @@ class RequestServiceTest {
                 null
         );
 
-        when(courseRepository.findByCode(anyString()))
+        when(courseService.findByCode(anyString()))
                 .thenReturn(new Group("G1", "Prof", 10, 5));
         when(requestRepository.save(any(Request.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
 
         // Act
-        RequestResponse result = requestService.createRequest(dto);
+        Request result = requestService.createRequest(dto);
 
         // Assert
-        assertEquals("student1", result.studentId());
-        assertEquals("TYPE", result.type());
+        assertEquals("student1", result.getStudentId());
+        assertEquals("TYPE", result.getType());
         verify(requestRepository).save(any(Request.class));
     }
 
@@ -87,7 +88,7 @@ class RequestServiceTest {
                 null
         );
 
-        when(courseRepository.findByCode(anyString())).thenReturn(null);
+        when(courseService.findByCode(anyString())).thenReturn(null);
 
         // Act + Assert
         assertThrows(IllegalArgumentException.class, () -> requestService.createRequest(dto));

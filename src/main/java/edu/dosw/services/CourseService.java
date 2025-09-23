@@ -34,7 +34,7 @@ public class CourseService {
 
     public CourseResponse createCourse(CourseRequest request) {
         if (courseRepository.existsByCode(request.code())) {
-            throw new BusinessException("Ya existe un curso con el código: " + request.code());
+            throw new BusinessException("Already exists a course with code: " + request.code());
         }
 
         Course course = new Course();
@@ -98,5 +98,9 @@ public class CourseService {
         group.setCapacity(groupRequest.capacity());
         group.setEnrolled(groupRequest.enrolled());
         return group;
+    }
+
+    public Group findByCode(String s) {
+        return courseRepository.findByCode(s);
     }
 }
