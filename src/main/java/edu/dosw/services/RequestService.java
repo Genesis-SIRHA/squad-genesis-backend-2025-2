@@ -4,6 +4,7 @@ import edu.dosw.dto.RequestDTO;
 import edu.dosw.dto.RequestResponse;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
+import edu.dosw.model.RequestDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import edu.dosw.repositories.CourseRepository;
@@ -139,5 +140,31 @@ public class RequestService {
         long approved = requestRepository.countByStatus("APPROVED");
         long rejected = requestRepository.countByStatus("REJECTED");
         return new RequestStats(total, pending, approved, rejected);
+    }
+
+    /**
+     *
+     * @param requestId
+     * @param responseDetails
+     * @return Request updated
+     */
+    public Request respondToRequest(String requestId, RequestDetails responseDetails) {
+        Request request = requestRepository.findById(requestId).orElse(null);
+
+        if (request != null) {
+            if (request.getRequestDetails() != null) {
+                RequestDetails existingDetails = request.getRequestDetails();
+                existingDetails.setAnswerDate(LocalDate.now());
+                existingDetails.setManagedBy(responseDetails.getManagedBy());
+                existingDetails.setAnswer(responseDetails.getAnswer());
+            } else {
+                responseDetails.setRequestId(requestId);
+                request.setRequestDetails(responseDetails);
+            }
+
+            request.setStatus(responseDetails.getAnswer());
+            return requestRepository.save(request);
+        }
+        return null;
     }
 }

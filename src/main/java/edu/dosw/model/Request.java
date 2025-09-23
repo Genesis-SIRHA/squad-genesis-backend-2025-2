@@ -33,6 +33,7 @@ public class Request {
     private Group destinationGroup;
     private String gestedBy;
     private LocalDate answerDate;
+    private RequestDetails requestDetails;
 
     public Request() {
         this.id = UUID.randomUUID().toString();
@@ -152,4 +153,13 @@ public class Request {
     public void setAnswerDate(LocalDate answerDate) {
         this.answerDate = answerDate;
     }
+
+    public RequestDetails getRequestDetails() {
+        return requestDetails;
+    }
+
+    public void setRequestDetails(RequestDetails requestDetails) {
+        this.requestDetails = requestDetails;
+    }
+
 }

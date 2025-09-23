@@ -5,6 +5,7 @@ import edu.dosw.dto.RequestResponse;
 import edu.dosw.dto.RequestStats;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import edu.dosw.model.RequestDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -97,4 +98,16 @@ public class RequestController {
         requestService.updateRequestStatus(id, "CANCELLED");
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/respond")
+    @Operation(summary = "Respond to a request", description = "Adds a response to a request")
+    public ResponseEntity<Request> respondToRequest(@PathVariable String id, @RequestBody RequestDetails response) {
+        Request request = requestService.respondToRequest(id, response);
+        if (request != null) {
+            return ResponseEntity.ok(request);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
+
