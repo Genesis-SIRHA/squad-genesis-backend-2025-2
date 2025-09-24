@@ -1,10 +1,8 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.RequestDTO;
-import edu.dosw.dto.RequestResponse;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
-import edu.dosw.model.RequestDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import edu.dosw.repositories.CourseRepository;
@@ -30,23 +28,24 @@ import java.util.Map;
 public class RequestService {
     
     private final RequestRepository requestRepository;
-    private final CourseRepository courseRepository;
+    private final CourseService courseService ;
     private final Map<String, QueryStrategy> strategyMap;
 
     /**
      * Constructs a new RequestService with the required repositories.
      * Initializes the strategy map for different user roles.
-     * 
+     *
      * @param requestRepository The repository for request data access
-     * @param courseRepository The repository for course data access
+     * @param courseService The service for course data access
+     * @param memberService The service for member data access
      */
     @Autowired
-    public RequestService(RequestRepository requestRepository, CourseRepository courseRepository) {
+    public RequestService(RequestRepository requestRepository,CourseService courseService, MembersService membersService) {
         this.requestRepository = requestRepository;
-        this.courseRepository = courseRepository;
+        this.courseService = courseService;
         this.strategyMap = Map.of(
             "STUDENT", new StudentStrategy(requestRepository),
-            "ADMINISTRATIVE", new AdministrativeStrategy(requestRepository),
+            "ADMINISTRATIVE", new AdministrativeStrategy(requestRepository, membersService),
             "ADMINISTRATOR", new AdministratorStrategy(requestRepository)
         );
     }
@@ -54,7 +53,7 @@ public class RequestService {
     /**
      * Fetches requests based on the user's role and ID.
      * Uses the strategy pattern to determine which requests are visible to the user.
-     * 
+     *
      * @param role The role of the user (STUDENT, ADMINISTRATIVE, or ADMINISTRATOR)
      * @param userId The ID of the user making the request
      * @return A list of requests visible to the user, sorted by creation date (newest first)
@@ -72,48 +71,34 @@ public class RequestService {
             .toList();
     }
 
-
     /**
      * Creates a new request with the provided details.
      * Validates that both origin and destination groups exist before creating the request.
-     * 
+     *
      * @param requestDTO The request data transfer object containing request details
-     * @return A RequestResponse containing the created request
+     * @return A Response containing the created request
      * @throws IllegalArgumentException if either origin or destination group is not found
      */
-    public RequestResponse createRequest(RequestDTO requestDTO) {
-        Request request = new Request();
-        request.setCreatedAt(LocalDateTime.now());
-        request.setStatus("PENDING");
-        request.setType(requestDTO.type());
-        request.setStudentId(requestDTO.studentId());
-        request.setIsExceptional(requestDTO.isExceptional());
+    public Request createRequest(RequestDTO requestDTO) {
+        Request request = requestDTO.toEntity();
 
-        request.setAnswerAt(LocalDate.now());
-        request.setManagedBy(requestDTO.studentId());
-        request.setAnswer(requestDTO.description());
-        request.setAnswerDate(LocalDate.now());
-
-        Group origin = courseRepository.findByCode(requestDTO.originGroupId());
+        Group origin = courseService.findByCode(requestDTO.originGroupId());
         if (origin == null) {
             throw new IllegalArgumentException("Origin group not found: " + requestDTO.originGroupId());
         }
 
-        Group destination = courseRepository.findByCode(requestDTO.destinationGroupId());
+        Group destination = courseService.findByCode(requestDTO.destinationGroupId());
         if (destination == null) {
             throw new IllegalArgumentException("Destination group not found: " + requestDTO.destinationGroupId());
         }
 
-        request.setOriginGroup(origin);
-        request.setDestinationGroup(destination);
-
-        return RequestResponse.fromRequest(requestRepository.save(request));
+        return requestRepository.save(request);
     }
 
 
     /**
      * Updates the status of an existing request.
-     * 
+     *
      * @param id The ID of the request to update
      * @param status The new status to set for the request
      * @return The updated Request
@@ -128,10 +113,14 @@ public class RequestService {
             .orElseThrow(() -> new RuntimeException("Request not found with id: " + id));
     }
 
+    public void deleteRequest(String id) {
+        requestRepository.deleteById(id);
+    }
+
 
     /**
      * Retrieves statistics about requests, including total count and counts by status.
-     * 
+     *
      * @return A RequestStats object containing the statistics
      */
     public RequestStats getRequestStats() {
