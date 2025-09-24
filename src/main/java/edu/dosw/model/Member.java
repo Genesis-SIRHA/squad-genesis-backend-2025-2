@@ -36,4 +36,20 @@ public class Member{
     public void setFacultyId(String facultyId) {
         this.facultyId = facultyId;
     }
+
+    public String getPlan() {
+        return plan;
+    }
+
+    public void setPlan(String plan) {
+        this.plan = plan;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
