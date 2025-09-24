@@ -4,7 +4,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
 public class Member{
-    private String memberId;
+    private final String memberId;
     private String type;
     private String name;
     private String plan;
