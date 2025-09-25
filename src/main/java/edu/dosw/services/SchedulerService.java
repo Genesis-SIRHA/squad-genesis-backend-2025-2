@@ -1,25 +1,26 @@
 package services;
 
 import dto.ScheduleRequest;
-import dto.ScheduleResponse;
+import edu.dosw.model.Schedule;
+import edu.dosw.services.SessionService;
 
 import java.util.List;
 
 public class SchedulerService {
+    private SessionService sessionService;
 
-    public ScheduleResponse createSchedule(ScheduleRequest scheduleRequest) {
-        for (SessionDTO session : scheduleRequest.getSessions()) {
 
-        }
+    public Schedule createSchedule(ScheduleRequest scheduleRequest) {
+
     }
 
-    public ScheduleResponse getScheduleById(String id) {
+    public Schedule getScheduleById(String id) {
     }
 
-    public List<ScheduleResponse> getAllSchedules() {
+    public List<Schedule> getAllSchedules() {
     }
 
-    public ScheduleResponse updateSchedule(String id, ScheduleRequest scheduleRequest) {
+    public Schedule updateSchedule(String id, ScheduleRequest scheduleRequest) {
     }
 
     public void deleteSchedule(String id) {

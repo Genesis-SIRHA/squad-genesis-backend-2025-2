@@ -1,7 +1,7 @@
-package controller;
+package edu.dosw.controller;
 
 import dto.ScheduleRequest;
-import dto.ScheduleResponse;
+import edu.dosw.model.Schedule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,26 +25,25 @@ public class SchedulerController {
 
     @PostMapping
     @Operation(summary = "Create a new schedule", description = "Creates a new class schedule with the provided details")
-    public ResponseEntity<ScheduleResponse> createSchedule(@RequestBody ScheduleRequest scheduleRequest) {
-        ScheduleResponse createdSchedule = schedulerService.createSchedule(scheduleRequest);
-        return ResponseEntity.ok(createdSchedule);
+    public ResponseEntity<Schedule> createSchedule(@RequestBody ScheduleRequest scheduleRequest) {
+        return ResponseEntity.ok(schedulerService.createSchedule(scheduleRequest));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get schedule by ID", description = "Retrieves a schedule by its unique identifier")
-    public ResponseEntity<ScheduleResponse> getScheduleById(@PathVariable String id) {
+    public ResponseEntity<Schedule> getScheduleById(@PathVariable String id) {
         return ResponseEntity.ok(schedulerService.getScheduleById(id));
     }
 
     @GetMapping
     @Operation(summary = "Get all schedules", description = "Retrieves all available schedules")
-    public ResponseEntity<List<ScheduleResponse>> getAllSchedules() {
+    public ResponseEntity<List<Schedule>> getAllSchedules() {
         return ResponseEntity.ok(schedulerService.getAllSchedules());
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a schedule", description = "Updates an existing schedule with new information")
-    public ResponseEntity<ScheduleResponse> updateSchedule(
+    public ResponseEntity<Schedule> updateSchedule(
             @PathVariable String id, 
             @RequestBody ScheduleRequest scheduleRequest) {
         return ResponseEntity.ok(schedulerService.updateSchedule(id, scheduleRequest));

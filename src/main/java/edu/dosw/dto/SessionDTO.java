@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import model.DayOfWeek;
+import edu.dosw.model.DayOfWeek;
 
 public class SessionDTO {
     @NotBlank(message = "El nombre del salón es obligatorio")
