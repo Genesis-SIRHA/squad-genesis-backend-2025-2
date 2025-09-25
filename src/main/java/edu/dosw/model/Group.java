@@ -38,6 +38,7 @@ public class Group {
 
 
 
+
     public void setProfessor(String professor) {
         this.teacherId = professor;
     }

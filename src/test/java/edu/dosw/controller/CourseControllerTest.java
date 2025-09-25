@@ -5,6 +5,7 @@ import edu.dosw.dto.CourseRequest;
 import edu.dosw.dto.GroupRequest;
 import edu.dosw.model.Course;
 import edu.dosw.model.Group;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -47,6 +48,7 @@ class CourseControllerTest {
                         "CS101",
                         "Intro a la Programación",
                         List.of(new Group("G1", "Profesor A", 30, 0))
+
                 ));
 
         mockMvc.perform(post("/api/courses")
@@ -61,6 +63,7 @@ class CourseControllerTest {
     void should_get_all_courses() throws Exception {
         when(courseService.getAllCourses())
                 .thenReturn(List.of(
+
                         new Course(
                                 "CS101",
                                 "Intro a la Programación",
@@ -84,11 +87,13 @@ class CourseControllerTest {
 
     @Test
     void should_get_course_by_id() throws Exception {
+
         when(courseService.getCourseById("12345"))
                 .thenReturn(Optional.of(new Course(
                         "CS101",
                         "Intro a la Programación",
                         List.of()
+
                 )));
 
         mockMvc.perform(get("/api/courses/12345"))
@@ -99,7 +104,7 @@ class CourseControllerTest {
 
     @Test
     void should_return_404_when_course_not_found() throws Exception {
-        when(courseService.getCourseById("999"))
+        when(courseService.getCourseByAbbreviation("999"))
                 .thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/courses/999"))
@@ -116,9 +121,11 @@ class CourseControllerTest {
 
         when(courseService.updateCourse(any(String.class), any(CourseRequest.class)))
                 .thenReturn(Optional.of(new Course(
+
                         "CS101",
                         "Programación Avanzada",
                         List.of()
+
                 )));
 
         mockMvc.perform(put("/api/courses/12345")
@@ -157,12 +164,12 @@ class CourseControllerTest {
 
         when(courseService.addGroupToCourse(eq("12345"), eq(groupRequest)))
                 .thenReturn(Optional.of(new Course(
+
                         "CS101",
                         "Intro a la Programación",
                         List.of(new Group("G2", "Profesor B", 25, 0))
+
                 )));
-
-
 
         mockMvc.perform(post("/api/courses/12345/groups")
                         .contentType(MediaType.APPLICATION_JSON)
