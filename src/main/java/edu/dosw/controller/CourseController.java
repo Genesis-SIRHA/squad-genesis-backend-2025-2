@@ -1,8 +1,8 @@
 package edu.dosw.controller;
 
 import edu.dosw.dto.CourseRequest;
-import edu.dosw.dto.CourseResponse;
 import edu.dosw.dto.GroupRequest;
+import edu.dosw.model.Course;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,7 +38,7 @@ public class CourseController {
      */
     @GetMapping
     @Operation(summary = "Get all courses", description = "Retrieves a list of all registered courses")
-    public ResponseEntity<List<CourseResponse>> getAllCourses() {
+    public ResponseEntity<List<Course>> getAllCourses() {
         return ResponseEntity.ok(courseService.getAllCourses());
     }
 
@@ -49,8 +49,8 @@ public class CourseController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "Get course by ID", description = "Retrieve course details by its ID")
-    public ResponseEntity<CourseResponse> getCourseById(@PathVariable String id) {
-        return courseService.getCourseById(id)
+    public ResponseEntity<Course> getCourseById(@PathVariable String id) {
+        return courseService.getCourseByAbbreviation(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -63,7 +63,7 @@ public class CourseController {
     @PostMapping
     @Operation(summary = "Create a new course", description = "Registers a new course with groups")
     @ApiResponse(responseCode = "200", description = "Course created successfully")
-    public ResponseEntity<CourseResponse> createCourse(@Valid @RequestBody CourseRequest courseRequest) {
+    public ResponseEntity<Course> createCourse(@Valid @RequestBody CourseRequest courseRequest) {
         return ResponseEntity.ok(courseService.createCourse(courseRequest));
     }
 
@@ -75,7 +75,7 @@ public class CourseController {
      */
     @PutMapping("/{id}")
     @Operation(summary = "Update course", description = "Updates course details including groups")
-    public ResponseEntity<CourseResponse> updateCourse(
+    public ResponseEntity<Course> updateCourse(
             @PathVariable String id, 
             @Valid @RequestBody CourseRequest courseRequest) {
         return courseService.updateCourse(id, courseRequest)
@@ -91,7 +91,7 @@ public class CourseController {
      */
     @PostMapping("/{courseId}/groups")
     @Operation(summary = "Add group to course", description = "Adds a new group to an existing course")
-    public ResponseEntity<CourseResponse> addGroupToCourse(
+    public ResponseEntity<Course> addGroupToCourse(
             @PathVariable String courseId,
             @Valid @RequestBody GroupRequest groupRequest) {
         return courseService.addGroupToCourse(courseId, groupRequest)

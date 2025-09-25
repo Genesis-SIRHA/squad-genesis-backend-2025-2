@@ -12,49 +12,41 @@ import java.util.UUID;
 @Document(collection = "requests")
 public class Request {
     @Id
-    private String id;
-    
+    private String requestId;
     @NotBlank(message = "Student ID is required")
     private String studentId;
-    
-    private String description;
-    private String status = "PENDING";
-    
     @NotNull(message = "Created at date is required")
     private LocalDateTime createdAt;
-    
+    private String status = "PENDING";
     private String type;
     private Boolean isExceptional = false;
-
-    private LocalDate answerAt;
-    private String managedBy;
-    private String answer;
-    private Group originGroup;
-    private Group destinationGroup;
+    private String destinationGroupId;
+    private String originGroupId;
+    private String description;
     private String gestedBy;
-    private LocalDate answerDate;
-    private RequestDetails requestDetails;
+    private LocalDate answerAt;
+    private String answer;
 
     public Request() {
-        this.id = UUID.randomUUID().toString();
+        this.requestId = UUID.randomUUID().toString();
         this.createdAt = LocalDateTime.now();
     }
     
-    public Request(String studentId, String description, String type, Group originGroup, Group destinationGroup) {
+    public Request(String studentId, String description, String type, String originGroupId, String destinationGroup) {
         this();
         this.studentId = studentId;
         this.description = description;
         this.type = type;
-        this.originGroup = originGroup;
-        this.destinationGroup = destinationGroup;
+        this.originGroupId = originGroupId;
+        this.destinationGroupId= destinationGroup;
     }
 
     public String getId() {
-        return id;
+        return requestId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setId(String requestId) {
+        this.requestId = requestId;
     }
 
     public String getStudentId() {
@@ -110,12 +102,12 @@ public class Request {
         this.answerAt = answerAt;
     }
 
-    public String getManagedBy() {
-        return managedBy;
+    public String getGestedBy() {
+        return gestedBy;
     }
 
-    public void setManagedBy(String managedBy) {
-        this.managedBy = managedBy;
+    public void setGestedBy(String managedBy) {
+        this.gestedBy = managedBy;
     }
 
     public String getAnswer() {
@@ -126,40 +118,19 @@ public class Request {
         this.answer = answer;
     }
 
-    public Group getOriginGroup() {
-        return originGroup;
+    public String getOriginGroupId() {
+        return originGroupId;
     }
 
-    public void setOriginGroup(Group originGroup) {
-        this.originGroup = originGroup;
+    public void setOriginGroupId(String originGroup) {
+        this.originGroupId = originGroup;
     }
 
-    public Group getDestinationGroup() {
-        return destinationGroup;
+    public String getDestinationGroupId() {
+        return destinationGroupId;
     }
 
-    public void setDestinationGroup(Group destinationGroup) {
-        this.destinationGroup = destinationGroup;
+    public void setDestinationGroup(String destinationGroup) {
+        this.destinationGroupId = destinationGroup;
     }
-
-    public String getGestedBy() {
-        return gestedBy;
-    }
-
-    public void setGestedBy(String gestedBy) {
-        this.gestedBy = gestedBy;
-    }
-
-    public void setAnswerDate(LocalDate answerDate) {
-        this.answerDate = answerDate;
-    }
-
-    public RequestDetails getRequestDetails() {
-        return requestDetails;
-    }
-
-    public void setRequestDetails(RequestDetails requestDetails) {
-        this.requestDetails = requestDetails;
-    }
-
 }
