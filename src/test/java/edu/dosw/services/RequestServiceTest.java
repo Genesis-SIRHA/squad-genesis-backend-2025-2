@@ -1,10 +1,10 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.RequestDTO;
-import edu.dosw.dto.RequestResponse;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
+import edu.dosw.model.RequestDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import edu.dosw.repositories.CourseRepository;
@@ -21,14 +21,16 @@ import static org.mockito.Mockito.*;
 class RequestServiceTest {
 
     private RequestRepository requestRepository;
-    private CourseRepository courseRepository;
+    private CourseService courseService;
     private RequestService requestService;
+    private MembersService membersService;
 
     @BeforeEach
     void setUp() {
         requestRepository = mock(RequestRepository.class);
-        courseRepository = mock(CourseRepository.class);
-        requestService = new RequestService(requestRepository, courseRepository);
+        courseService = mock(CourseService.class);
+        membersService = mock(MembersService.class);
+        requestService = new RequestService(requestRepository, courseService,membersService);
     }
 
     @Test
@@ -57,17 +59,17 @@ class RequestServiceTest {
                 null
         );
 
-        when(courseRepository.findByCode(anyString()))
+        when(courseService.findByCode(anyString()))
                 .thenReturn(new Group("G1", "Prof", 10, 5));
         when(requestRepository.save(any(Request.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
 
         // Act
-        RequestResponse result = requestService.createRequest(dto);
+        Request result = requestService.createRequest(dto);
 
         // Assert
-        assertEquals("student1", result.studentId());
-        assertEquals("TYPE", result.type());
+        assertEquals("student1", result.getStudentId());
+        assertEquals("TYPE", result.getType());
         verify(requestRepository).save(any(Request.class));
     }
 
@@ -87,7 +89,7 @@ class RequestServiceTest {
                 null
         );
 
-        when(courseRepository.findByCode(anyString())).thenReturn(null);
+        when(courseService.findByCode(anyString())).thenReturn(null);
 
         // Act + Assert
         assertThrows(IllegalArgumentException.class, () -> requestService.createRequest(dto));
@@ -140,23 +142,26 @@ class RequestServiceTest {
         assertEquals(2, stats.rejected());
     }
 
+
     @Test
     void respondToRequest_ShouldAddNewRequestDetailsIfNoneExist() {
         // Arrange
         Request request = new Request();
         request.setId("456");
 
-        Request response = new Request();
-        response.setManagedBy("professor2");
-        response.setStatus("REJECTED");
+        RequestDetails responseDetails = new RequestDetails();
+        responseDetails.setManagedBy("professor2");
+        responseDetails.setAnswer("REJECTED");
 
         when(requestRepository.findById("456")).thenReturn(Optional.of(request));
         when(requestRepository.save(any(Request.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Request updated = requestService.respondToRequest("456", response);
+        // Act
+        Request updated = requestService.respondToRequest("456", responseDetails);
 
-        assertNotNull(updated.getManagedBy());
-        assertEquals("456", updated.getId());
+        // Assert
+        assertNotNull(updated.getRequestDetails());
+        assertEquals("456", updated.getRequestDetails().getRequestId());
         assertEquals("REJECTED", updated.getStatus());
         verify(requestRepository).save(updated);
     }
@@ -164,17 +169,16 @@ class RequestServiceTest {
     @Test
     void respondToRequest_ShouldReturnNullIfRequestNotFound() {
         // Arrange
-        Request response = new Request();
-        response.setAnswer("APPROVED");
+        RequestDetails responseDetails = new RequestDetails();
+        responseDetails.setAnswer("APPROVED");
 
         when(requestRepository.findById("999")).thenReturn(Optional.empty());
 
         // Act
-        Request result = requestService.respondToRequest("999", response);
+        Request result = requestService.respondToRequest("999", responseDetails);
 
         // Assert
         assertNull(result);
         verify(requestRepository, never()).save(any(Request.class));
     }
-
 }

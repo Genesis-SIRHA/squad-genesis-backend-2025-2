@@ -21,7 +21,6 @@ public record RequestDTO(
         if (isExceptional == null) isExceptional = false;
         if (status == null) status = "PENDING";
     }
-
     public static RequestDTO fromRequest(Request request) {
         return new RequestDTO(
                 request.getId(),
@@ -30,14 +29,13 @@ public record RequestDTO(
                 request.getIsExceptional(),
                 request.getStatus(),
                 request.getDescription(),
-                request.getOriginGroupId(),
-                request.getDestinationGroupId(),
+                request.getOriginGroupId() != null ? request.getOriginGroupId(): null,
+                request.getDestinationGroupId() != null ? request.getDestinationGroupId() : null,
                 request.getAnswer(),
-                request.getManagedBy()
+                request.getGestedBy()
         );
     }
-
-
+    
     public Request toEntity() {
         Request request = new Request();
         request.setId(this.id != null ? this.id : UUID.randomUUID().toString());
@@ -47,7 +45,7 @@ public record RequestDTO(
         request.setStatus(this.status);
         request.setDescription(this.description);
         request.setAnswer(this.answer);
-        request.setManagedBy(this.managedBy);
+        request.setGestedBy(this.managedBy);
         return request;
     }
 }
