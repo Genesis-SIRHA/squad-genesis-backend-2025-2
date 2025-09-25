@@ -1,7 +1,6 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.CourseRequest;
-import edu.dosw.dto.CourseResponse;
 import edu.dosw.dto.GroupRequest;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Course;
@@ -20,59 +19,49 @@ import java.util.stream.Collectors;
 @Service
 public class CourseService {
     private final CourseRepository courseRepository;
+    private final GroupService groupService;
 
     /**
      * Constructs a new CourseService with the provided CourseRepository.
      * @param courseRepository The repository for course data access
      */
-    public CourseService(CourseRepository courseRepository) {
+    public CourseService(CourseRepository courseRepository, GroupService groupService) {
         this.courseRepository = courseRepository;
+        this.groupService = groupService;
     }
-
     /**
      * Retrieves a list of all courses.
      * @return A list of CourseResponse objects representing all courses
      */
-    public List<CourseResponse> getAllCourses() {
-        return courseRepository.findAll().stream()
-                .map(CourseResponse::fromModel)
-                .collect(Collectors.toList());
+    public List<Course> getAllCourses() {
+        return courseRepository.findAll();
     }
-
     /**
-     * Retrieves a course by its ID.
-     * @param id The ID of the course to retrieve
+     * Retrieves a course by its abbreviation.
+     * @param abbreviation The abbreation of the course to retrieve
      * @return An Optional containing the CourseResponse if found, or empty if not found
      */
-    public Optional<CourseResponse> getCourseById(String id) {
-        return courseRepository.findById(id)
-                .map(CourseResponse::fromModel);
+    public Optional<Course> getCourseByAbbreviation(String abbreviation) {
+        return courseRepository.findById(abbreviation);
     }
 
     /**
      * Creates a new course with the provided details.
      * @param request The course details to create
-     * @return The created course as a CourseResponse
+     * @return The created course
      * @throws BusinessException if a course with the same code already exists
      */
-    public CourseResponse createCourse(CourseRequest request) {
+    public Course createCourse(CourseRequest request) {
         if (courseRepository.existsByCode(request.code())) {
-            throw new BusinessException("Ya existe un curso con el código: " + request.code());
+            throw new BusinessException("Already exists a course with code: " + request.code());
         }
 
         Course course = new Course();
-        course.setCode(request.code());
-        course.setName(request.name());
-        
-        if (request.groups() != null) {
-            List<Group> groups = request.groups().stream()
-                    .map(this::mapToGroup)
-                    .collect(Collectors.toList());
-            course.setGroups(groups);
-        }
+        course.setAbbreviation(request.code());
+        course.setCourseName(request.name());
 
         Course savedCourse = courseRepository.save(course);
-        return CourseResponse.fromModel(savedCourse);
+        return savedCourse;
     }
 
     /**
@@ -81,54 +70,36 @@ public class CourseService {
      * @param request The updated course details
      * @return An Optional containing the updated CourseResponse if found, or empty if not found
      */
-    public Optional<CourseResponse> updateCourse(String id, CourseRequest request) {
+    public Optional<Course> updateCourse(String id, CourseRequest request) {
         return courseRepository.findById(id)
                 .map(existingCourse -> {
-                    existingCourse.setName(request.name());
-                    
-                    if (request.groups() != null) {
-                        List<Group> updatedGroups = request.groups().stream()
-                                .map(this::mapToGroup)
-                                .collect(Collectors.toList());
-                        existingCourse.setGroups(updatedGroups);
-                    }
-                    
+                    existingCourse.setCourseName(request.name());
                     Course updatedCourse = courseRepository.save(existingCourse);
-                    return CourseResponse.fromModel(updatedCourse);
+                    return updatedCourse;
                 });
     }
-
     /**
      * Adds a new group to an existing course.
-     * @param courseId The ID of the course to add the group to
+     * @param abbreviation The ID of the course to add the group to
      * @param groupRequest The details of the group to add
-     * @return An Optional containing the updated CourseResponse if found, or empty if course not found
+     * @return An Optional containing the updated Course if found, or empty if course not found
      * @throws BusinessException if a group with the same code already exists in the course
-     */
-    public Optional<CourseResponse> addGroupToCourse(String courseId, GroupRequest groupRequest) {
-        return courseRepository.findById(courseId)
-                .map(course -> {
-                    boolean groupExists = course.getGroups().stream()
-                            .anyMatch(g -> g.getGroupCode().equals(groupRequest.groupCode()));
-                    
-                    if (groupExists) {
-                        throw new BusinessException("Ya existe un grupo con el código: " + groupRequest.groupCode());
-                    }
+     */    public Optional<Course> addGroupToCourse(String abbreviation, GroupRequest groupRequest) {
+        List<Group> groups = groupService.getAllGroupsByCourseAbbreviation(abbreviation);
+        if (groups.stream().anyMatch(g -> g.getGroupCode().equals(groupRequest.groupCode()))) {
+            throw new BusinessException("Group already exists");
+        }
 
-                    Group newGroup = mapToGroup(groupRequest);
-                    course.getGroups().add(newGroup);
-                    
-                    Course updatedCourse = courseRepository.save(course);
-                    return CourseResponse.fromModel(updatedCourse);
-                });
+        groupService.createGroup(groupRequest);
+        return this.getCourseByAbbreviation(abbreviation);
     }
 
     /**
-     * Deletes a course by its ID.
-     * @param id The ID of the course to delete
+     * Deletes a course by its abbreviation.
+     * @param abbreviation The abbreviation of the course to delete
      */
-    public void deleteCourse(String id) {
-        courseRepository.deleteById(id);
+    public void deleteCourse(String abbreviation) {
+        courseRepository.deleteById(abbreviation);
     }
 
     /**
@@ -139,9 +110,13 @@ public class CourseService {
     private Group mapToGroup(GroupRequest groupRequest) {
         Group group = new Group();
         group.setGroupCode(groupRequest.groupCode());
-        group.setProfessor(groupRequest.professor());
-        group.setCapacity(groupRequest.capacity());
+        group.setTeacherId(groupRequest.professor());
+        group.setmaxCapacity(groupRequest.capacity());
         group.setEnrolled(groupRequest.enrolled());
         return group;
+    }
+
+    public Group findByCode(String s) {
+        return courseRepository.findByCode(s);
     }
 }
