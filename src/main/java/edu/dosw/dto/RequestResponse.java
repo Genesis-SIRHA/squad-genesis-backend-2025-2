@@ -18,19 +18,18 @@ public record RequestResponse(
 
     public static RequestResponse fromRequest(Request request) {
         return new RequestResponse(
-                request.getId(),
-                request.getStudentId(),
-                request.getStatus(),
-                request.getCreatedAt() != null ? request.getCreatedAt().toString() : null,
-                request.getType(),
-                request.getIsExceptional(),
-                request.getDescription(),
-                request.getOriginGroup(),
-                request.getDestinationGroup(),
-                request.getAnswer(),
-                request.getManagedBy(),
-                request.getAnswerAt() != null ? request.getAnswerAt().toString() : null
+            request.getId(),
+            request.getStudentId(),
+            request.getStatus(),
+            request.getCreatedAt().toString(),
+            request.getType(),
+            request.getIsExceptional(),
+            request.getDescription(),
+            request.getOriginGroup() != null ? GroupResponse.fromModel(request.getOriginGroup()) : null,
+            request.getDestinationGroup() != null ? GroupResponse.fromModel(request.getDestinationGroup()) : null,
+            request.getAnswer(),
+            request.getManagedBy(),
+            request.getAnswerAt() != null ? request.getAnswerAt().toString() : null
         );
     }
-
 }
