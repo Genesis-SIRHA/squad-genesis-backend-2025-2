@@ -3,6 +3,7 @@ package edu.dosw.services;
 import edu.dosw.dto.RequestDTO;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
+import edu.dosw.repositories.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import edu.dosw.repositories.CourseRepository;
@@ -29,6 +30,7 @@ public class RequestService {
     
     private final RequestRepository requestRepository;
     private final CourseRepository courseRepository;
+    private final GroupRepository groupRepository;
     private final Map<String, QueryStrategy> strategyMap;
 
     /**
@@ -39,7 +41,7 @@ public class RequestService {
      * @param courseRepository The repository for course data access
      */
     @Autowired
-    public RequestService(RequestRepository requestRepository, CourseRepository courseRepository) {
+    public RequestService(RequestRepository requestRepository, CourseRepository courseRepository, GroupRepository groupRepository) {
         this.requestRepository = requestRepository;
         this.courseRepository = courseRepository;
         this.strategyMap = Map.of(
@@ -47,7 +49,10 @@ public class RequestService {
             "ADMINISTRATIVE", new AdministrativeStrategy(requestRepository),
             "ADMINISTRATOR", new AdministratorStrategy(requestRepository)
         );
+        this.groupRepository = groupRepository;
     }
+
+
 
     /**
      * Fetches requests based on the user's role and ID.
@@ -92,12 +97,12 @@ public class RequestService {
         request.setAnswer(requestDTO.description());
         request.setAnswerAt(LocalDate.now());
 
-        Group origin = courseRepository.findByCode(requestDTO.originGroupId());
+        Group origin = groupRepository.findByCode(requestDTO.originGroupId());
         if (origin == null) {
             throw new IllegalArgumentException("Origin group not found: " + requestDTO.originGroupId());
         }
 
-        Group destination = courseRepository.findByCode(requestDTO.destinationGroupId());
+        Group destination = groupRepository.findByCode(requestDTO.destinationGroupId());
         if (destination == null) {
             throw new IllegalArgumentException("Destination group not found: " + requestDTO.destinationGroupId());
         }

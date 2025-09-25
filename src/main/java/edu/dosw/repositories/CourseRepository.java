@@ -4,6 +4,8 @@ import edu.dosw.model.Course;
 import edu.dosw.model.Group;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.util.Optional;
+
 /**
  * Repository interface for accessing and managing Course entities in MongoDB.
  * Extends MongoRepository to provide CRUD operations and custom query methods.
@@ -24,5 +26,6 @@ public interface CourseRepository extends MongoRepository<Course, String> {
      * @param code The group code to search for
      * @return The Group entity if found, or null if no group with the given code exists
      */
-    Group findByCode(String code);
+    Optional<Course> findByCode(String code);
+
 }

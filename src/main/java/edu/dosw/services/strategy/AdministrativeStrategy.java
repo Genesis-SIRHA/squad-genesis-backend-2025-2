@@ -26,6 +26,11 @@ public class AdministrativeStrategy implements QueryStrategy {
         this.membersService = membersService;
     }
 
+    public AdministrativeStrategy(RequestRepository requestRepository) {
+        this.requestRepository = requestRepository;
+        this.membersService = null;
+    }
+
     /**
      * Queries all available requests and those created by the specified user.
      *

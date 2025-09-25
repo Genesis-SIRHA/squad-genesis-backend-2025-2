@@ -4,6 +4,7 @@ import edu.dosw.dto.RequestDTO;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
+import edu.dosw.repositories.GroupRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import edu.dosw.repositories.CourseRepository;
@@ -23,11 +24,14 @@ class RequestServiceTest {
     private CourseRepository courseRepository;
     private RequestService requestService;
 
+    private GroupRepository groupRepository;
+
     @BeforeEach
     void setUp() {
         requestRepository = mock(RequestRepository.class);
         courseRepository = mock(CourseRepository.class);
-        requestService = new RequestService(requestRepository, courseRepository);
+        groupRepository = mock(GroupRepository.class);
+        requestService = new RequestService(requestRepository, courseRepository,groupRepository);
     }
 
     @Test
@@ -56,7 +60,7 @@ class RequestServiceTest {
                 null
         );
 
-        when(courseRepository.findByCode(anyString()))
+        when(groupRepository.findByCode(anyString()))
                 .thenReturn(new Group("G1", "Prof", 10, 5));
         when(requestRepository.save(any(Request.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
