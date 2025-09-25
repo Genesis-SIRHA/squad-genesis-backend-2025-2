@@ -2,11 +2,10 @@ package edu.dosw.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.dosw.dto.RequestDTO;
-import edu.dosw.dto.RequestResponse;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
-import edu.dosw.model.RequestDetails;import edu.dosw.services.RequestService;
+import edu.dosw.services.RequestService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -36,6 +35,7 @@ class RequestControllerTest {
 
     @Test
     void should_create_request() throws Exception {
+
         RequestDTO dto = new RequestDTO(
                 null,
                 "student123",
@@ -49,23 +49,24 @@ class RequestControllerTest {
                 null
         );
 
-        RequestResponse response = new RequestResponse(
+
+        RequestDTO responseDTO = new RequestDTO(
                 "req1",
                 "student123",
-                "PENDING",
-                LocalDateTime.now().toString(),
                 "GROUP_CHANGE",
                 false,
+                "PENDING",
                 "Cambio de grupo",
-                null,
-                null,
-                null,
+                "G1",
+                "G2",
                 null,
                 null
         );
 
-        when(requestService.createRequest(any(RequestDTO.class))).thenReturn(response);
 
+        when(requestService.createRequest(any(RequestDTO.class))).thenReturn(responseDTO.toEntity());
+
+        // Act & Assert
         mockMvc.perform(post("/api/requests")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
@@ -83,7 +84,7 @@ class RequestControllerTest {
         Group destinationGroup = new Group("G2", "Profesor B", 30, 5);
 
         Request request = new Request("student123", "Cambio de grupo", "GROUP_CHANGE",
-                originGroup, destinationGroup);
+                originGroup.getGroupCode(), destinationGroup.getGroupCode());
         request.setStatus("PENDING");
 
         when(requestService.fetchRequests("ADMIN", "student123"))
@@ -144,24 +145,23 @@ class RequestControllerTest {
 
         when(requestService.respondToRequest(any(), any())).thenReturn(request);
 
-        Request response = new Request();
-        response.setStatus("APPROVED");
-        response.setManagedBy("professor1");
+        Request details = new Request();
+        details.setAnswer("APPROVED");
+        details.setGestedBy("professor1");
 
         mockMvc.perform(post("/api/requests/123/respond")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(response)))
+                        .content(objectMapper.writeValueAsString(details)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value("123"))
                 .andExpect(jsonPath("$.status").value("APPROVED"));
     }
 
-
     @Test
     void respondToRequest_ShouldReturnNotFound_WhenRequestDoesNotExist() throws Exception {
         when(requestService.respondToRequest(any(), any())).thenReturn(null);
 
-        RequestDetails details = new RequestDetails();
+        Request details = new Request();
         details.setAnswer("REJECTED");
 
         mockMvc.perform(post("/requests/999/respond")
@@ -169,6 +169,4 @@ class RequestControllerTest {
                         .content(objectMapper.writeValueAsString(details)))
                 .andExpect(status().isNotFound());
     }
-
-
 }

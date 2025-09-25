@@ -34,16 +34,18 @@ public class CourseService {
      * @return A list of CourseResponse objects representing all courses
      */
     public List<Course> getAllCourses() {
-        return courseRepository.findAll();
+        return courseRepository.findAll().stream().collect(Collectors.toList());
     }
+  
     /**
      * Retrieves a course by its abbreviation.
      * @param abbreviation The abbreation of the course to retrieve
      * @return An Optional containing the CourseResponse if found, or empty if not found
      */
-    public Optional<Course> getCourseByAbbreviation(String abbreviation) {
-        return courseRepository.findById(abbreviation);
-    }
+
+    public Optional<Course> getCourseById(String id) {
+        return courseRepository.findById(id);
+
 
     /**
      * Creates a new course with the provided details.
@@ -84,15 +86,25 @@ public class CourseService {
      * @param groupRequest The details of the group to add
      * @return An Optional containing the updated Course if found, or empty if course not found
      * @throws BusinessException if a group with the same code already exists in the course
-     */    public Optional<Course> addGroupToCourse(String abbreviation, GroupRequest groupRequest) {
-        List<Group> groups = groupService.getAllGroupsByCourseAbbreviation(abbreviation);
-        if (groups.stream().anyMatch(g -> g.getGroupCode().equals(groupRequest.groupCode()))) {
-            throw new BusinessException("Group already exists");
-        }
 
-        groupService.createGroup(groupRequest);
-        return this.getCourseByAbbreviation(abbreviation);
-    }
+     */
+    public Optional<Course> addGroupToCourse(String courseId, GroupRequest groupRequest) {
+        return courseRepository.findById(courseId)
+                .map(course -> {
+                    boolean groupExists = course.getGroups().stream()
+                            .anyMatch(g -> g.getGroupCode().equals(groupRequest.groupCode()));
+                    
+                    if (groupExists) {
+                        throw new BusinessException("Ya existe un grupo con el código: " + groupRequest.groupCode());
+                    }
+
+                    Group newGroup = mapToGroup(groupRequest);
+                    course.getGroups().add(newGroup);
+                    
+                    Course updatedCourse = courseRepository.save(course);
+                    return updatedCourse;
+                });
+
 
     /**
      * Deletes a course by its abbreviation.

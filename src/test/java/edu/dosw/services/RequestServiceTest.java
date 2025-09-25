@@ -1,7 +1,6 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.RequestDTO;
-import edu.dosw.dto.RequestResponse;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
@@ -63,11 +62,11 @@ class RequestServiceTest {
                 .thenAnswer(inv -> inv.getArgument(0));
 
         // Act
-        RequestResponse result = requestService.createRequest(dto);
+        Request result = requestService.createRequest(dto);
 
         // Assert
-        assertEquals("student1", result.studentId());
-        assertEquals("TYPE", result.type());
+        assertEquals("student1", result.getStudentId());
+        assertEquals("TYPE", result.getType());
         verify(requestRepository).save(any(Request.class));
     }
 
@@ -146,35 +145,42 @@ class RequestServiceTest {
         Request request = new Request();
         request.setId("456");
 
-        Request response = new Request();
-        response.setManagedBy("professor2");
-        response.setStatus("REJECTED");
+        Request responseDetails = new Request();
+        responseDetails.setGestedBy("professor2");
+        responseDetails.setAnswer("REJECTED");
+        responseDetails.setStatus("REJECTED");
 
         when(requestRepository.findById("456")).thenReturn(Optional.of(request));
         when(requestRepository.save(any(Request.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Request updated = requestService.respondToRequest("456", response);
+        // Act
+        Request updated = requestService.respondToRequest("456", responseDetails);
 
-        assertNotNull(updated.getManagedBy());
+        // Assert
+        assertNotNull(updated.getAnswer(), "Answer should not be null");
         assertEquals("456", updated.getId());
-        assertEquals("REJECTED", updated.getStatus());
+        assertEquals("REJECTED", updated.getAnswer(), "Answer should be REJECTED");
+        assertEquals("REJECTED", updated.getStatus(), "Status should be updated to REJECTED");
+        assertEquals("professor2", updated.getGestedBy(), "GestedBy should be updated");
+
         verify(requestRepository).save(updated);
     }
+
+
 
     @Test
     void respondToRequest_ShouldReturnNullIfRequestNotFound() {
         // Arrange
-        Request response = new Request();
-        response.setAnswer("APPROVED");
+        Request responseDetails = new Request();
+        responseDetails.setAnswer("APPROVED");
 
         when(requestRepository.findById("999")).thenReturn(Optional.empty());
 
         // Act
-        Request result = requestService.respondToRequest("999", response);
+        Request result = requestService.respondToRequest("999", responseDetails);
 
         // Assert
         assertNull(result);
         verify(requestRepository, never()).save(any(Request.class));
     }
-
 }

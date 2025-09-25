@@ -41,7 +41,9 @@ class CourseServiceTest {
 
         // Assert
         assertEquals(1, result.size());
-        assertEquals("CS101", result.get(0).getCourseName());
+
+        assertEquals("CS101", result.get(0).getCode());
+
     }
 
     @Test
@@ -51,11 +53,11 @@ class CourseServiceTest {
         when(courseRepository.findById("1")).thenReturn(Optional.of(course));
 
         // Act
-        //Optional<Course> result = courseService.getCourseById("1");
+        Optional<Course> result = courseService.getCourseById("1");
 
         // Assert
-//        assertTrue(result.isPresent());
-//        assertEquals("CS101", result.get().getCourseName());
+        assertTrue(result.isPresent());
+        assertEquals("CS101", result.get().getCode());
     }
 
     @Test
@@ -64,7 +66,9 @@ class CourseServiceTest {
         when(courseRepository.findById("missing")).thenReturn(Optional.empty());
 
         // Act
-        //Optional<Course> result = courseService.getCourseById("missing");
+
+        Optional<Course> result = courseService.getCourseById("missing");
+
 
         // Assert
         //assertTrue(result.isEmpty());
@@ -93,10 +97,12 @@ class CourseServiceTest {
         Course response = courseService.createCourse(request);
 
         // Assert
-        assertEquals("CS101", response.getCourseCode());
-        assertEquals("Intro", response.getCourseName());
-        //assertNotNull(response.groups());
-        //assertTrue(response.groups().isEmpty());
+
+        assertEquals("CS101", response.getCode());
+        assertEquals("Intro", response.getName());
+        assertNotNull(response.getGroups());
+        assertTrue(response.getGroups().isEmpty());
+
         verify(courseRepository).save(any(Course.class));
     }
 
@@ -115,9 +121,11 @@ class CourseServiceTest {
         Course response = courseService.createCourse(request);
 
         // Assert
-        assertEquals("CS101", response.getCourseName());
-        //assertEquals(1, response.groups().size());
-        //assertEquals("G1", response.groups().get(0).groupCode());
+
+        assertEquals("CS101", response.getCode());
+        assertEquals(1, response.getGroups().size());
+        assertEquals("G1", response.getGroups().get(0).getGroupCode());
+
     }
 
     @Test
@@ -137,7 +145,9 @@ class CourseServiceTest {
 
         // Assert
         assertTrue(updated.isPresent());
-        assertEquals("NewName", updated.get().getCourseName());
+
+        assertEquals("NewName", updated.get().getName());
+
         verify(courseRepository).save(existing);
     }
 
@@ -169,6 +179,9 @@ class CourseServiceTest {
 
         // Assert
         assertTrue(result.isPresent());
+
+        assertEquals(2, result.get().getGroups().size());
+
         // verify that repository save was called with the same course instance
         verify(courseRepository).save(course);
     }

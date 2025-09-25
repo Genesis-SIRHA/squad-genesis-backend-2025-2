@@ -24,15 +24,38 @@ public class Group {
     }
 
     public String getGroupCode() { return groupCode; }
-    public void setGroupCode(String groupCode) { this.groupCode = groupCode; }
-
+    public String getAbbreviation() { return abbreviation; }
+    public String getYear() { return year; }
+    public String getSemester() { return semester; }
     public String getTeacherId() { return teacherId; }
-    public void setTeacherId(String teacherId) { this.teacherId = teacherId; }
-
-    public int getmaxCapacity() { return maxCapacity; }
-
-    public void setmaxCapacity(int maxCapacity) { this.maxCapacity = maxCapacity; }
-
+    public boolean isLab() { return isLab; }
+    public int getGroupNum() { return groupNum; }
     public int getEnrolled() { return enrolled; }
+    public int getMaxCapacity() { return maxCapacity; }
+
+    public String getProfessor() { return teacherId; }
+    public int getCapacity() { return maxCapacity; }
+
+
+
+
+    public void setProfessor(String professor) {
+        this.teacherId = professor;
+    }
+
+    public void setCapacity(int capacity) {
+        this.maxCapacity = capacity;
+    }
+
+    public void setGroupCode(String groupCode) { this.groupCode = groupCode; }
+    public void setAbbreviation(String abbreviation) { this.abbreviation = abbreviation; }
+    public void setYear(String year) { this.year = year; }
+    public void setSemester(String semester) { this.semester = semester; }
+    public void setTeacherId(String teacherId) { this.teacherId = teacherId; }
+    public void setLab(boolean isLab) { this.isLab = isLab; }
+    public void setGroupNum(int groupNum) { this.groupNum = groupNum; }
     public void setEnrolled(int enrolled) { this.enrolled = enrolled; }
+    public void setMaxCapacity(int maxCapacity) { this.maxCapacity = maxCapacity; }
+
+
 }
