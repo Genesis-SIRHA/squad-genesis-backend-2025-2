@@ -1,7 +1,6 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.CourseRequest;
-import edu.dosw.dto.CourseResponse;
 import edu.dosw.dto.GroupRequest;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Course;
@@ -33,10 +32,8 @@ public class CourseService {
      * Retrieves a list of all courses.
      * @return A list of CourseResponse objects representing all courses
      */
-    public List<CourseResponse> getAllCourses() {
-        return courseRepository.findAll().stream()
-                .map(CourseResponse::fromModel)
-                .collect(Collectors.toList());
+    public List<Course> getAllCourses() {
+        return courseRepository.findAll().stream().collect(Collectors.toList());
     }
 
     /**
@@ -44,9 +41,8 @@ public class CourseService {
      * @param id The ID of the course to retrieve
      * @return An Optional containing the CourseResponse if found, or empty if not found
      */
-    public Optional<CourseResponse> getCourseById(String id) {
-        return courseRepository.findById(id)
-                .map(CourseResponse::fromModel);
+    public Optional<Course> getCourseById(String id) {
+        return courseRepository.findById(id);
     }
 
     /**
@@ -55,7 +51,7 @@ public class CourseService {
      * @return The created course as a CourseResponse
      * @throws BusinessException if a course with the same code already exists
      */
-    public CourseResponse createCourse(CourseRequest request) {
+    public Course createCourse(CourseRequest request) {
         if (courseRepository.existsByCode(request.code())) {
             throw new BusinessException("Ya existe un curso con el código: " + request.code());
         }
@@ -72,7 +68,7 @@ public class CourseService {
         }
 
         Course savedCourse = courseRepository.save(course);
-        return CourseResponse.fromModel(savedCourse);
+        return savedCourse;
     }
 
     /**
@@ -81,7 +77,7 @@ public class CourseService {
      * @param request The updated course details
      * @return An Optional containing the updated CourseResponse if found, or empty if not found
      */
-    public Optional<CourseResponse> updateCourse(String id, CourseRequest request) {
+    public Optional<Course> updateCourse(String id, CourseRequest request) {
         return courseRepository.findById(id)
                 .map(existingCourse -> {
                     existingCourse.setName(request.name());
@@ -94,7 +90,7 @@ public class CourseService {
                     }
                     
                     Course updatedCourse = courseRepository.save(existingCourse);
-                    return CourseResponse.fromModel(updatedCourse);
+                    return updatedCourse;
                 });
     }
 
@@ -105,7 +101,7 @@ public class CourseService {
      * @return An Optional containing the updated CourseResponse if found, or empty if course not found
      * @throws BusinessException if a group with the same code already exists in the course
      */
-    public Optional<CourseResponse> addGroupToCourse(String courseId, GroupRequest groupRequest) {
+    public Optional<Course> addGroupToCourse(String courseId, GroupRequest groupRequest) {
         return courseRepository.findById(courseId)
                 .map(course -> {
                     boolean groupExists = course.getGroups().stream()
@@ -119,7 +115,7 @@ public class CourseService {
                     course.getGroups().add(newGroup);
                     
                     Course updatedCourse = courseRepository.save(course);
-                    return CourseResponse.fromModel(updatedCourse);
+                    return updatedCourse;
                 });
     }
 

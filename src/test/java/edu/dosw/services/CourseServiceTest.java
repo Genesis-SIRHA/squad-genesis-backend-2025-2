@@ -1,7 +1,6 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.CourseRequest;
-import edu.dosw.dto.CourseResponse;
 import edu.dosw.dto.GroupRequest;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Course;
@@ -38,11 +37,11 @@ class CourseServiceTest {
         when(courseRepository.findAll()).thenReturn(List.of(course));
 
         // Act
-        List<CourseResponse> result = courseService.getAllCourses();
+        List<Course> result = courseService.getAllCourses();
 
         // Assert
         assertEquals(1, result.size());
-        assertEquals("CS101", result.get(0).code());
+        assertEquals("CS101", result.get(0).getCode());
     }
 
     @Test
@@ -52,11 +51,11 @@ class CourseServiceTest {
         when(courseRepository.findById("1")).thenReturn(Optional.of(course));
 
         // Act
-        Optional<CourseResponse> result = courseService.getCourseById("1");
+        Optional<Course> result = courseService.getCourseById("1");
 
         // Assert
         assertTrue(result.isPresent());
-        assertEquals("CS101", result.get().code());
+        assertEquals("CS101", result.get().getCode());
     }
 
     @Test
@@ -65,7 +64,7 @@ class CourseServiceTest {
         when(courseRepository.findById("missing")).thenReturn(Optional.empty());
 
         // Act
-        Optional<CourseResponse> result = courseService.getCourseById("missing");
+        Optional<Course> result = courseService.getCourseById("missing");
 
         // Assert
         assertTrue(result.isEmpty());
@@ -91,13 +90,13 @@ class CourseServiceTest {
         when(courseRepository.save(any(Course.class))).thenReturn(saved);
 
         // Act
-        CourseResponse response = courseService.createCourse(request);
+        Course response = courseService.createCourse(request);
 
         // Assert
-        assertEquals("CS101", response.code());
-        assertEquals("Intro", response.name());
-        assertNotNull(response.groups());
-        assertTrue(response.groups().isEmpty());
+        assertEquals("CS101", response.getCode());
+        assertEquals("Intro", response.getName());
+        assertNotNull(response.getGroups());
+        assertTrue(response.getGroups().isEmpty());
         verify(courseRepository).save(any(Course.class));
     }
 
@@ -115,12 +114,12 @@ class CourseServiceTest {
         when(courseRepository.save(any(Course.class))).thenReturn(saved);
 
         // Act
-        CourseResponse response = courseService.createCourse(request);
+        Course response = courseService.createCourse(request);
 
         // Assert
-        assertEquals("CS101", response.code());
-        assertEquals(1, response.groups().size());
-        assertEquals("G1", response.groups().get(0).getGroupCode());
+        assertEquals("CS101", response.getCode());
+        assertEquals(1, response.getGroups().size());
+        assertEquals("G1", response.getGroups().get(0).getGroupCode());
     }
 
     @Test
@@ -136,11 +135,11 @@ class CourseServiceTest {
         CourseRequest request = new CourseRequest("CS101", "NewName", null);
 
         // Act
-        Optional<CourseResponse> updated = courseService.updateCourse("1", request);
+        Optional<Course> updated = courseService.updateCourse("1", request);
 
         // Assert
         assertTrue(updated.isPresent());
-        assertEquals("NewName", updated.get().name());
+        assertEquals("NewName", updated.get().getName());
         verify(courseRepository).save(existing);
     }
 
@@ -151,7 +150,7 @@ class CourseServiceTest {
         CourseRequest request = new CourseRequest("CS101", "Name", null);
 
         // Act
-        Optional<CourseResponse> updated = courseService.updateCourse("missing", request);
+        Optional<Course> updated = courseService.updateCourse("missing", request);
 
         // Assert
         assertTrue(updated.isEmpty());
@@ -170,11 +169,11 @@ class CourseServiceTest {
         GroupRequest newGroupReq = new GroupRequest("G2", "NewProf", 20, 0);
 
         // Act
-        Optional<CourseResponse> result = courseService.addGroupToCourse("1", newGroupReq);
+        Optional<Course> result = courseService.addGroupToCourse("1", newGroupReq);
 
         // Assert
         assertTrue(result.isPresent());
-        assertEquals(2, result.get().groups().size());
+        assertEquals(2, result.get().getGroups().size());
         // verify that repository save was called with the same course instance
         verify(courseRepository).save(course);
     }
