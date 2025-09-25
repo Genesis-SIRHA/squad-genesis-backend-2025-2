@@ -1,0 +1,36 @@
+package edu.dosw.dto;
+
+import edu.dosw.model.Request;
+
+public record RequestResponse(
+        String id,
+        String studentId,
+        String status,
+        String createdAt,
+        String type,
+        Boolean isExceptional,
+        String description,
+        GroupResponse originGroup,
+        GroupResponse destinationGroup,
+        String answer,
+        String managedBy,
+        String answerAt) {
+
+    public static RequestResponse fromRequest(Request request) {
+        return new RequestResponse(
+                request.getId(),
+                request.getStudentId(),
+                request.getStatus(),
+                request.getCreatedAt() != null ? request.getCreatedAt().toString() : null,
+                request.getType(),
+                request.getIsExceptional(),
+                request.getDescription(),
+                request.getOriginGroup(),
+                request.getDestinationGroup(),
+                request.getAnswer(),
+                request.getManagedBy(),
+                request.getAnswerAt() != null ? request.getAnswerAt().toString() : null
+        );
+    }
+
+}

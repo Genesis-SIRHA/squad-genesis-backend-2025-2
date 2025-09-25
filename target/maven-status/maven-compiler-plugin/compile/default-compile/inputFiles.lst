@@ -1,28 +1,26 @@
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\model\Request.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\dto\CourseRequest.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\Application.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\services\strategy\StudentStrategy.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\model\RequestDetails.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\repositories\MembersRepository.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\services\CourseService.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\model\Group.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\dto\RequestStats.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\dto\RequestDTO.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\services\RequestService.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\model\Member.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\config\OpenAPIConfig.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\exception\GlobalExceptionHandler.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\services\strategy\QueryStrategy.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\dto\CourseResponse.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\services\strategy\AdministratorStrategy.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\controller\CourseController.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\controller\RequestController.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\OpenAPIConfig.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\dto\GroupResponse.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\dto\GroupRequest.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\repositories\CourseRepository.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\exception\BusinessException.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\services\strategy\AdministrativeStrategy.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\services\MembersService.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\repositories\RequestRepository.java
-C:\Users\pipet\IdeaProjects\squad-genesis-backend-2025-2\src\main\java\edu\dosw\model\Course.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\model\Course.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\services\strategy\StudentStrategy.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\repositories\RequestRepository.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\dto\RequestDTO.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\services\strategy\AdministratorStrategy.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\dto\GroupRequest.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\model\RequestDetails.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\exception\BusinessException.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\dto\RequestStats.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\dto\RequestResponse.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\dto\CourseResponse.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\Application.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\controller\RequestController.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\dto\GroupResponse.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\repositories\CourseRepository.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\services\strategy\QueryStrategy.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\config\OpenAPIConfig.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\services\RequestService.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\services\strategy\AdministrativeStrategy.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\model\Request.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\exception\GlobalExceptionHandler.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\controller\CourseController.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\services\CourseService.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\OpenAPIConfig.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\model\Group.java
+C:\Users\Manuel Alejandro\Downloads\squad-genesis-backend-2025-2\src\main\java\edu\dosw\dto\CourseRequest.java

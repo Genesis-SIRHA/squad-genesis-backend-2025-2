@@ -2,11 +2,11 @@ package edu.dosw.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.dosw.dto.RequestDTO;
+import edu.dosw.dto.RequestResponse;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
-import edu.dosw.model.RequestDetails;
-import edu.dosw.services.RequestService;
+import edu.dosw.model.RequestDetails;import edu.dosw.services.RequestService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -49,7 +49,20 @@ class RequestControllerTest {
                 null
         );
 
-        Request response = new Request();
+        RequestResponse response = new RequestResponse(
+                "req1",
+                "student123",
+                "PENDING",
+                LocalDateTime.now().toString(),
+                "GROUP_CHANGE",
+                false,
+                "Cambio de grupo",
+                null,
+                null,
+                null,
+                null,
+                null
+        );
 
         when(requestService.createRequest(any(RequestDTO.class))).thenReturn(response);
 
@@ -70,7 +83,7 @@ class RequestControllerTest {
         Group destinationGroup = new Group("G2", "Profesor B", 30, 5);
 
         Request request = new Request("student123", "Cambio de grupo", "GROUP_CHANGE",
-                originGroup.getGroupCode(), destinationGroup.getGroupCode());
+                originGroup, destinationGroup);
         request.setStatus("PENDING");
 
         when(requestService.fetchRequests("ADMIN", "student123"))
@@ -131,17 +144,18 @@ class RequestControllerTest {
 
         when(requestService.respondToRequest(any(), any())).thenReturn(request);
 
-        RequestDetails details = new RequestDetails();
-        details.setAnswer("APPROVED");
-        details.setManagedBy("professor1");
+        Request response = new Request();
+        response.setStatus("APPROVED");
+        response.setManagedBy("professor1");
 
         mockMvc.perform(post("/api/requests/123/respond")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(details)))
+                        .content(objectMapper.writeValueAsString(response)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value("123"))
                 .andExpect(jsonPath("$.status").value("APPROVED"));
     }
+
 
     @Test
     void respondToRequest_ShouldReturnNotFound_WhenRequestDoesNotExist() throws Exception {
@@ -155,4 +169,6 @@ class RequestControllerTest {
                         .content(objectMapper.writeValueAsString(details)))
                 .andExpect(status().isNotFound());
     }
+
+
 }

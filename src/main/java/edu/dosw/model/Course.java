@@ -1,32 +1,68 @@
 package edu.dosw.model;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.constraints.NotBlank;
 
+import java.util.List;
+
 @Document(collection = "courses")
 public class Course {
-    @abbreviation
-    private String abbreviation;
+
+    @Id
+    private String id;
+
+    private String code;
+
     @NotBlank
-    private String courseName;
+    private String name;
+
+    private List<Group> groups;
 
     public Course() {}
 
-    public Course(String abbreviation, String name) {
-        this.abbreviation = abbreviation;
-        this.courseName = name;
+    public Course(String code, String name) {
+        this.code = code;
+        this.name = name;
     }
 
+    public Course(String code, String name, List<Group> groups) {
+        this.code = code;
+        this.name = name;
+        this.groups = groups;
+    }
 
-    public String getAbbreviation() { return abbreviation; }
+    // ====== GETTERS & SETTERS ======
 
-    public void setAbbreviation(String abbreviation) { this.abbreviation = abbreviation; }
+    public String getId() {
+        return id;
+    }
 
-    public String getCourseName() { return courseName; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public void setCourseName(String name) { this.courseName = name; }
+    public String getCode() {
+        return code;
+    }
 
-    public String getCourseCode() {
-        return abbreviation;
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<Group> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<Group> groups) {
+        this.groups = groups;
     }
 }

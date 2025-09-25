@@ -1,10 +1,11 @@
 package edu.dosw.controller;
 
 import edu.dosw.dto.RequestDTO;
+import edu.dosw.dto.RequestResponse;
 import edu.dosw.dto.RequestStats;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import edu.dosw.model.RequestDetails;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,8 +42,8 @@ public class RequestController {
      */
     @PostMapping
     @Operation(summary = "Create a new request", description = "Creates a new request with the provided details")
-    public ResponseEntity<Request> createRequest(@RequestBody RequestDTO request) {
-        Request createdRequest = requestService.createRequest(request);
+    public ResponseEntity<RequestResponse> createRequest(@RequestBody RequestDTO request) {
+        RequestResponse createdRequest = requestService.createRequest(request);
         return ResponseEntity.ok(createdRequest);
     }
 
@@ -94,19 +95,24 @@ public class RequestController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Cancel a request", description = "Cancels a request by its ID")
     public ResponseEntity<Void> deleteRequest(@PathVariable String id) {
-        requestService.deleteRequest(id);
+        requestService.updateRequestStatus(id, "CANCELLED");
         return ResponseEntity.noContent().build();
     }
 
+
     @PostMapping("/{id}/respond")
-    @Operation(summary = "Respond to a request", description = "Adds a response to a request")
-    public ResponseEntity<Request> respondToRequest(@PathVariable String id, @RequestBody RequestDetails response) {
-        Request request = requestService.respondToRequest(id, response);
-        if (request != null) {
-            return ResponseEntity.ok(request);
-        } else {
+    @Operation(summary = "Respond to a request", description = "Adds an answer and managedBy to a request")
+    public ResponseEntity<Request> respondToRequest(
+            @PathVariable String id,
+            @RequestBody Request response) {
+
+        Request updated = requestService.respondToRequest(id, response);
+
+        if (updated == null) {
             return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.ok(updated);
     }
+
 }
 
