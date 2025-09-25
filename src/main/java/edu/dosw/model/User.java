@@ -3,22 +3,22 @@ package edu.dosw.model;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
-public class Member{
-    private final String memberId;
+public class User {
+    private final String userId;
     private String type;
     private String name;
     private String plan;
     private String facultyId;
 
-    public Member(String memberId, String name, String type, String facultyId) {
-        this.memberId = memberId;
+    public User(String userId, String name, String type, String facultyId) {
+        this.userId = userId;
         this.name = name;
         this.type = type;
         this.facultyId = facultyId;
     }
 
-    public String getMemberId() {
-        return memberId;
+    public String getUserId() {
+        return userId;
     }
 
     public String getType() {

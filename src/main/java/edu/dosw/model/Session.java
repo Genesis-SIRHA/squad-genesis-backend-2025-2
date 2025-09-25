@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "schedules")
 public class Session {
     private String groupCode;
+    private String abbreviation;
     private String classroomName;
     private int slot;
     private DayOfWeek day;
@@ -60,5 +61,17 @@ public class Session {
 
     public void setSemester(int semester) {
         this.semester = semester;
+    }
+
+    public String getAbbreviation() {
+        return abbreviation;
+    }
+
+    public void setAbbreviation(String abbreviation) {
+        this.abbreviation = abbreviation;
+    }
+
+    public String getGroupCode() {
+        return groupCode;
     }
 }

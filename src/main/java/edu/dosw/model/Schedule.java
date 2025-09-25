@@ -26,4 +26,12 @@ public class Schedule {
     public void setSessions(ArrayList<Session> sessions) {
         this.sessions = sessions;
     }
+
+    public void deleteGroup(String abbreviation, String groupId) {
+        sessions.removeIf(session -> session.getAbbreviation().equals(abbreviation) && session.getGroupCode().equals(groupId));
+    }
+
+    public void addSessions(ArrayList<Session> sessions) {
+        sessions.addAll(sessions);
+    }
 }

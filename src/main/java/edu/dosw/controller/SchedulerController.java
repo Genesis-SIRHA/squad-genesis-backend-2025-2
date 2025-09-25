@@ -1,15 +1,12 @@
 package edu.dosw.controller;
 
-import dto.ScheduleRequest;
 import edu.dosw.model.Schedule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import services.SchedulerService;
-
-import java.util.List;
+import edu.dosw.services.SchedulerService;
 
 @RestController
 @RequestMapping("/api/schedules")
@@ -23,36 +20,16 @@ public class SchedulerController {
         this.schedulerService = schedulerService;
     }
 
-    @PostMapping
-    @Operation(summary = "Create a new schedule", description = "Creates a new class schedule with the provided details")
-    public ResponseEntity<Schedule> createSchedule(@RequestBody ScheduleRequest scheduleRequest) {
-        return ResponseEntity.ok(schedulerService.createSchedule(scheduleRequest));
-    }
-
-    @GetMapping("/{id}")
+    @GetMapping("/{studentId}")
     @Operation(summary = "Get schedule by ID", description = "Retrieves a schedule by its unique identifier")
-    public ResponseEntity<Schedule> getScheduleById(@PathVariable String id) {
-        return ResponseEntity.ok(schedulerService.getScheduleById(id));
+    public ResponseEntity<Schedule> getScheduleById(@PathVariable String studentId) {
+        return ResponseEntity.ok(schedulerService.getScheduleById(studentId));
     }
 
-    @GetMapping
-    @Operation(summary = "Get all schedules", description = "Retrieves all available schedules")
-    public ResponseEntity<List<Schedule>> getAllSchedules() {
-        return ResponseEntity.ok(schedulerService.getAllSchedules());
-    }
-
-    @PutMapping("/{id}")
-    @Operation(summary = "Update a schedule", description = "Updates an existing schedule with new information")
-    public ResponseEntity<Schedule> updateSchedule(
-            @PathVariable String id, 
-            @RequestBody ScheduleRequest scheduleRequest) {
-        return ResponseEntity.ok(schedulerService.updateSchedule(id, scheduleRequest));
-    }
-
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{studentId}")
     @Operation(summary = "Delete a schedule", description = "Deletes a schedule by its ID")
-    public ResponseEntity<Void> deleteSchedule(@PathVariable String id) {
-        schedulerService.deleteSchedule(id);
+    public ResponseEntity<Void> deleteSchedule(@PathVariable String studentId) {
+        schedulerService.deleteSchedule(studentId);
         return ResponseEntity.noContent().build();
     }
 

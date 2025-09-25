@@ -35,4 +35,8 @@ public class Group {
 
     public int getEnrolled() { return enrolled; }
     public void setEnrolled(int enrolled) { this.enrolled = enrolled; }
+
+    public String getAbbreviation() {
+        return abbreviation;
+    }
 }
