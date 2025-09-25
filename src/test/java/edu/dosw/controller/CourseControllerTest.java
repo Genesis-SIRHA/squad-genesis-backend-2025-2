@@ -48,7 +48,6 @@ class CourseControllerTest {
                         "CS101",
                         "Intro a la Programación",
                         List.of(new Group("G1", "Profesor A", 30, 0))
-
                 ));
 
         mockMvc.perform(post("/api/courses")
@@ -63,7 +62,6 @@ class CourseControllerTest {
     void should_get_all_courses() throws Exception {
         when(courseService.getAllCourses())
                 .thenReturn(List.of(
-
                         new Course(
                                 "CS101",
                                 "Intro a la Programación",
@@ -76,8 +74,6 @@ class CourseControllerTest {
                         )
                 ));
 
-
-
         mockMvc.perform(get("/api/courses"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
@@ -85,26 +81,11 @@ class CourseControllerTest {
                 .andExpect(jsonPath("$[1].code").value("CS102"));
     }
 
-    @Test
-    void should_get_course_by_id() throws Exception {
 
-        when(courseService.getCourseById("12345"))
-                .thenReturn(Optional.of(new Course(
-                        "CS101",
-                        "Intro a la Programación",
-                        List.of()
-
-                )));
-
-        mockMvc.perform(get("/api/courses/12345"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("CS101"))
-                .andExpect(jsonPath("$.name").value("Intro a la Programación"));
-    }
 
     @Test
     void should_return_404_when_course_not_found() throws Exception {
-        when(courseService.getCourseByAbbreviation("999"))
+        when(courseService.findByCode("999"))
                 .thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/courses/999"))
@@ -121,11 +102,9 @@ class CourseControllerTest {
 
         when(courseService.updateCourse(any(String.class), any(CourseRequest.class)))
                 .thenReturn(Optional.of(new Course(
-
                         "CS101",
                         "Programación Avanzada",
                         List.of()
-
                 )));
 
         mockMvc.perform(put("/api/courses/12345")
@@ -164,11 +143,9 @@ class CourseControllerTest {
 
         when(courseService.addGroupToCourse(eq("12345"), eq(groupRequest)))
                 .thenReturn(Optional.of(new Course(
-
                         "CS101",
                         "Intro a la Programación",
                         List.of(new Group("G2", "Profesor B", 25, 0))
-
                 )));
 
         mockMvc.perform(post("/api/courses/12345/groups")

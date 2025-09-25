@@ -27,6 +27,13 @@ public record GroupRequest(
 
 
 ) {
-
+    public Group toEntity() {
+        Group group = new Group();
+        group.setGroupCode(this.groupCode);
+        group.setTeacherId(this.professor);
+        group.setMaxCapacity(this.capacity);
+        group.setEnrolled(this.enrolled);
+        return group;
+    }
 }
 

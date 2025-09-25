@@ -50,7 +50,7 @@ public class CourseController {
     @GetMapping("/{id}")
     @Operation(summary = "Get course by ID", description = "Retrieve course details by its ID")
     public ResponseEntity<Course> getCourseById(@PathVariable String id) {
-        return courseService.getCourseByAbbreviation(id)
+        return courseService.findByCode(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
