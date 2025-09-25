@@ -1,11 +1,12 @@
 package edu.dosw.model;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.constraints.NotBlank;
 
 @Document(collection = "courses")
 public class Course {
-    @abbreviation
+    @Id
     private String abbreviation;
     @NotBlank
     private String courseName;

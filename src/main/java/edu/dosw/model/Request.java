@@ -133,4 +133,6 @@ public class Request {
     public void setDestinationGroup(String destinationGroup) {
         this.destinationGroupId = destinationGroup;
     }
+
+
 }
