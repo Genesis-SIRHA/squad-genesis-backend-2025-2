@@ -1,6 +1,8 @@
 package edu.dosw.dto;
 
+import edu.dosw.model.Group;
 import edu.dosw.model.Request;
+
 
 public record RequestResponse(
         String id,
@@ -10,8 +12,8 @@ public record RequestResponse(
         String type,
         Boolean isExceptional,
         String description,
-        GroupResponse originGroup,
-        GroupResponse destinationGroup,
+        Group originGroup,
+        Group destinationGroup,
         String answer,
         String managedBy,
         String answerAt) {
@@ -25,8 +27,8 @@ public record RequestResponse(
             request.getType(),
             request.getIsExceptional(),
             request.getDescription(),
-            request.getOriginGroup() != null ? GroupResponse.fromModel(request.getOriginGroup()) : null,
-            request.getDestinationGroup() != null ? GroupResponse.fromModel(request.getDestinationGroup()) : null,
+            request.getOriginGroup() ,
+            request.getDestinationGroup(),
             request.getAnswer(),
             request.getManagedBy(),
             request.getAnswerAt() != null ? request.getAnswerAt().toString() : null

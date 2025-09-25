@@ -37,6 +37,7 @@ public class Group {
     public int getCapacity() { return maxCapacity; }
 
 
+
     public void setProfessor(String professor) {
         this.teacherId = professor;
     }
@@ -54,4 +55,6 @@ public class Group {
     public void setGroupNum(int groupNum) { this.groupNum = groupNum; }
     public void setEnrolled(int enrolled) { this.enrolled = enrolled; }
     public void setMaxCapacity(int maxCapacity) { this.maxCapacity = maxCapacity; }
+
+
 }

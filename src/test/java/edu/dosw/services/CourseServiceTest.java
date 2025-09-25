@@ -120,7 +120,7 @@ class CourseServiceTest {
         // Assert
         assertEquals("CS101", response.code());
         assertEquals(1, response.groups().size());
-        assertEquals("G1", response.groups().get(0).groupCode());
+        assertEquals("G1", response.groups().get(0).getGroupCode());
     }
 
     @Test

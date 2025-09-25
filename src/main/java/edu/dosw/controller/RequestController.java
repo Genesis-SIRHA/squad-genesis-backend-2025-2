@@ -28,6 +28,7 @@ public class RequestController {
 
     /**
      * Constructs a new RequestController with the provided RequestService.
+     *
      * @param requestService The service to handle request operations
      */
     @Autowired
@@ -37,6 +38,7 @@ public class RequestController {
 
     /**
      * Creates a new request with the provided details.
+     *
      * @param request The request data to create
      * @return The created request with its generated ID and status
      */
@@ -49,8 +51,9 @@ public class RequestController {
 
     /**
      * Retrieves requests based on user role and ID.
+     *
      * @param userId The ID of the user making the request
-     * @param role The role of the user (e.g., STUDENT, PROFESSOR)
+     * @param role   The role of the user (e.g., STUDENT, PROFESSOR)
      * @return List of requests filtered by user role and ID
      */
     @GetMapping("/{userId}/role")
@@ -65,20 +68,22 @@ public class RequestController {
 
     /**
      * Updates the status of an existing request.
-     * @param id The ID of the request to update
+     *
+     * @param id     The ID of the request to update
      * @param status The new status to set for the request
      * @return The updated request
      */
     @PutMapping("/{id}/status")
     @Operation(summary = "Update request status", description = "Updates the status of an existing request")
     public ResponseEntity<Request> updateRequestStatus(
-            @PathVariable String id, 
+            @PathVariable String id,
             @RequestParam String status) {
         return ResponseEntity.ok(requestService.updateRequestStatus(id, status));
     }
 
     /**
      * Retrieves statistics about requests.
+     *
      * @return Request statistics including counts by status
      */
     @GetMapping("/stats")
@@ -89,6 +94,7 @@ public class RequestController {
 
     /**
      * Cancels a request by its ID.
+     *
      * @param id The ID of the request to cancel
      * @return 204 No Content if successful
      */
@@ -105,9 +111,7 @@ public class RequestController {
         Request request = requestService.respondToRequest(id, response);
         if (request != null) {
             return ResponseEntity.ok(request);
-        } else {
-            return ResponseEntity.notFound().build();
         }
+        return null;
     }
 }
-

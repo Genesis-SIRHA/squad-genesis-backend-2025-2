@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.dosw.dto.CourseRequest;
 import edu.dosw.dto.CourseResponse;
 import edu.dosw.dto.GroupRequest;
-import edu.dosw.dto.GroupResponse;
+import edu.dosw.model.Group;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -155,7 +155,7 @@ class CourseControllerTest {
                         "12345",
                         "CS101",
                         "Intro a la Programación",
-                        List.of(new GroupResponse("G2", "Profesor B", 25, 0))
+                        List.of(new Group("G2", "Profesor B", 25, 0))
                 )));
 
 

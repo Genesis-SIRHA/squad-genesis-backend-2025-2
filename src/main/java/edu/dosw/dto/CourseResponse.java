@@ -1,6 +1,8 @@
 package edu.dosw.dto;
 
 import edu.dosw.model.Course;
+import edu.dosw.model.Group;
+
 import java.util.List;
 
 /**
@@ -18,7 +20,7 @@ public record CourseResponse(
     String name,
     
     /** List of groups associated with this course */
-    List<GroupResponse> groups
+    List<Group> groups
 ) {
     /**
      * Creates a CourseResponse from a Course entity.
@@ -31,7 +33,7 @@ public record CourseResponse(
             course.getCode(),
             course.getName(),
             course.getGroups().stream()
-                .map(GroupResponse::fromModel)
+                .map(Group::fromModel)
                 .toList()
         );
     }
