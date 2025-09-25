@@ -5,7 +5,7 @@ import edu.dosw.dto.RequestResponse;
 import edu.dosw.dto.RequestStats;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import edu.dosw.model.RequestDetails;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -99,15 +99,20 @@ public class RequestController {
         return ResponseEntity.noContent().build();
     }
 
+
     @PostMapping("/{id}/respond")
-    @Operation(summary = "Respond to a request", description = "Adds a response to a request")
-    public ResponseEntity<Request> respondToRequest(@PathVariable String id, @RequestBody RequestDetails response) {
-        Request request = requestService.respondToRequest(id, response);
-        if (request != null) {
-            return ResponseEntity.ok(request);
-        } else {
+    @Operation(summary = "Respond to a request", description = "Adds an answer and managedBy to a request")
+    public ResponseEntity<Request> respondToRequest(
+            @PathVariable String id,
+            @RequestBody Request response) {
+
+        Request updated = requestService.respondToRequest(id, response);
+
+        if (updated == null) {
             return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.ok(updated);
     }
+
 }
 

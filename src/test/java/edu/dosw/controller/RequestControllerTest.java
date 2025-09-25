@@ -6,8 +6,7 @@ import edu.dosw.dto.RequestResponse;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
-import edu.dosw.model.RequestDetails;
-import edu.dosw.services.RequestService;
+import edu.dosw.model.RequestDetails;import edu.dosw.services.RequestService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -145,17 +144,18 @@ class RequestControllerTest {
 
         when(requestService.respondToRequest(any(), any())).thenReturn(request);
 
-        RequestDetails details = new RequestDetails();
-        details.setAnswer("APPROVED");
-        details.setManagedBy("professor1");
+        Request response = new Request();
+        response.setStatus("APPROVED");
+        response.setManagedBy("professor1");
 
         mockMvc.perform(post("/api/requests/123/respond")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(details)))
+                        .content(objectMapper.writeValueAsString(response)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value("123"))
                 .andExpect(jsonPath("$.status").value("APPROVED"));
     }
+
 
     @Test
     void respondToRequest_ShouldReturnNotFound_WhenRequestDoesNotExist() throws Exception {
@@ -169,4 +169,6 @@ class RequestControllerTest {
                         .content(objectMapper.writeValueAsString(details)))
                 .andExpect(status().isNotFound());
     }
+
+
 }

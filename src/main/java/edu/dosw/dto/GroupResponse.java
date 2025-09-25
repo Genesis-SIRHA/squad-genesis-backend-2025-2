@@ -32,4 +32,8 @@ public record GroupResponse(
             group.getEnrolled()
         );
     }
+
+    public String getGroupCode() {
+        return groupCode;
+    }
 }
