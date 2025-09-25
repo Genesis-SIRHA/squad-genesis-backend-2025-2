@@ -2,7 +2,6 @@ package edu.dosw.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.dosw.dto.RequestDTO;
-import edu.dosw.dto.RequestResponse;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
@@ -50,20 +49,7 @@ class RequestControllerTest {
                 null
         );
 
-        RequestResponse response = new RequestResponse(
-                "req1",
-                "student123",
-                "PENDING",
-                LocalDateTime.now().toString(),
-                "GROUP_CHANGE",
-                false,
-                "Cambio de grupo",
-                null,
-                null,
-                null,
-                null,
-                null
-        );
+        Request response = new Request();
 
         when(requestService.createRequest(any(RequestDTO.class))).thenReturn(response);
 
@@ -84,7 +70,7 @@ class RequestControllerTest {
         Group destinationGroup = new Group("G2", "Profesor B", 30, 5);
 
         Request request = new Request("student123", "Cambio de grupo", "GROUP_CHANGE",
-                originGroup, destinationGroup);
+                originGroup.getGroupCode(), destinationGroup.getGroupCode());
         request.setStatus("PENDING");
 
         when(requestService.fetchRequests("ADMIN", "student123"))
