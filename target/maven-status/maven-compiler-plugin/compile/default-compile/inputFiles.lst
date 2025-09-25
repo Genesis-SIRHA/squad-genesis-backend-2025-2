@@ -10,7 +10,6 @@ C:\Users\Karol\OneDrive\Documentos\GitHub\squad-genesis-backend-2025-2\src\main\
 C:\Users\Karol\OneDrive\Documentos\GitHub\squad-genesis-backend-2025-2\src\main\java\edu\dosw\Application.java
 C:\Users\Karol\OneDrive\Documentos\GitHub\squad-genesis-backend-2025-2\src\main\java\edu\dosw\config\OpenAPIConfig.java
 C:\Users\Karol\OneDrive\Documentos\GitHub\squad-genesis-backend-2025-2\src\main\java\edu\dosw\services\strategy\AdministrativeStrategy.java
-C:\Users\Karol\OneDrive\Documentos\GitHub\squad-genesis-backend-2025-2\src\main\java\edu\dosw\dto\RequestResponse.java
 C:\Users\Karol\OneDrive\Documentos\GitHub\squad-genesis-backend-2025-2\src\main\java\edu\dosw\model\Group.java
 C:\Users\Karol\OneDrive\Documentos\GitHub\squad-genesis-backend-2025-2\src\main\java\edu\dosw\repositories\CourseRepository.java
 C:\Users\Karol\OneDrive\Documentos\GitHub\squad-genesis-backend-2025-2\src\main\java\edu\dosw\repositories\RequestRepository.java
@@ -19,6 +18,5 @@ C:\Users\Karol\OneDrive\Documentos\GitHub\squad-genesis-backend-2025-2\src\main\
 C:\Users\Karol\OneDrive\Documentos\GitHub\squad-genesis-backend-2025-2\src\main\java\edu\dosw\services\strategy\StudentStrategy.java
 C:\Users\Karol\OneDrive\Documentos\GitHub\squad-genesis-backend-2025-2\src\main\java\edu\dosw\exception\BusinessException.java
 C:\Users\Karol\OneDrive\Documentos\GitHub\squad-genesis-backend-2025-2\src\main\java\edu\dosw\model\Request.java
-C:\Users\Karol\OneDrive\Documentos\GitHub\squad-genesis-backend-2025-2\src\main\java\edu\dosw\model\RequestDetails.java
 C:\Users\Karol\OneDrive\Documentos\GitHub\squad-genesis-backend-2025-2\src\main\java\edu\dosw\dto\RequestStats.java
 C:\Users\Karol\OneDrive\Documentos\GitHub\squad-genesis-backend-2025-2\src\main\java\edu\dosw\controller\RequestController.java

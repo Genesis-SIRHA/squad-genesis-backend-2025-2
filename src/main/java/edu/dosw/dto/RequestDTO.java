@@ -29,10 +29,10 @@ public record RequestDTO(
                 request.getIsExceptional(),
                 request.getStatus(),
                 request.getDescription(),
-                request.getOriginGroup() != null ? request.getOriginGroup().getGroupCode() : null,
-                request.getDestinationGroup() != null ? request.getDestinationGroup().getGroupCode() : null,
+                request.getOriginGroupId() != null ? request.getOriginGroupId() : null,
+                request.getDestinationGroupId() != null ? request.getDestinationGroupId(): null,
                 request.getAnswer(),
-                request.getManagedBy()
+                request.getGestedBy()
         );
     }
     
@@ -45,7 +45,7 @@ public record RequestDTO(
         request.setStatus(this.status);
         request.setDescription(this.description);
         request.setAnswer(this.answer);
-        request.setManagedBy(this.managedBy);
+        request.setGestedBy(this.managedBy);
         return request;
     }
 }
