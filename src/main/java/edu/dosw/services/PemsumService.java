@@ -12,12 +12,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Service class responsible for generating and managing student academic records (Pemsum).
+ * This service coordinates between different services to build a comprehensive academic summary.
+ */
 @Service
 public class PemsumService {
     private final FacultyService facultyService;
     private final MembersService membersService;
     private final HistorialService historialService;
 
+    /**
+     * Constructs a new PemsumService with required dependencies.
+     * 
+     * @param facultyService Service for faculty-related operations
+     * @param membersService Service for member-related operations
+     * @param historialService Service for academic history operations
+     */
     @Autowired
     public PemsumService(FacultyService facultyService, MembersService membersService, HistorialService historialService) {
         this.facultyService = facultyService;
@@ -25,41 +36,58 @@ public class PemsumService {
         this.historialService = historialService;
     }
 
+    /**
+     * Retrieves the academic record (Pemsum) for a specific student.
+     * 
+     * @param studentId The unique identifier of the student
+     * @return A Pemsum object containing the student's academic summary
+     */
     public Pemsum getPemsum(String studentId) {
         return buildPemsum(studentId);
     }
 
+    /**
+     * Builds a Pemsum object by gathering and processing student academic data.
+     * 
+     * @param studentId The unique identifier of the student
+     * @return A fully constructed Pemsum object
+     * @throws BusinessException if faculty name or plan is invalid
+     */
     private Pemsum buildPemsum(String studentId) {
-        Pemsum pemsum = new Pemsum();
         User student = membersService.listById(studentId);
         String facultyName = student.getFacultyName();
         String plan = student.getPlan();
 
-        pemsum.setStudentName(student.getName());
-        pemsum.setStudentId(studentId);
-        pemsum.setFacultyName(facultyName);
-        pemsum.setFacultyPlan(plan);
-
         ArrayList<Course> courses = facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan);
+        if (courses.isEmpty()) {
+            throw new BusinessException("Invalid faculty name or plan: " + facultyName + " - " + plan);
+        }
+
         String year = PeriodService.getYear();
         String period = PeriodService.getPeriod();
         ArrayList<Historial> historials = historialService.getSessionsByStudentIdAndPeriod(studentId, year, period);
 
-        if (courses.isEmpty()) {
-            throw new BusinessException("Invalid faculty name or plan: "+facultyName+" - "+plan);
-        }
-
-        int totalCredits = courses.stream().mapToInt(Course::getCredits).sum();
         Map<Course, String> coursesMap = getCoursesMap(courses, historials);
+        int totalCredits = courses.stream().mapToInt(Course::getCredits).sum();
         int approvedCredits = getApprovedCredits(coursesMap);
 
-        pemsum.setTotalCredits(totalCredits);
-        pemsum.setCourses(coursesMap);
-        pemsum.setApprovedCredits(approvedCredits);
-
-        return pemsum ;
+        return new Pemsum.Builder()
+                .studentId(studentId)
+                .studentName(student.getName())
+                .facultyName(facultyName)
+                .facultyPlan(plan)
+                .totalCredits(totalCredits)
+                .approvedCredits(approvedCredits)
+                .courses(coursesMap)
+                .build();
     }
 
+    /**
+     * Calculates the total number of approved credits from a course map.
+     * 
+     * @param coursesMap Map of courses with their status
+     * @return The sum of credits for all approved courses
+     */
     private int getApprovedCredits(Map<Course, String> coursesMap) {
         int approvedCredits = 0;
         for (Course course : coursesMap.keySet()) {
@@ -70,16 +98,24 @@ public class PemsumService {
         return approvedCredits;
     }
 
+    /**
+     * Creates a map of courses with their corresponding status based on academic history.
+     * 
+     * @param courses List of all courses in the student's program
+     * @param historials List of the student's academic history records
+     * @return A map of courses with their current status
+     */
     private Map<Course, String> getCoursesMap(ArrayList<Course> courses, ArrayList<Historial> historials) {
         Map<Course, String> coursesMap = new HashMap<>();
         for (Course course : courses) {
             if (historials.stream().anyMatch(h -> h.getGroupCode().equals(course.getAbbreviation()))) {
-                coursesMap.put(course, historials.stream().filter(h -> h.getGroupCode().equals(course.getAbbreviation())).findFirst().get().getStatus());
+                coursesMap.put(course, historials.stream()
+                        .filter(h -> h.getGroupCode().equals(course.getAbbreviation()))
+                        .findFirst().get().getStatus());
                 continue;
             }
             coursesMap.put(course, "pending");
         }
         return coursesMap;
     }
-
 }

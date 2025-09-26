@@ -35,6 +35,7 @@ edu\dosw\model\Group.class
 OpenAPIConfig.class
 edu\dosw\model\Historial.class
 edu\dosw\services\strategy\QueryStrategy.class
+edu\dosw\model\Pemsum$Builder.class
 edu\dosw\dto\CourseRequest.class
 edu\dosw\controller\RequestController.class
 edu\dosw\services\MembersService.class
