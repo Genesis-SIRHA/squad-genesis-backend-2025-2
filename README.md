@@ -16,6 +16,7 @@ ___
 ![img.png](docs/Img/jira.png)
 ## Estrategías de gitflow:
 
+---
 1. Ramas Principales: 
 - main: rama encargada de las releases del sprint
 - develop: En esta rama nos encargamos de desarrollar y de integrar las nuevas funcionalidades antes de pasar a main.
@@ -56,6 +57,8 @@ ___
 ![img.png](docs/UML/diagramaClases1.png)
 
 ![img.png](docs/UML/diagramaClases2.png)
+
+![img.png](docs/UML/diagramaClases3.png)
 ### Diagramas de secuencia
 
 #### 1. Login
@@ -106,5 +109,10 @@ ___
 ## Pasando a Codigo:
 ___
 ### Jacoco build
-Se hace aumento en las pruebas unitarias
-![img.png](docs/Img/coberturaJacoco.png)
+
+En la sprint número dos se presenta la siguiente cobertura de pruebas unitarias
+![img.png](docs/Img/jacocoS2.png)
+
+Se hace aumento de pruebas unitarias, en base a ...
+
+![img.png](docs/Img/jacocoS3.png)
