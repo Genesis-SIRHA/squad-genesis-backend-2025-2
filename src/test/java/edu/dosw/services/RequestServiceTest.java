@@ -7,7 +7,7 @@ import edu.dosw.model.Request;
 import edu.dosw.repositories.GroupRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import edu.dosw.repositories.CourseRepository;
+import edu.dosw.repositories.FacultyRepository;
 import edu.dosw.repositories.RequestRepository;
 
 import java.util.Optional;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 class RequestServiceTest {
 
     private RequestRepository requestRepository;
-    private CourseRepository courseRepository;
+    private FacultyRepository facultyRepository;
     private RequestService requestService;
 
     private GroupRepository groupRepository;
@@ -29,9 +29,9 @@ class RequestServiceTest {
     @BeforeEach
     void setUp() {
         requestRepository = mock(RequestRepository.class);
-        courseRepository = mock(CourseRepository.class);
+        facultyRepository = mock(FacultyRepository.class);
         groupRepository = mock(GroupRepository.class);
-        requestService = new RequestService(requestRepository, courseRepository,groupRepository);
+        requestService = new RequestService(requestRepository, facultyRepository,groupRepository);
     }
 
     @Test
@@ -90,7 +90,7 @@ class RequestServiceTest {
                 null
         );
 
-        when(courseRepository.findByCode(anyString())).thenReturn(null);
+        when(facultyRepository.findByCode(anyString())).thenReturn(null);
 
         // Act + Assert
         assertThrows(IllegalArgumentException.class, () -> requestService.createRequest(dto));

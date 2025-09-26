@@ -13,13 +13,17 @@ public class Course {
     @NotBlank
     private String courseName;
 
+    private int credits;
+
     public Course() {
     }
 
-    public Course(String abbreviation, String courseName) {
+    public Course(String abbreviation, String courseName, int credits) {
         this.abbreviation = abbreviation;
         this.courseName = courseName;
+        this.credits = credits;
     }
+
 
     public String getAbbreviation() {
         return abbreviation;
@@ -35,5 +39,13 @@ public class Course {
 
     public void setCourseName(String courseName) {
         this.courseName = courseName;
+    }
+
+    public int getCredits() {
+        return credits;
+    }
+
+    public void setCredits(int credits) {
+        this.credits = credits;
     }
 }

@@ -7,7 +7,7 @@ import edu.dosw.model.Course;
 import edu.dosw.model.Group;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import edu.dosw.repositories.CourseRepository;
+import edu.dosw.repositories.FacultyRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,27 +17,27 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-class CourseServiceTest {
+class FacultyServiceTest {
 
-    private CourseRepository courseRepository;
-    private CourseService courseService;
+    private FacultyRepository facultyRepository;
+    private FacultyService facultyService;
     private GroupService groupService;
 
     @BeforeEach
     void setUp() {
-        courseRepository = mock(CourseRepository.class);
+        facultyRepository = mock(FacultyRepository.class);
         groupService = mock(GroupService.class);
-        courseService = new CourseService(courseRepository, groupService);
+        facultyService = new FacultyService(facultyRepository, groupService);
     }
 
     @Test
     void getAllCourses_shouldReturnCourses() {
         // Arrange
         Course course = new Course("CS101", "Intro", new ArrayList<>());
-        when(courseRepository.findAll()).thenReturn(List.of(course));
+        when(facultyRepository.findAll()).thenReturn(List.of(course));
 
         // Act
-        List<Course> result = courseService.getAllCourses();
+        List<Course> result = facultyService.getAllCourses();
 
         // Assert
         assertEquals(1, result.size());
@@ -48,10 +48,10 @@ class CourseServiceTest {
     void getCourseById_shouldReturnResponseWhenFound() {
         // Arrange
         Course course = new Course("CS101", "Intro", new ArrayList<>());
-        when(courseRepository.findById("1")).thenReturn(Optional.of(course));
+        when(facultyRepository.findById("1")).thenReturn(Optional.of(course));
 
         // Act
-        Optional<Course> result = courseService.getCourseById("1");
+        Optional<Course> result = facultyService.getCourseById("1");
 
         // Assert
         assertTrue(result.isPresent());
@@ -61,10 +61,10 @@ class CourseServiceTest {
     @Test
     void getCourseById_shouldReturnEmptyWhenNotFound() {
         // Arrange
-        when(courseRepository.findById("missing")).thenReturn(Optional.empty());
+        when(facultyRepository.findById("missing")).thenReturn(Optional.empty());
 
         // Act
-        Optional<Course> result = courseService.getCourseById("missing");
+        Optional<Course> result = facultyService.getCourseById("missing");
 
         // Assert
         assertTrue(result.isEmpty());
@@ -74,11 +74,11 @@ class CourseServiceTest {
     void createCourse_shouldThrowWhenCodeAlreadyExists() {
         // Arrange
         CourseRequest request = new CourseRequest("CS101", "Intro", null);
-        when(courseRepository.existsByCode("CS101")).thenReturn(true);
+        when(facultyRepository.existsByCode("CS101")).thenReturn(true);
 
         // Act + Assert
-        assertThrows(BusinessException.class, () -> courseService.createCourse(request));
-        verify(courseRepository, never()).save(any(Course.class));
+        assertThrows(BusinessException.class, () -> facultyService.createCourse(request));
+        verify(facultyRepository, never()).save(any(Course.class));
     }
 
     @Test
@@ -86,18 +86,18 @@ class CourseServiceTest {
         // Arrange
         CourseRequest request = new CourseRequest("CS101", "Intro", null);
         Course saved = new Course("CS101", "Intro", new ArrayList<>());
-        when(courseRepository.existsByCode("CS101")).thenReturn(false);
-        when(courseRepository.save(any(Course.class))).thenReturn(saved);
+        when(facultyRepository.existsByCode("CS101")).thenReturn(false);
+        when(facultyRepository.save(any(Course.class))).thenReturn(saved);
 
         // Act
-        Course response = courseService.createCourse(request);
+        Course response = facultyService.createCourse(request);
 
         // Assert
         assertEquals("CS101", response.getCode());
         assertEquals("Intro", response.getName());
         assertNotNull(response.getGroups());
         assertTrue(response.getGroups().isEmpty());
-        verify(courseRepository).save(any(Course.class));
+        verify(facultyRepository).save(any(Course.class));
     }
 
     @Test
@@ -108,11 +108,11 @@ class CourseServiceTest {
 
         Course saved = new Course("CS101", "Intro", List.of(new Group("G1", "Prof", 20, 0)));
 
-        when(courseRepository.existsByCode("CS101")).thenReturn(false);
-        when(courseRepository.save(any(Course.class))).thenReturn(saved);
+        when(facultyRepository.existsByCode("CS101")).thenReturn(false);
+        when(facultyRepository.save(any(Course.class))).thenReturn(saved);
 
         // Act
-        Course response = courseService.createCourse(request);
+        Course response = facultyService.createCourse(request);
 
         // Assert
         assertEquals("CS101", response.getCode());
@@ -124,75 +124,75 @@ class CourseServiceTest {
     void updateCourse_shouldUpdateAndReturnResponse_whenCourseExists() {
         // Arrange
         Course existing = new Course("CS101", "OldName", new ArrayList<>());
-        when(courseRepository.findById("1")).thenReturn(Optional.of(existing));
-        when(courseRepository.save(any(Course.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(facultyRepository.findById("1")).thenReturn(Optional.of(existing));
+        when(facultyRepository.save(any(Course.class))).thenAnswer(inv -> inv.getArgument(0));
 
         CourseRequest request = new CourseRequest("CS101", "NewName", null);
 
         // Act
-        Optional<Course> updated = courseService.updateCourse("1", request);
+        Optional<Course> updated = facultyService.updateCourse("1", request);
 
         // Assert
         assertTrue(updated.isPresent());
         assertEquals("NewName", updated.get().getName());
-        verify(courseRepository).save(existing);
+        verify(facultyRepository).save(existing);
     }
 
     @Test
     void updateCourse_shouldReturnEmptyWhenCourseNotFound() {
         // Arrange
-        when(courseRepository.findById("missing")).thenReturn(Optional.empty());
+        when(facultyRepository.findById("missing")).thenReturn(Optional.empty());
         CourseRequest request = new CourseRequest("CS101", "Name", null);
 
         // Act
-        Optional<Course> updated = courseService.updateCourse("missing", request);
+        Optional<Course> updated = facultyService.updateCourse("missing", request);
 
         // Assert
         assertTrue(updated.isEmpty());
-        verify(courseRepository, never()).save(any(Course.class));
+        verify(facultyRepository, never()).save(any(Course.class));
     }
 
     @Test
     void addGroupToCourse_shouldAddNewGroup() {
         // Arrange
         Course course = new Course("CS101", "Intro", new ArrayList<>(List.of(new Group("G1", "Prof", 20, 0))));
-        when(courseRepository.findById("1")).thenReturn(Optional.of(course));
-        when(courseRepository.save(any(Course.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(facultyRepository.findById("1")).thenReturn(Optional.of(course));
+        when(facultyRepository.save(any(Course.class))).thenAnswer(inv -> inv.getArgument(0));
 
         GroupRequest newGroupReq = new GroupRequest("G2", "NewProf", 20, 0);
 
         // Act
-        Optional<Course> result = courseService.addGroupToCourse("1", newGroupReq);
+        Optional<Course> result = facultyService.addGroupToCourse("1", newGroupReq);
 
         // Assert
         assertTrue(result.isPresent());
         assertEquals(2, result.get().getGroups().size());
-        verify(courseRepository).save(course);
+        verify(facultyRepository).save(course);
     }
 
     @Test
     void addGroupToCourse_shouldThrowWhenGroupAlreadyExists() {
         // Arrange
         Course course = new Course("CS101", "Intro", new ArrayList<>(List.of(new Group("G1", "Prof", 20, 0))));
-        when(courseRepository.findById("1")).thenReturn(Optional.of(course));
+        when(facultyRepository.findById("1")).thenReturn(Optional.of(course));
 
         GroupRequest duplicate = new GroupRequest("G1", "Other", 20, 0);
 
         // Act + Assert
-        assertThrows(BusinessException.class, () -> courseService.addGroupToCourse("1", duplicate));
-        verify(courseRepository, never()).save(any(Course.class));
+        assertThrows(BusinessException.class, () -> facultyService.addGroupToCourse("1", duplicate));
+        verify(facultyRepository, never()).save(any(Course.class));
     }
 
     @Test
     void deleteCourse_shouldCallRepositoryDelete() {
         // Arrange
-        doNothing().when(courseRepository).deleteById("1");
+        doNothing().when(facultyRepository).deleteById("1");
 
         // Act
-        courseService.deleteCourse("1");
+        facultyService.deleteCourse("1");
 
         // Assert
-        verify(courseRepository).deleteById("1");
+        verify(facultyRepository).deleteById("1");
     }
 }
 

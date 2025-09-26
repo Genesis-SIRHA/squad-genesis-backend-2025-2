@@ -7,10 +7,10 @@ import jakarta.validation.constraints.NotNull;
 
 /**
  * Represents a request to create or update a group.
- * Contains group details like code, professor, maxCapacity, and enrolled students.
+ * Contains group details like abbreviation, professor, maxCapacity, and enrolled students.
  */
 public record GroupRequest(
-    /** Unique code that identifies the group. Cannot be blank. */
+    /** Unique abbreviation that identifies the group. Cannot be blank. */
     @NotBlank(message = "El código del grupo es obligatorio")
     String groupCode,
     

@@ -12,7 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import edu.dosw.services.CourseService;
+import edu.dosw.services.FacultyService;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +33,7 @@ class CourseControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private CourseService courseService;
+    private FacultyService facultyService;
 
     @Test
     void should_create_course() throws Exception {
@@ -43,7 +43,7 @@ class CourseControllerTest {
 //                List.of(new GroupRequest("G1", "Profesor A", 30, 0))
 //        );
 
-//        when(courseService.createCourse(any(CourseRequest.class)))
+//        when(facultyService.createCourse(any(CourseRequest.class)))
 //                .thenReturn(new Course(
 //                        "CS101",
 //                        "Intro a la Programación",
@@ -54,13 +54,13 @@ class CourseControllerTest {
 //                        .contentType(MediaType.APPLICATION_JSON)
 //                        .content(objectMapper.writeValueAsString(request)))
 //                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.code").value("CS101"))
+//                .andExpect(jsonPath("$.abbreviation").value("CS101"))
 //                .andExpect(jsonPath("$.name").value("Intro a la Programación"));
     }
 
     @Test
     void should_get_all_courses() throws Exception {
-        when(courseService.getAllCourses())
+        when(facultyService.getAllCourses())
                 .thenReturn(List.of(
                         new Course(
                                 "CS101",
@@ -77,15 +77,15 @@ class CourseControllerTest {
         mockMvc.perform(get("/api/courses"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].code").value("CS101"))
-                .andExpect(jsonPath("$[1].code").value("CS102"));
+                .andExpect(jsonPath("$[0].abbreviation").value("CS101"))
+                .andExpect(jsonPath("$[1].abbreviation").value("CS102"));
     }
 
 
 
     @Test
     void should_return_404_when_course_not_found() throws Exception {
-        when(courseService.findByCode("999"))
+        when(facultyService.findCourseByCode("999"))
                 .thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/courses/999"))
@@ -100,7 +100,7 @@ class CourseControllerTest {
                 List.of(new GroupRequest("G1", "Profesor A", 30, 0))
         );
 
-        when(courseService.updateCourse(any(String.class), any(CourseRequest.class)))
+        when(facultyService.updateCourse(any(String.class), any(CourseRequest.class)))
                 .thenReturn(Optional.of(new Course(
                         "CS101",
                         "Programación Avanzada",
@@ -122,7 +122,7 @@ class CourseControllerTest {
                 List.of()
         );
 
-        when(courseService.updateCourse(any(String.class), any(CourseRequest.class)))
+        when(facultyService.updateCourse(any(String.class), any(CourseRequest.class)))
                 .thenReturn(Optional.empty());
 
         mockMvc.perform(put("/api/courses/999")
@@ -141,7 +141,7 @@ class CourseControllerTest {
     void should_add_group_to_course() throws Exception {
         GroupRequest groupRequest = new GroupRequest("G2", "Profesor B", 25, 0);
 
-        when(courseService.addGroupToCourse(eq("12345"), eq(groupRequest)))
+        when(facultyService.addGroupToCourse(eq("12345"), eq(groupRequest)))
                 .thenReturn(Optional.of(new Course(
                         "CS101",
                         "Intro a la Programación",
@@ -159,7 +159,7 @@ class CourseControllerTest {
     void should_return_404_when_adding_group_to_nonexistent_course() throws Exception {
         GroupRequest groupRequest = new GroupRequest("G2", "Profesor B", 25, 0);
 
-        when(courseService.addGroupToCourse(any(String.class), any(GroupRequest.class)))
+        when(facultyService.addGroupToCourse(any(String.class), any(GroupRequest.class)))
                 .thenReturn(Optional.empty());
 
         mockMvc.perform(post("/api/courses/999/groups")
