@@ -103,6 +103,13 @@ public class RequestController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Processes a response to a specific request.
+     *
+     * @param id The unique identifier of the request to respond to
+     * @param response The response containing the answer and status update
+     * @return ResponseEntity containing the updated request if found, or null if not found
+     */
     @PostMapping("/{id}/respond")
     @Operation(summary = "Respond to a request", description = "Adds a response to a request")
     public ResponseEntity<Request> respondToRequest(@PathVariable String id, @RequestBody Request response) {
