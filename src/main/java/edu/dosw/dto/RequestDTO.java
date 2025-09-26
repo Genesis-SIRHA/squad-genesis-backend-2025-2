@@ -5,6 +5,22 @@ import edu.dosw.model.Request;
 
 import java.util.UUID;
 
+/**
+ * Data Transfer Object for handling request-related operations.
+ * Represents a request with all its associated details including student information,
+ * request type, status, and related groups.
+ *
+ * @param id Unique identifier for the request. Auto-generated if not provided.
+ * @param studentId ID of the student making the request. Cannot be null.
+ * @param type Type of the request (e.g., group change, special permission).
+ * @param isExceptional Indicates if this is an exceptional request. Defaults to false.
+ * @param status Current status of the request. Defaults to "PENDING".
+ * @param description Detailed description of the request.
+ * @param originGroupId ID of the source group in case of group change requests.
+ * @param destinationGroupId ID of the target group in case of group change requests.
+ * @param answer Response or resolution provided for the request.
+ * @param managedBy ID of the staff member handling this request.
+ */
 public record RequestDTO(
         String id,
         @NotNull String studentId,
@@ -21,31 +37,43 @@ public record RequestDTO(
         if (isExceptional == null) isExceptional = false;
         if (status == null) status = "PENDING";
     }
+    /**
+     * Creates a RequestDTO from a Request entity.
+     *
+     * @param request The Request entity to convert
+     * @return A new RequestDTO populated with data from the Request entity
+     */
     public static RequestDTO fromRequest(Request request) {
         return new RequestDTO(
-                request.getId(),
+                request.getRequestId(),
                 request.getStudentId(),
                 request.getType(),
-                request.getIsExceptional(),
+                request.getExceptional(),
                 request.getStatus(),
                 request.getDescription(),
-                request.getOriginGroup() != null ? request.getOriginGroup().getGroupCode() : null,
-                request.getDestinationGroup() != null ? request.getDestinationGroup().getGroupCode() : null,
+                request.getOriginGroupId() != null ? request.getOriginGroupId() : null,
+                request.getDestinationGroupId() != null ? request.getDestinationGroupId(): null,
                 request.getAnswer(),
-                request.getManagedBy()
+                request.getGestedBy()
         );
     }
     
+    /**
+     * Converts this DTO to a Request entity.
+     * Generates a new UUID for the request if no ID is provided.
+     *
+     * @return A new Request entity populated with this DTO's data
+     */
     public Request toEntity() {
         Request request = new Request();
-        request.setId(this.id != null ? this.id : UUID.randomUUID().toString());
+        request.setRequestId(this.id != null ? this.id : UUID.randomUUID().toString());
         request.setStudentId(this.studentId);
         request.setType(this.type);
-        request.setIsExceptional(this.isExceptional);
+        request.setExceptional(this.isExceptional);
         request.setStatus(this.status);
         request.setDescription(this.description);
         request.setAnswer(this.answer);
-        request.setManagedBy(this.managedBy);
+        request.setGestedBy(this.managedBy);
         return request;
     }
 }

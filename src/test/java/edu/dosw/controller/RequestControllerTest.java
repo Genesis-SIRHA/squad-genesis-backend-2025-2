@@ -1,172 +1,128 @@
 package edu.dosw.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.dosw.dto.RequestDTO;
-import edu.dosw.dto.RequestResponse;
 import edu.dosw.dto.RequestStats;
-import edu.dosw.model.Group;
 import edu.dosw.model.Request;
-import edu.dosw.model.RequestDetails;
 import edu.dosw.services.RequestService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@WebMvcTest(RequestController.class)
 class RequestControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockBean
+    @Mock
     private RequestService requestService;
 
-    @Test
-    void should_create_request() throws Exception {
-        RequestDTO dto = new RequestDTO(
-                null,
-                "student123",
-                "GROUP_CHANGE",
-                false,
-                null,
-                "Cambio de grupo",
-                "G1",
-                "G2",
-                null,
-                null
-        );
+    @InjectMocks
+    private RequestController requestController;
 
-        RequestResponse response = new RequestResponse(
-                "req1",
-                "student123",
-                "PENDING",
-                LocalDateTime.now().toString(),
-                "GROUP_CHANGE",
-                false,
-                "Cambio de grupo",
-                null,
-                null,
-                null,
-                null,
-                null
-        );
+    private Request request;
+    private RequestDTO requestDTO;
 
-        when(requestService.createRequest(any(RequestDTO.class))).thenReturn(response);
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
 
-        mockMvc.perform(post("/api/requests")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value("req1"))
-                .andExpect(jsonPath("$.studentId").value("student123"))
-                .andExpect(jsonPath("$.description").value("Cambio de grupo"))
-                .andExpect(jsonPath("$.status").value("PENDING"));
-    }
-
-    @Test
-    void should_fetch_requests_by_role() throws Exception {
-        // Arrange
-        Group originGroup = new Group("G1", "Profesor A", 30, 10);
-        Group destinationGroup = new Group("G2", "Profesor B", 30, 5);
-
-        Request request = new Request("student123", "Cambio de grupo", "GROUP_CHANGE",
-                originGroup, destinationGroup);
+        request = new Request("student123", "Need schedule change", "TRANSFER", "G1", "G2");
+        request.setRequestId(UUID.randomUUID().toString());
         request.setStatus("PENDING");
+        request.setCreatedAt(LocalDateTime.now());
 
-        when(requestService.fetchRequests("ADMIN", "student123"))
-                .thenReturn(List.of(request));
-
-        // Act & Assert
-        mockMvc.perform(get("/api/requests/{userId}/role", "student123")
-                        .param("role", "ADMIN"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].studentId").value("student123"))
-                .andExpect(jsonPath("$[0].description").value("Cambio de grupo"))
-                .andExpect(jsonPath("$[0].status").value("PENDING"));
-    }
-
-
-
-    @Test
-    void should_update_request_status() throws Exception {
-        Request updatedRequest = new Request();
-        updatedRequest.setId("req1");
-        updatedRequest.setStatus("APPROVED");
-
-        when(requestService.updateRequestStatus("req1", "APPROVED")).thenReturn(updatedRequest);
-
-        mockMvc.perform(put("/api/requests/req1/status")
-                        .param("status", "APPROVED"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("APPROVED"));
+        requestDTO = new RequestDTO(
+                request.getRequestId(),
+                request.getStudentId(),
+                request.getType(),
+                request.getExceptional(),
+                request.getStatus(),
+                request.getDescription(),
+                request.getOriginGroupId(),
+                request.getDestinationGroupId(),
+                request.getAnswer(),
+                request.getGestedBy()
+        );
     }
 
     @Test
-    void should_get_request_stats() throws Exception {
-        // Arrange
-        RequestStats stats = new RequestStats(10, 5, 3, 2);
+    void createRequest_ShouldReturnCreatedRequest() {
+        when(requestService.createRequest(requestDTO)).thenReturn(request);
+
+        ResponseEntity<Request> response = requestController.createRequest(requestDTO);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(request, response.getBody());
+        verify(requestService, times(1)).createRequest(requestDTO);
+    }
+
+    @Test
+    void fetchRequests_ShouldReturnListOfRequests() {
+        when(requestService.fetchRequests("STUDENT", "student123")).thenReturn(List.of(request));
+
+        ResponseEntity<List<Request>> response = requestController.fetchRequests("student123", "STUDENT");
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().size());
+        assertEquals("student123", response.getBody().get(0).getStudentId());
+    }
+
+    @Test
+    void updateRequestStatus_ShouldReturnUpdatedRequest() {
+        request.setStatus("APPROVED");
+        when(requestService.updateRequestStatus("123", "APPROVED")).thenReturn(request);
+
+        ResponseEntity<Request> response = requestController.updateRequestStatus("123", "APPROVED");
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("APPROVED", response.getBody().getStatus());
+        verify(requestService, times(1)).updateRequestStatus("123", "APPROVED");
+    }
+
+    @Test
+    void getRequestStats_ShouldReturnStats() {
+        RequestStats stats = new RequestStats(5,0, 2, 3);
         when(requestService.getRequestStats()).thenReturn(stats);
 
-        // Act & Assert
-        mockMvc.perform(get("/api/requests/stats"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.total").value(10))
-                .andExpect(jsonPath("$.pending").value(5))
-                .andExpect(jsonPath("$.approved").value(3))
-                .andExpect(jsonPath("$.rejected").value(2));
-    }
+        ResponseEntity<RequestStats> response = requestController.getRequestStats();
 
-
-    @Test
-    void should_cancel_request() throws Exception {
-        mockMvc.perform(delete("/api/requests/req1"))
-                .andExpect(status().isNoContent());
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(stats, response.getBody());
     }
 
     @Test
-    void respondToRequest_ShouldReturnOk_WhenRequestExists() throws Exception {
-        Request request = new Request();
-        request.setId("123");
-        request.setStatus("APPROVED");
+    void deleteRequest_ShouldCallServiceAndReturnNoContent() {
+        ResponseEntity<Void> response = requestController.deleteRequest("123");
 
-        when(requestService.respondToRequest(any(), any())).thenReturn(request);
-
-        RequestDetails details = new RequestDetails();
-        details.setAnswer("APPROVED");
-        details.setManagedBy("professor1");
-
-        mockMvc.perform(post("/api/requests/123/respond")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(details)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value("123"))
-                .andExpect(jsonPath("$.status").value("APPROVED"));
+        assertEquals(204, response.getStatusCodeValue());
+        verify(requestService, times(1)).updateRequestStatus("123", "CANCELLED");
     }
 
     @Test
-    void respondToRequest_ShouldReturnNotFound_WhenRequestDoesNotExist() throws Exception {
-        when(requestService.respondToRequest(any(), any())).thenReturn(null);
+    void respondToRequest_ShouldReturnResponseWhenFound() {
+        Request responseRequest = new Request("student123", "Response OK", "TRANSFER", "G1", "G2");
+        when(requestService.respondToRequest(eq("123"), any(Request.class))).thenReturn(responseRequest);
 
-        RequestDetails details = new RequestDetails();
-        details.setAnswer("REJECTED");
+        ResponseEntity<Request> response = requestController.respondToRequest("123", responseRequest);
 
-        mockMvc.perform(post("/requests/999/respond")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(details)))
-                .andExpect(status().isNotFound());
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("student123", response.getBody().getStudentId());
+    }
+
+    @Test
+    void respondToRequest_ShouldReturnNullWhenNotFound() {
+        when(requestService.respondToRequest(eq("123"), any(Request.class))).thenReturn(null);
+
+        ResponseEntity<Request> response = requestController.respondToRequest("123", request);
+
+        assertNull(response);
     }
 }

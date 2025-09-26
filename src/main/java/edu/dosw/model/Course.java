@@ -1,37 +1,39 @@
 package edu.dosw.model;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.constraints.NotBlank;
-import java.util.List;
+import org.springframework.data.annotation.Id;
 
 @Document(collection = "courses")
 public class Course {
     @Id
-    private String id;
     @NotBlank
-    private String code;
+    private String abbreviation;
+
     @NotBlank
-    private String name;
-    private List<Group> groups;
+    private String courseName;
 
-    public Course() {}
-
-    public Course(String code, String name, List<Group> groups) {
-        this.code = code;
-        this.name = name;
-        this.groups = groups;
+    public Course() {
     }
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public Course(String abbreviation, String courseName) {
+        this.abbreviation = abbreviation;
+        this.courseName = courseName;
+    }
 
-    public String getCode() { return code; }
-    public void setCode(String code) { this.code = code; }
+    public String getAbbreviation() {
+        return abbreviation;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void setAbbreviation(String abbreviation) {
+        this.abbreviation = abbreviation;
+    }
 
-    public List<Group> getGroups() { return groups; }
-    public void setGroups(List<Group> groups) { this.groups = groups; }
+    public String getCourseName() {
+        return courseName;
+    }
+
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
+    }
 }

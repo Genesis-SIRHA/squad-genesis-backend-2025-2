@@ -12,49 +12,41 @@ import java.util.UUID;
 @Document(collection = "requests")
 public class Request {
     @Id
-    private String id;
-    
+    private String requestId;
     @NotBlank(message = "Student ID is required")
     private String studentId;
-    
-    private String description;
-    private String status = "PENDING";
-    
     @NotNull(message = "Created at date is required")
     private LocalDateTime createdAt;
-    
+    private String status = "PENDING";
     private String type;
     private Boolean isExceptional = false;
-
-    private LocalDate answerAt;
-    private String managedBy;
-    private String answer;
-    private Group originGroup;
-    private Group destinationGroup;
+    private String destinationGroupId;
+    private String originGroupId;
+    private String description;
     private String gestedBy;
-    private LocalDate answerDate;
-    private RequestDetails requestDetails;
+    private LocalDate answerAt;
+    private String answer;
 
     public Request() {
-        this.id = UUID.randomUUID().toString();
+        this.requestId = UUID.randomUUID().toString();
         this.createdAt = LocalDateTime.now();
     }
-    
-    public Request(String studentId, String description, String type, Group originGroup, Group destinationGroup) {
+
+    public Request(String studentId, String description, String type, String originGroupId, String destinationGroup) {
         this();
         this.studentId = studentId;
         this.description = description;
         this.type = type;
-        this.originGroup = originGroup;
-        this.destinationGroup = destinationGroup;
+        this.originGroupId = originGroupId;
+        this.destinationGroupId = destinationGroup;
     }
 
-    public String getId() {
-        return id;
+    public String getRequestId() {
+        return requestId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 
     public String getStudentId() {
@@ -65,12 +57,12 @@ public class Request {
         this.studentId = studentId;
     }
 
-    public String getDescription() {
-        return description;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public String getStatus() {
@@ -81,65 +73,44 @@ public class Request {
         this.status = status;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
     public String getType() {
         return type;
     }
+
     public void setType(String type) {
         this.type = type;
     }
 
-    public Boolean getIsExceptional() {
+    public Boolean getExceptional() {
         return isExceptional;
     }
-    public void setIsExceptional(Boolean isExceptional) {
-        this.isExceptional = isExceptional;
+
+    public void setExceptional(Boolean exceptional) {
+        isExceptional = exceptional;
     }
 
-    public LocalDate getAnswerAt() {
-        return answerAt;
+    public String getDestinationGroupId() {
+        return destinationGroupId;
     }
 
-    public void setAnswerAt(LocalDate answerAt) {
-        this.answerAt = answerAt;
+    public void setDestinationGroupId(String destinationGroupId) {
+        this.destinationGroupId = destinationGroupId;
     }
 
-    public String getManagedBy() {
-        return managedBy;
+    public String getOriginGroupId() {
+        return originGroupId;
     }
 
-    public void setManagedBy(String managedBy) {
-        this.managedBy = managedBy;
+    public void setOriginGroupId(String originGroupId) {
+        this.originGroupId = originGroupId;
     }
 
-    public String getAnswer() {
-        return answer;
+    public String getDescription() {
+        return description;
     }
 
-    public void setAnswer(String answer) {
-        this.answer = answer;
-    }
-
-    public Group getOriginGroup() {
-        return originGroup;
-    }
-
-    public void setOriginGroup(Group originGroup) {
-        this.originGroup = originGroup;
-    }
-
-    public Group getDestinationGroup() {
-        return destinationGroup;
-    }
-
-    public void setDestinationGroup(Group destinationGroup) {
-        this.destinationGroup = destinationGroup;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getGestedBy() {
@@ -150,16 +121,19 @@ public class Request {
         this.gestedBy = gestedBy;
     }
 
-    public void setAnswerDate(LocalDate answerDate) {
-        this.answerDate = answerDate;
+    public LocalDate getAnswerAt() {
+        return answerAt;
     }
 
-    public RequestDetails getRequestDetails() {
-        return requestDetails;
+    public void setAnswerAt(LocalDate answerAt) {
+        this.answerAt = answerAt;
     }
 
-    public void setRequestDetails(RequestDetails requestDetails) {
-        this.requestDetails = requestDetails;
+    public String getAnswer() {
+        return answer;
     }
 
+    public void setAnswer(String answer) {
+        this.answer = answer;
+    }
 }

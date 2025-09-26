@@ -1,10 +1,9 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.RequestDTO;
-import edu.dosw.dto.RequestResponse;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
-import edu.dosw.model.RequestDetails;
+import edu.dosw.repositories.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import edu.dosw.repositories.CourseRepository;
@@ -31,6 +30,7 @@ public class RequestService {
     
     private final RequestRepository requestRepository;
     private final CourseRepository courseRepository;
+    private final GroupRepository groupRepository;
     private final Map<String, QueryStrategy> strategyMap;
 
     /**
@@ -41,7 +41,7 @@ public class RequestService {
      * @param courseRepository The repository for course data access
      */
     @Autowired
-    public RequestService(RequestRepository requestRepository, CourseRepository courseRepository) {
+    public RequestService(RequestRepository requestRepository, CourseRepository courseRepository, GroupRepository groupRepository) {
         this.requestRepository = requestRepository;
         this.courseRepository = courseRepository;
         this.strategyMap = Map.of(
@@ -49,7 +49,10 @@ public class RequestService {
             "ADMINISTRATIVE", new AdministrativeStrategy(requestRepository),
             "ADMINISTRATOR", new AdministratorStrategy(requestRepository)
         );
+        this.groupRepository = groupRepository;
     }
+
+
 
     /**
      * Fetches requests based on the user's role and ID.
@@ -66,7 +69,6 @@ public class RequestService {
         if (strategy == null) {
             throw new IllegalArgumentException("Unsupported role: " + role);
         }
-
         return strategy.queryRequests(userId).stream()
             .sorted(Comparator.comparing(Request::getCreatedAt).reversed())
             .toList();
@@ -81,33 +83,33 @@ public class RequestService {
      * @return A RequestResponse containing the created request
      * @throws IllegalArgumentException if either origin or destination group is not found
      */
-    public RequestResponse createRequest(RequestDTO requestDTO) {
+    public Request createRequest(RequestDTO requestDTO) {
         Request request = new Request();
         request.setCreatedAt(LocalDateTime.now());
         request.setStatus("PENDING");
         request.setType(requestDTO.type());
         request.setStudentId(requestDTO.studentId());
-        request.setIsExceptional(requestDTO.isExceptional());
+        request.setExceptional(requestDTO.isExceptional());
 
         request.setAnswerAt(LocalDate.now());
-        request.setManagedBy(requestDTO.studentId());
+        request.setGestedBy(requestDTO.studentId());
         request.setAnswer(requestDTO.description());
-        request.setAnswerDate(LocalDate.now());
+        request.setAnswerAt(LocalDate.now());
 
-        Group origin = courseRepository.findByCode(requestDTO.originGroupId());
+        Group origin = groupRepository.findByCode(requestDTO.originGroupId());
         if (origin == null) {
             throw new IllegalArgumentException("Origin group not found: " + requestDTO.originGroupId());
         }
 
-        Group destination = courseRepository.findByCode(requestDTO.destinationGroupId());
+        Group destination = groupRepository.findByCode(requestDTO.destinationGroupId());
         if (destination == null) {
             throw new IllegalArgumentException("Destination group not found: " + requestDTO.destinationGroupId());
         }
 
-        request.setOriginGroup(origin);
-        request.setDestinationGroup(destination);
+        request.setOriginGroupId(origin.getGroupCode());
+        request.setDestinationGroupId(destination.getGroupCode());
 
-        return RequestResponse.fromRequest(requestRepository.save(request));
+        return requestRepository.save(request);
     }
 
 
@@ -142,29 +144,24 @@ public class RequestService {
         return new RequestStats(total, pending, approved, rejected);
     }
 
-    /**
-     *
-     * @param requestId
-     * @param responseDetails
-     * @return Request updated
-     */
-    public Request respondToRequest(String requestId, RequestDetails responseDetails) {
-        Request request = requestRepository.findById(requestId).orElse(null);
+    public Request respondToRequest(String requestId, Request response) {
+        return requestRepository.findById(requestId)
+                .map(existing -> {
+                    existing.setAnswer(response.getAnswer());
+                    existing.setGestedBy(response.getGestedBy());
+                    existing.setAnswerAt(LocalDate.from(LocalDateTime.now()));
+                    if ("APPROVED".equalsIgnoreCase(response.getStatus()) ||
+                            "REJECTED".equalsIgnoreCase(response.getStatus()) ||
+                            "PENDING".equalsIgnoreCase(response.getStatus())) {
 
-        if (request != null) {
-            if (request.getRequestDetails() != null) {
-                RequestDetails existingDetails = request.getRequestDetails();
-                existingDetails.setAnswerDate(LocalDate.now());
-                existingDetails.setManagedBy(responseDetails.getManagedBy());
-                existingDetails.setAnswer(responseDetails.getAnswer());
-            } else {
-                responseDetails.setRequestId(requestId);
-                request.setRequestDetails(responseDetails);
-            }
+                        existing.setStatus(response.getStatus());
+                    } else {
+                        throw new IllegalArgumentException("Invalid status. Must be APPROVED, REJECTED or PENDING");
+                    }
 
-            request.setStatus(responseDetails.getAnswer());
-            return requestRepository.save(request);
-        }
-        return null;
+
+                    return requestRepository.save(existing);
+                })
+                .orElse(null);
     }
 }
