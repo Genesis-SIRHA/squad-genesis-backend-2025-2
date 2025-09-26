@@ -3,10 +3,12 @@ package edu.dosw.services;
 import edu.dosw.dto.GroupRequest;
 import edu.dosw.model.Group;
 import edu.dosw.repositories.GroupRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class GroupService {
     private final GroupRepository groupRepository;
 
