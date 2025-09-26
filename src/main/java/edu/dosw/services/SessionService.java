@@ -14,8 +14,9 @@ public class SessionService {
         this.sessionRepository = sessionRepository;
     }
 
-    public ArrayList<Session> getSessionsByAbbreviationAndGroup(String abbreviation, String groupCode) {
-        return sessionRepository.findByAbbreviationAndGroupCode(abbreviation, groupCode);
+    public ArrayList<Session> getSessionsByGroupCode(String groupCode) {
+        return sessionRepository.findByGroupCode(groupCode);
     }
+
 
 }

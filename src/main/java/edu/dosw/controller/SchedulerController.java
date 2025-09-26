@@ -26,11 +26,4 @@ public class SchedulerController {
         return ResponseEntity.ok(schedulerService.getScheduleById(studentId));
     }
 
-    @DeleteMapping("/{studentId}")
-    @Operation(summary = "Delete a schedule", description = "Deletes a schedule by its ID")
-    public ResponseEntity<Void> deleteSchedule(@PathVariable String studentId) {
-        schedulerService.deleteSchedule(studentId);
-        return ResponseEntity.noContent().build();
-    }
-
 }

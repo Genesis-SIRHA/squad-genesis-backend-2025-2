@@ -8,16 +8,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "groups")
-public class Group {
+@Document(collection = "historial")
+public class Historial {
+    private String studentId;
     private String groupCode;
-    private String abbreviation;
+    private String status;
     private String year;
     private String period;
-    private String teacherId;
-    private boolean isLab;
-    private int groupNum;
-    private int enrolled;
-    private int maxCapacity;
 
 }

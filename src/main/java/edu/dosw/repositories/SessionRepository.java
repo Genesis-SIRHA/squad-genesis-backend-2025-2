@@ -7,6 +7,6 @@ import org.springframework.data.mongodb.repository.Query;
 import java.util.ArrayList;
 
 public interface SessionRepository extends MongoRepository<Session, String> {
-    @Query("{ 'abbreviation': ?0, 'groupCode': ?1 }")
-    ArrayList<Session> findByAbbreviationAndGroupCode(String abbreviation, String groupCode);
+    @Query("{  'groupCode': ?0 }")
+    ArrayList<Session> findByGroupCode( String groupCode);
 }
