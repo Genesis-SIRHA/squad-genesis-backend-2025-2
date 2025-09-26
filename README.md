@@ -33,18 +33,20 @@ Back Proyecto DOSW
 
 ### Diagramas de casos de Uso
 
-![img.png](docs/UML/Casos de Uso.png)
+![img.png](docs/UML/diagramaCasosUso.png)
 
 ### Diagrama Componentes General
 
-![img.png](docs/UML/Diagrama Componentes General.png)
-
+![img.png](docs/UML/diagramaComponentesGeneral.png)
 ### Diegrama Componentes Especifico
 ![img.png](docs/UML/diagramaComponentesEspecifico.png)
 
 ### Diagrama de Bases de Datos
 ![img.png](docs/UML/diagramaBasesDatos.png)
 
+### Diagrama de clases
+
+![img.png](docs/UML/diagramaClases.png)
 ### Diagramas de secuencia
 
 #### 1. Login
@@ -57,11 +59,38 @@ Back Proyecto DOSW
 ![img.png](docs/UML/consultarSolcitudesEstudiantes.png)
 
 #### 4. Responder Solicitudes 
+
 ![img.png](docs/UML/diagramaResponderSolicitudes.png)
 
-### 5. Diagrama de clases 
+### 5. Crear una Solicitud
+![img.png](docs/UML/diagramaCrearSolicitud.png)
 
-![img.png](docs/UML/diagramaClases.png)
+### 6. Actualizar Status de una solicitud
+![img.png](docs/UML/diagramaActualizarStatus.png)
+
+### 7. Estadísticas de solicitudes
+![img.png](docs/UML/diagramaEstadisticasSolicitud.png)
+
+### 8. Obtener todos los cursos
+![img.png](docs/UML/diagramaObtenerCursos.png)
+
+### 9. Obtener un curso por su código
+![img.png](docs/UML/diagramaObtenerCursoPorCodigo.png)
+
+### 10. Crear un curso
+![img.png](docs/UML/diagramaCrearCurso.png)
+
+### 11. Actualizar los cursos
+![img.png](docs/UML/diagramaActualizarCursos.png)
+
+### 12. Añadir grupo a los cursos
+![img.png](docs/UML/diagramaAñadirGrupoCurso.png)
+
+### 13. Eliminar un curso
+![img.png](docs/UML/diagramaEliminarCurso.png)
+
+### 14. Consultar horario
+![img.png](docs/UML/diagramaConsultarHorario.png)
 ## Pasando a Codigo:
 
 ### Jacoco build
