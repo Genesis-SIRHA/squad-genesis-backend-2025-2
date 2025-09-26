@@ -69,7 +69,6 @@ public class RequestService {
         if (strategy == null) {
             throw new IllegalArgumentException("Unsupported role: " + role);
         }
-
         return strategy.queryRequests(userId).stream()
             .sorted(Comparator.comparing(Request::getCreatedAt).reversed())
             .toList();
@@ -90,7 +89,7 @@ public class RequestService {
         request.setStatus("PENDING");
         request.setType(requestDTO.type());
         request.setStudentId(requestDTO.studentId());
-        request.setIsExceptional(requestDTO.isExceptional());
+        request.setExceptional(requestDTO.isExceptional());
 
         request.setAnswerAt(LocalDate.now());
         request.setGestedBy(requestDTO.studentId());
@@ -108,7 +107,7 @@ public class RequestService {
         }
 
         request.setOriginGroupId(origin.getGroupCode());
-        request.setDestinationGroup(destination.getGroupCode());
+        request.setDestinationGroupId(destination.getGroupCode());
 
         return requestRepository.save(request);
     }

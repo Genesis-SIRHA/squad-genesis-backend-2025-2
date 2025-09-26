@@ -55,7 +55,7 @@ public class CourseService {
         }
 
         Course course = new Course();
-        course.setCode(request.code());
+        course.setAbbreviation(request.code());
         course.setCourseName(request.name());
 
         return courseRepository.save(course);
@@ -77,26 +77,18 @@ public class CourseService {
 
     /**
      * Adds a new group to an existing course.
-     * @param courseId The ID of the course to add the group to
+     * @param abbreviation The ID of the course to add the group to
      * @param groupRequest The details of the group to add
      * @return An Optional containing the updated Course if found, or empty if course not found
      * @throws BusinessException if a group with the same code already exists in the course
      */
-    public Optional<Course> addGroupToCourse(String courseId, GroupRequest groupRequest) {
-        return courseRepository.findById(courseId)
-                .map(course -> {
-                    boolean groupExists = course.getGroups().stream()
-                            .anyMatch(g -> g.getGroupCode().equals(groupRequest.groupCode()));
-
-                    if (groupExists) {
-                        throw new BusinessException("Ya existe un grupo con el código: " + groupRequest.groupCode());
-                    }
-
-                    Group newGroup = mapToGroup(groupRequest);
-                    course.getGroups().add(newGroup);
-
-                    return courseRepository.save(course);
-                });
+    public Boolean addGroupToCourse(String abbreviation, GroupRequest groupRequest) {
+         Optional<Course> course = courseRepository.findById(abbreviation);
+         if (course.isEmpty()) {
+             throw new BusinessException("Course not found with id: " + abbreviation);
+         }
+         Group group = groupService.createGroup(groupRequest);
+         return group != null;
     }
 
     /**
@@ -115,8 +107,8 @@ public class CourseService {
     private Group mapToGroup(GroupRequest groupRequest) {
         Group group = new Group();
         group.setGroupCode(groupRequest.groupCode());
-        group.setTeacherId(groupRequest.professor());
-        group.setMaxCapacity(groupRequest.capacity());
+        group.setTeacherId(groupRequest.teacherId());
+        group.setMaxCapacity(groupRequest.maxCapacity());
         group.setEnrolled(groupRequest.enrolled());
         return group;
     }

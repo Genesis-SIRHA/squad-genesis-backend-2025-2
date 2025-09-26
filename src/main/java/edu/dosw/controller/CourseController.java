@@ -94,9 +94,11 @@ public class CourseController {
     public ResponseEntity<Course> addGroupToCourse(
             @PathVariable String courseId,
             @Valid @RequestBody GroupRequest groupRequest) {
-        return courseService.addGroupToCourse(courseId, groupRequest)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Boolean result = courseService.addGroupToCourse(courseId, groupRequest);
+        if (result) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.badRequest().build();
     }
 
     /**

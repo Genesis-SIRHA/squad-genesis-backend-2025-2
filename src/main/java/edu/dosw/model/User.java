@@ -1,13 +1,9 @@
 package edu.dosw.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Data
-@AllArgsConstructor
-@Document (collection = "universityMembers")
+@Document(collection = "universityMembers")
 public class User {
     @Id
     private final String userId;
@@ -16,4 +12,48 @@ public class User {
     private String plan;
     private String facultyId;
 
+    public User(String userId, String type, String name, String plan, String facultyId) {
+        this.userId = userId;
+        this.type = type;
+        this.name = name;
+        this.plan = plan;
+        this.facultyId = facultyId;
+    }
+
+    // Getters
+    public String getUserId() {
+        return userId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getPlan() {
+        return plan;
+    }
+
+    public String getFacultyId() {
+        return facultyId;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPlan(String plan) {
+        this.plan = plan;
+    }
+
+    public void setFacultyId(String facultyId) {
+        this.facultyId = facultyId;
+    }
 }

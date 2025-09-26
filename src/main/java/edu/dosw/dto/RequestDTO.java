@@ -23,10 +23,10 @@ public record RequestDTO(
     }
     public static RequestDTO fromRequest(Request request) {
         return new RequestDTO(
-                request.getId(),
+                request.getRequestId(),
                 request.getStudentId(),
                 request.getType(),
-                request.getIsExceptional(),
+                request.getExceptional(),
                 request.getStatus(),
                 request.getDescription(),
                 request.getOriginGroupId() != null ? request.getOriginGroupId() : null,
@@ -38,10 +38,10 @@ public record RequestDTO(
     
     public Request toEntity() {
         Request request = new Request();
-        request.setId(this.id != null ? this.id : UUID.randomUUID().toString());
+        request.setRequestId(this.id != null ? this.id : UUID.randomUUID().toString());
         request.setStudentId(this.studentId);
         request.setType(this.type);
-        request.setIsExceptional(this.isExceptional);
+        request.setExceptional(this.isExceptional);
         request.setStatus(this.status);
         request.setDescription(this.description);
         request.setAnswer(this.answer);
