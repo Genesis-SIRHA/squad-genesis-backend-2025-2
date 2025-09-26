@@ -17,12 +17,16 @@ public class HistorialService {
         this.historialRepository = historialRepository;
     }
 
-    public ArrayList<String> getCurrentSessionsByStudentIdAndPeriod(String studentId, String year, String period) {
+    public ArrayList<String> getSessionsGroupCodesByStudentIdAndPeriod(String studentId, String year, String period) {
         ArrayList<Historial> historial = historialRepository.findCurrentSessionsByStudentIdAndYearAndPeriod(studentId, year, period);
         ArrayList<String> groupCodes = new ArrayList<>();
         for (Historial h : historial) {
             groupCodes.add(h.getGroupCode());
         }
         return groupCodes;
+    }
+
+    public ArrayList<Historial> getSessionsByStudentIdAndPeriod(String studentId, String year, String period) {
+        return historialRepository.findCurrentSessionsByStudentIdAndYearAndPeriod(studentId, year, period);
     }
 }

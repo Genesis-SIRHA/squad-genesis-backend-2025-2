@@ -17,7 +17,7 @@ public class SchedulerService {
     }
 
     private Schedule buildSchedule(String studentId, String year, String period) {
-        ArrayList<String> groupCodes = historialService.getCurrentSessionsByStudentIdAndPeriod(studentId, year, period);
+        ArrayList<String> groupCodes = historialService.getSessionsGroupCodesByStudentIdAndPeriod(studentId, year, period);
         ArrayList<Session> sessions = new ArrayList<>();
 
         for (String groupCode: groupCodes){
