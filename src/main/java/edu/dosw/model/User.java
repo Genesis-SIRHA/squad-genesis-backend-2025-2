@@ -10,14 +10,14 @@ public class User {
     private String type;
     private String name;
     private String plan;
-    private String facultyId;
+    private String facultyName;
 
-    public User(String userId, String type, String name, String plan, String facultyId) {
+    public User(String userId, String type, String name, String plan, String facultyName) {
         this.userId = userId;
         this.type = type;
         this.name = name;
         this.plan = plan;
-        this.facultyId = facultyId;
+        this.facultyName = facultyName;
     }
 
     // Getters
@@ -37,8 +37,8 @@ public class User {
         return plan;
     }
 
-    public String getFacultyId() {
-        return facultyId;
+    public String getFacultyName() {
+        return facultyName;
     }
 
     public void setType(String type) {
@@ -53,7 +53,7 @@ public class User {
         this.plan = plan;
     }
 
-    public void setFacultyId(String facultyId) {
-        this.facultyId = facultyId;
+    public void setFacultyName(String facultyName) {
+        this.facultyName = facultyName;
     }
 }

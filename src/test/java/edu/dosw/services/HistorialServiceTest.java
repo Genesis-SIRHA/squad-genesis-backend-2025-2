@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -42,7 +43,7 @@ class HistorialServiceTest {
                 .thenReturn(mockHistorial);
 
         // Act
-        ArrayList<String> result = historialService.getCurrentSessionsByStudentIdAndPeriod("S1", "2025", "1");
+        List<String> result = historialService.getCurrentSessionsByStudentIdAndPeriod("S1", "2025", "1");
 
         // Assert
         assertEquals(2, result.size());
@@ -57,7 +58,7 @@ class HistorialServiceTest {
                 .thenReturn(new ArrayList<>());
 
         // Act
-        ArrayList<String> result = historialService.getCurrentSessionsByStudentIdAndPeriod("S1", "2025", "1");
+        List<String> result = historialService.getCurrentSessionsByStudentIdAndPeriod("S1", "2025", "1");
 
         // Assert
         assertNotNull(result);
