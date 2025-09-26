@@ -42,13 +42,31 @@ estudiante crea solicitudes y observa las respuestas dadas por el administrativo
 ![img.png](docs/UML/diagramaContexto.png)
 
 ### Diagramas de casos de Uso
+Se manejan 3 actores: estudiante, administrador y administrativo
+
+El estudiante puede crear solicitudes, consultar su estado e historial, revisar su horario académico
+de cualquier periodo actual o pasado y su semáforo académico. Está relacionado con el proceso de
+responder solicitudes, ya que visualiza la respuesta a sus requerimientos.
+
+El administrativo tiene funciones más avanzadas como responder solicitudes de su facultad,
+registrar materias y grupos, administrar horarios de los estudiantes y configurar periodos habilitados.Consulta
+información detallada del estudiante y de los grupos. 
 
 ![img.png](docs/UML/diagramaCasosUso.png)
 
 ### Diagrama Componentes General
+El diagrama sigue una arquitectura en tres capas (presentación, logica de negocio y datos),
+asegurando una separación de responsabilidades. El frontEnd es la capa de presentación encargada de la
+interacción con el usuario, el backEnd es una capa intermedia que maneja la lógica de negocio, procesando las
+peticiones provenientes del FrontEnd y comunicandóse con la base de datos para realizar operaciones como añadir, modificar
+y eliminar materias, solicitudes, etc.
 
 ![img.png](docs/UML/diagramaComponentesGeneral.png)
-### Diegrama Componentes Especifico
+### Diagrama Componentes Especifico
+La aplicación implementa una arquitectura en capas siguiendo el siguiente flujo: Controller -> Service -> Repository -> Database.
+Los controladores como Requestcontroller y CourseController reciben las peticiones del usuario, utilizan objetos de transferencia
+de datos (DTOs) y retornan las respuestas adecuadas. Los servicios como RequestService y CourseService contienen la lógica de negocio y
+actuan entre intermediarios de los controladores y los repositores, donde estos último, gestionan el acceso a la base de datos.
 ![img.png](docs/UML/diagramaComponentesEspecifico.png)
 
 ### Diagrama de Bases de Datos
