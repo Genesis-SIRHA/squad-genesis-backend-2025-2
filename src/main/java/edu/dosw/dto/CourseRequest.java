@@ -1,24 +1,33 @@
 package edu.dosw.dto;
 
-import jakarta.validation.Valid;
+import edu.dosw.model.Course;
 import jakarta.validation.constraints.NotBlank;
-import java.util.List;
 
 /**
  * Represents a request to create or update a course.
- * Contains the course code, name, and list of groups.
- *
- * @param code The unique code that identifies the course. Cannot be blank.
- * @param name The name of the course. Cannot be blank.
- * @param groups List of groups associated with this course.
+ * Contains the course abbreviation, name, and list of groups.
  */
 public record CourseRequest(
+    /** The unique abbreviation that identifies the course. Cannot be blank. */
     @NotBlank(message = "El código del curso es obligatorio")
-    String code,
+    String abbreviation,
     
+    /** The name of the course. Cannot be blank. */
     @NotBlank(message = "El nombre del curso es obligatorio")
-    String name,
-    
-    @Valid
-    List<GroupRequest> groups
-) {}
+    String courseName,
+
+    int credits,
+
+    String facultyName,
+
+    String plan
+) {
+
+    public Course toEntity() {
+        return new Course(
+            this.abbreviation(),
+            this.courseName(),
+            this.credits()
+        );
+    }
+}

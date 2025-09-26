@@ -6,7 +6,7 @@ import edu.dosw.model.Group;
 import edu.dosw.repositories.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import edu.dosw.repositories.CourseRepository;
+import edu.dosw.repositories.FacultyRepository;
 import edu.dosw.services.strategy.AdministrativeStrategy;
 import edu.dosw.services.strategy.AdministratorStrategy;
 import edu.dosw.services.strategy.QueryStrategy;
@@ -29,7 +29,7 @@ import java.util.Map;
 public class RequestService {
     
     private final RequestRepository requestRepository;
-    private final CourseRepository courseRepository;
+    private final FacultyRepository facultyRepository;
     private final GroupRepository groupRepository;
     private final Map<String, QueryStrategy> strategyMap;
 
@@ -38,12 +38,12 @@ public class RequestService {
      * Initializes the strategy map for different user roles.
      * 
      * @param requestRepository The repository for request data access
-     * @param courseRepository The repository for course data access
+     * @param facultyRepository The repository for course data access
      */
     @Autowired
-    public RequestService(RequestRepository requestRepository, CourseRepository courseRepository, GroupRepository groupRepository) {
+    public RequestService(RequestRepository requestRepository, FacultyRepository facultyRepository, GroupRepository groupRepository) {
         this.requestRepository = requestRepository;
-        this.courseRepository = courseRepository;
+        this.facultyRepository = facultyRepository;
         this.strategyMap = Map.of(
             "STUDENT", new StudentStrategy(requestRepository),
             "ADMINISTRATIVE", new AdministrativeStrategy(requestRepository),
