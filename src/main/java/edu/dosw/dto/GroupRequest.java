@@ -13,39 +13,36 @@ public record GroupRequest(
     /** Unique abbreviation that identifies the group. Cannot be blank. */
     @NotBlank(message = "El código del grupo es obligatorio")
     String groupCode,
-    
-    /** Abbreviation of the course. Cannot be blank. */
+
     @NotBlank(message = "La abreviatura del curso es obligatoria")
     String abbreviation,
-    
-    /** Academic year. Cannot be blank. */
+
     @NotBlank(message = "El año académico es obligatorio")
     String year,
-    
-    /** Academic period. Cannot be blank. */
+
     @NotBlank(message = "El período académico es obligatorio")
     String period,
-    
-    /** ID of the professor for this group. Cannot be blank. */
+
     @NotBlank(message = "El ID del profesor es obligatorio")
     String teacherId,
-    
-    /** Indicates if the group is a lab. */
+
     @NotNull(message = "El indicador de laboratorio es obligatorio")
     Boolean isLab,
-    
-    /** Group number. Must be greater than 0. */
+
     @Min(value = 1, message = "El número de grupo debe ser mayor a 0")
     int groupNum,
-    
-    /** Maximum maxCapacity of the group. Must be greater than 0. */
+
     @Min(value = 1, message = "La capacidad debe ser mayor a 0")
     int maxCapacity,
-    
-    /** Number of currently enrolled students. Cannot be negative. */
+
     @Min(value = 0, message = "El número de inscritos no puede ser negativo")
     int enrolled
 ) {
+    /**
+     * Converts this GroupRequest to a Group entity.
+     *
+     * @return a new Group entity populated with this request's data
+     */
     public Group toEntity() {
         Group group = new Group();
         group.setGroupCode(this.groupCode);

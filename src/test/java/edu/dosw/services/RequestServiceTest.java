@@ -4,187 +4,189 @@ import edu.dosw.dto.RequestDTO;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
+import edu.dosw.repositories.CourseRepository;
 import edu.dosw.repositories.GroupRepository;
+import edu.dosw.repositories.RequestRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import edu.dosw.repositories.FacultyRepository;
-import edu.dosw.repositories.RequestRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for {@link RequestService}.
+ */
 class RequestServiceTest {
 
     private RequestRepository requestRepository;
-    private FacultyRepository facultyRepository;
-    private RequestService requestService;
-
+    private CourseRepository courseRepository;
     private GroupRepository groupRepository;
+    private RequestService requestService;
 
     @BeforeEach
     void setUp() {
         requestRepository = mock(RequestRepository.class);
-        facultyRepository = mock(FacultyRepository.class);
+        courseRepository = mock(CourseRepository.class);
         groupRepository = mock(GroupRepository.class);
-        requestService = new RequestService(requestRepository, facultyRepository,groupRepository);
+        requestService = new RequestService(requestRepository, courseRepository, groupRepository);
     }
 
     @Test
-    void fetchRequests_shouldThrowWhenRoleIsUnsupported() {
-        // Arrange
-        String unsupportedRole = "UNKNOWN";
-        String id = "id1";
+    void fetchRequests_shouldReturnSortedRequestsForStudent() {
+        Request oldReq = new Request();
+        oldReq.setCreatedAt(LocalDateTime.now().minusDays(1));
+        Request newReq = new Request();
+        newReq.setCreatedAt(LocalDateTime.now());
 
-        // Act + Assert
-        assertThrows(IllegalArgumentException.class, () -> requestService.fetchRequests(unsupportedRole, id));
+        when(requestRepository.findByStudentId("s1")).thenReturn(List.of(oldReq, newReq));
+
+        List<Request> result = requestService.fetchRequests("STUDENT", "s1");
+
+        assertEquals(2, result.size());
+        assertEquals(newReq, result.get(0)); // newest first
     }
 
     @Test
-    void createRequest_shouldSaveAndReturnResponse() {
-        // Arrange
+    void fetchRequests_shouldThrowForInvalidRole() {
+        assertThrows(IllegalArgumentException.class, () -> requestService.fetchRequests("INVALID", "s1"));
+    }
+
+    @Test
+    void createRequest_shouldCreateRequestWhenGroupsExist() {
         RequestDTO dto = new RequestDTO(
-                UUID.randomUUID().toString(),
-                "student1",
-                "TYPE",
-                false,
-                "PENDING",
-                "desc",
-                "orig",
-                "dest",
-                null,
-                null
+                "1", "student1", "TYPE_A", null, null,
+                "desc", "originGroup", "destGroup", "answer", "admin"
         );
 
-        when(groupRepository.findByCode(anyString()))
-                .thenReturn(new Group("G1", "Prof", 10, 5));
-        when(requestRepository.save(any(Request.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
+        Group origin = new Group();
+        origin.setGroupCode("originGroup");
+        Group dest = new Group();
+        dest.setGroupCode("destGroup");
 
-        // Act
+        when(groupRepository.findByCode("originGroup")).thenReturn(origin);
+        when(groupRepository.findByCode("destGroup")).thenReturn(dest);
+        when(requestRepository.save(any(Request.class))).thenAnswer(inv -> inv.getArgument(0));
+
         Request result = requestService.createRequest(dto);
 
-        // Assert
+        assertNotNull(result);
         assertEquals("student1", result.getStudentId());
-        assertEquals("TYPE", result.getType());
-        verify(requestRepository).save(any(Request.class));
+        assertEquals("originGroup", result.getOriginGroupId());
+        assertEquals("destGroup", result.getDestinationGroupId());
+        assertEquals("PENDING", result.getStatus()); // default from DTO
+        assertFalse(result.getExceptional()); // default from DTO
     }
 
     @Test
-    void createRequest_shouldThrowWhenCourseNotFound() {
-        // Arrange
-        RequestDTO dto = new RequestDTO(
-                UUID.randomUUID().toString(),
-                "studentX",
-                "TYPE",
-                false,
-                "PENDING",
-                "desc",
-                "orig",
-                "dest",
-                null,
-                null
-        );
+    void createRequest_shouldThrowWhenOriginGroupNotFound() {
+        RequestDTO dto = new RequestDTO("1", "student1", "TYPE_A", false, "PENDING",
+                "desc", "invalidGroup", "destGroup", "answer", "admin");
 
-        when(facultyRepository.findByCode(anyString())).thenReturn(null);
+        when(groupRepository.findByCode("invalidGroup")).thenReturn(null);
 
-        // Act + Assert
         assertThrows(IllegalArgumentException.class, () -> requestService.createRequest(dto));
-        verify(requestRepository, never()).save(any(Request.class));
     }
 
     @Test
-    void updateRequestStatus_shouldUpdateStatusWhenRequestExists() {
-        // Arrange
+    void createRequest_shouldThrowWhenDestinationGroupNotFound() {
+        RequestDTO dto = new RequestDTO("1", "student1", "TYPE_A", false, "PENDING",
+                "desc", "originGroup", "invalidGroup", "answer", "admin");
+
+        Group origin = new Group();
+        origin.setGroupCode("originGroup");
+
+        when(groupRepository.findByCode("originGroup")).thenReturn(origin);
+        when(groupRepository.findByCode("invalidGroup")).thenReturn(null);
+
+        assertThrows(IllegalArgumentException.class, () -> requestService.createRequest(dto));
+    }
+
+    @Test
+    void updateRequestStatus_shouldUpdateStatus() {
+        Request request = new Request();
+        request.setStatus("PENDING");
+
+        when(requestRepository.findById("123")).thenReturn(Optional.of(request));
+        when(requestRepository.save(any(Request.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Request result = requestService.updateRequestStatus("123", "APPROVED");
+
+        assertEquals("APPROVED", result.getStatus());
+    }
+
+    @Test
+    void updateRequestStatus_shouldThrowWhenNotFound() {
+        when(requestRepository.findById("123")).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> requestService.updateRequestStatus("123", "APPROVED"));
+    }
+
+    @Test
+    void getRequestStats_shouldReturnStats() {
+        when(requestRepository.count()).thenReturn(10L);
+        when(requestRepository.countByStatus("PENDING")).thenReturn(4L);
+        when(requestRepository.countByStatus("APPROVED")).thenReturn(3L);
+        when(requestRepository.countByStatus("REJECTED")).thenReturn(3L);
+
+        RequestStats stats = requestService.getRequestStats();
+
+        assertEquals(10, stats.total());
+        assertEquals(4, stats.pending());
+        assertEquals(3, stats.approved());
+        assertEquals(3, stats.rejected());
+    }
+
+    @Test
+    void respondToRequest_shouldUpdateAndSave() {
         Request existing = new Request();
-        existing.setId("1");
+        existing.setRequestId("1");
         existing.setStatus("PENDING");
+
+        Request response = new Request();
+        response.setStatus("APPROVED");
+        response.setAnswer("OK");
+        response.setGestedBy("admin");
 
         when(requestRepository.findById("1")).thenReturn(Optional.of(existing));
         when(requestRepository.save(any(Request.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        // Act
-        Request updated = requestService.updateRequestStatus("1", "APPROVED");
+        Request result = requestService.respondToRequest("1", response);
 
-        // Assert
-        assertEquals("APPROVED", updated.getStatus());
-        verify(requestRepository).save(existing);
+        assertNotNull(result);
+        assertEquals("APPROVED", result.getStatus());
+        assertEquals("OK", result.getAnswer());
+        assertEquals("admin", result.getGestedBy());
+        assertEquals(LocalDate.now(), result.getAnswerAt());
     }
 
     @Test
-    void updateRequestStatus_shouldThrowWhenRequestNotFound() {
-        // Arrange
-        when(requestRepository.findById("404")).thenReturn(Optional.empty());
+    void respondToRequest_shouldThrowForInvalidStatus() {
+        Request existing = new Request();
+        existing.setRequestId("1");
+        existing.setStatus("PENDING");
 
-        // Act + Assert
-        assertThrows(RuntimeException.class, () -> requestService.updateRequestStatus("404", "APPROVED"));
-        verify(requestRepository, never()).save(any(Request.class));
+        Request response = new Request();
+        response.setStatus("INVALID");
+
+        when(requestRepository.findById("1")).thenReturn(Optional.of(existing));
+
+        assertThrows(IllegalArgumentException.class, () -> requestService.respondToRequest("1", response));
     }
 
     @Test
-    void getRequestStats_shouldReturnAggregatedCounts() {
-        // Arrange
-        when(requestRepository.count()).thenReturn(5L);
-        when(requestRepository.countByStatus("PENDING")).thenReturn(2L);
-        when(requestRepository.countByStatus("APPROVED")).thenReturn(1L);
-        when(requestRepository.countByStatus("REJECTED")).thenReturn(2L);
+    void respondToRequest_shouldReturnNullWhenNotFound() {
+        when(requestRepository.findById("1")).thenReturn(Optional.empty());
 
-        // Act
-        RequestStats stats = requestService.getRequestStats();
+        Request response = new Request();
+        response.setStatus("APPROVED");
 
-        // Assert
-        assertEquals(5, stats.total());
-        assertEquals(2, stats.pending());
-        assertEquals(1, stats.approved());
-        assertEquals(2, stats.rejected());
-    }
+        Request result = requestService.respondToRequest("1", response);
 
-    @Test
-    void respondToRequest_ShouldAddNewRequestDetailsIfNoneExist() {
-        // Arrange
-        Request request = new Request();
-        request.setId("456");
-
-        Request responseDetails = new Request();
-        responseDetails.setGestedBy("professor2");
-        responseDetails.setAnswer("REJECTED");
-        responseDetails.setStatus("REJECTED");
-
-        when(requestRepository.findById("456")).thenReturn(Optional.of(request));
-        when(requestRepository.save(any(Request.class))).thenAnswer(inv -> inv.getArgument(0));
-
-        // Act
-        Request updated = requestService.respondToRequest("456", responseDetails);
-
-        // Assert
-        assertNotNull(updated.getAnswer(), "Answer should not be null");
-        assertEquals("456", updated.getId());
-        assertEquals("REJECTED", updated.getAnswer(), "Answer should be REJECTED");
-        assertEquals("REJECTED", updated.getStatus(), "Status should be updated to REJECTED");
-        assertEquals("professor2", updated.getGestedBy(), "GestedBy should be updated");
-
-        verify(requestRepository).save(updated);
-    }
-
-
-
-    @Test
-    void respondToRequest_ShouldReturnNullIfRequestNotFound() {
-        // Arrange
-        Request responseDetails = new Request();
-        responseDetails.setAnswer("APPROVED");
-
-        when(requestRepository.findById("999")).thenReturn(Optional.empty());
-
-        // Act
-        Request result = requestService.respondToRequest("999", responseDetails);
-
-        // Assert
         assertNull(result);
-        verify(requestRepository, never()).save(any(Request.class));
     }
 }

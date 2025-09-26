@@ -1,170 +1,149 @@
 package edu.dosw.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.dosw.dto.CourseRequest;
 import edu.dosw.dto.GroupRequest;
 import edu.dosw.model.Course;
-import edu.dosw.model.Group;
-
+import edu.dosw.services.CourseService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import edu.dosw.services.FacultyService;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@WebMvcTest(CourseController.class)
+/**
+ * Unit tests for CourseController.
+ */
 class CourseControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Mock
+    private CourseService courseService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @InjectMocks
+    private CourseController courseController;
 
-    @MockBean
-    private FacultyService facultyService;
+    private Course course;
+    private CourseRequest courseRequest;
+    private GroupRequest groupRequest;
 
-    @Test
-    void should_create_course() throws Exception {
-//        CourseRequest request = new CourseRequest(
-//                "CS101",
-//                "Intro a la Programación",
-//                List.of(new GroupRequest("G1", "Profesor A", 30, 0))
-//        );
-
-//        when(facultyService.createCourse(any(CourseRequest.class)))
-//                .thenReturn(new Course(
-//                        "CS101",
-//                        "Intro a la Programación",
-//                        List.of(new Group("G1", "Profesor A", 30, 0))
-//                ));
-
-//        mockMvc.perform(post("/api/courses")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(request)))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.abbreviation").value("CS101"))
-//                .andExpect(jsonPath("$.name").value("Intro a la Programación"));
-    }
-
-    @Test
-    void should_get_all_courses() throws Exception {
-        when(facultyService.getAllCourses())
-                .thenReturn(List.of(
-                        new Course(
-                                "CS101",
-                                "Intro a la Programación",
-                                List.of(new Group("G1", "Profesor A", 30, 0))
-                        ),
-                        new Course(
-                                "CS102",
-                                "Estructuras de Datos",
-                                List.of(new Group("G1", "Profesor A", 30, 0))
-                        )
-                ));
-
-        mockMvc.perform(get("/api/courses"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].abbreviation").value("CS101"))
-                .andExpect(jsonPath("$[1].abbreviation").value("CS102"));
-    }
-
-
-
-    @Test
-    void should_return_404_when_course_not_found() throws Exception {
-        when(facultyService.findCourseByCode("999"))
-                .thenReturn(Optional.empty());
-
-        mockMvc.perform(get("/api/courses/999"))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void should_update_course() throws Exception {
-        CourseRequest updateRequest = new CourseRequest(
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        course = new Course("CS101", "Software Engineering");
+        groupRequest = new GroupRequest(
+                "G1",
                 "CS101",
-                "Programación Avanzada",
-                List.of(new GroupRequest("G1", "Profesor A", 30, 0))
+                "2025",
+                "1",
+                "T001",
+                true,
+                1,
+                30,
+                25
         );
-
-        when(facultyService.updateCourse(any(String.class), any(CourseRequest.class)))
-                .thenReturn(Optional.of(new Course(
-                        "CS101",
-                        "Programación Avanzada",
-                        List.of()
-                )));
-
-        mockMvc.perform(put("/api/courses/12345")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Programación Avanzada"));
+        courseRequest = new CourseRequest("CS101", "Software Engineering", List.of(groupRequest));
     }
 
     @Test
-    void should_return_404_when_updating_nonexistent_course() throws Exception {
-        CourseRequest updateRequest = new CourseRequest(
-                "CS999",
-                "Curso Inexistente",
-                List.of()
-        );
+    void shouldReturnAllCourses() {
+        when(courseService.getAllCourses()).thenReturn(List.of(course));
 
-        when(facultyService.updateCourse(any(String.class), any(CourseRequest.class)))
-                .thenReturn(Optional.empty());
+        ResponseEntity<List<Course>> response = courseController.getAllCourses();
 
-        mockMvc.perform(put("/api/courses/999")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateRequest)))
-                .andExpect(status().isNotFound());
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().size());
+        assertEquals("CS101", response.getBody().get(0).getAbbreviation());
+        verify(courseService).getAllCourses();
     }
 
     @Test
-    void should_delete_course() throws Exception {
-        mockMvc.perform(delete("/api/courses/12345"))
-                .andExpect(status().isNoContent());
+    void shouldReturnCourseByIdWhenExists() {
+        when(courseService.findByCode("CS101")).thenReturn(Optional.of(course));
+
+        ResponseEntity<Course> response = courseController.getCourseById("CS101");
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals("CS101", response.getBody().getAbbreviation());
+        verify(courseService).findByCode("CS101");
     }
 
     @Test
-    void should_add_group_to_course() throws Exception {
-        GroupRequest groupRequest = new GroupRequest("G2", "Profesor B", 25, 0);
+    void shouldReturnNotFoundWhenCourseDoesNotExist() {
+        when(courseService.findByCode("INVALID")).thenReturn(Optional.empty());
 
-        when(facultyService.addGroupToCourse(eq("12345"), eq(groupRequest)))
-                .thenReturn(Optional.of(new Course(
-                        "CS101",
-                        "Intro a la Programación",
-                        List.of(new Group("G2", "Profesor B", 25, 0))
-                )));
+        ResponseEntity<Course> response = courseController.getCourseById("INVALID");
 
-        mockMvc.perform(post("/api/courses/12345/groups")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(groupRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.groups[0].groupCode").value("G2"));
+        assertEquals(404, response.getStatusCodeValue());
+        assertNull(response.getBody());
+        verify(courseService).findByCode("INVALID");
     }
 
     @Test
-    void should_return_404_when_adding_group_to_nonexistent_course() throws Exception {
-        GroupRequest groupRequest = new GroupRequest("G2", "Profesor B", 25, 0);
+    void shouldCreateCourse() {
+        when(courseService.createCourse(courseRequest)).thenReturn(course);
 
-        when(facultyService.addGroupToCourse(any(String.class), any(GroupRequest.class)))
-                .thenReturn(Optional.empty());
+        ResponseEntity<Course> response = courseController.createCourse(courseRequest);
 
-        mockMvc.perform(post("/api/courses/999/groups")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(groupRequest)))
-                .andExpect(status().isNotFound());
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(course, response.getBody());
+        verify(courseService).createCourse(courseRequest);
+    }
+
+    @Test
+    void shouldUpdateCourseWhenExists() {
+        when(courseService.updateCourse("CS101", courseRequest)).thenReturn(Optional.of(course));
+
+        ResponseEntity<Course> response = courseController.updateCourse("CS101", courseRequest);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(course, response.getBody());
+        verify(courseService).updateCourse("CS101", courseRequest);
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenUpdatingNonExistingCourse() {
+        when(courseService.updateCourse("INVALID", courseRequest)).thenReturn(Optional.empty());
+
+        ResponseEntity<Course> response = courseController.updateCourse("INVALID", courseRequest);
+
+        assertEquals(404, response.getStatusCodeValue());
+        assertNull(response.getBody());
+        verify(courseService).updateCourse("INVALID", courseRequest);
+    }
+
+    @Test
+    void shouldAddGroupToCourseSuccessfully() {
+        when(courseService.addGroupToCourse("CS101", groupRequest)).thenReturn(true);
+
+        ResponseEntity<Course> response = courseController.addGroupToCourse("CS101", groupRequest);
+
+        assertEquals(200, response.getStatusCodeValue());
+        verify(courseService).addGroupToCourse("CS101", groupRequest);
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenAddGroupFails() {
+        when(courseService.addGroupToCourse("CS101", groupRequest)).thenReturn(false);
+
+        ResponseEntity<Course> response = courseController.addGroupToCourse("CS101", groupRequest);
+
+        assertEquals(400, response.getStatusCodeValue());
+        verify(courseService).addGroupToCourse("CS101", groupRequest);
+    }
+
+    @Test
+    void shouldDeleteCourse() {
+        ResponseEntity<Void> response = courseController.deleteCourse("CS101");
+
+        assertEquals(204, response.getStatusCodeValue());
+        verify(courseService).deleteCourse("CS101");
     }
 }
