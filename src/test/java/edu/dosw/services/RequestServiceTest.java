@@ -4,7 +4,7 @@ import edu.dosw.dto.RequestDTO;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
-import edu.dosw.model.RequestDetails;
+import edu.dosw.repositories.GroupRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import edu.dosw.repositories.CourseRepository;
@@ -21,16 +21,17 @@ import static org.mockito.Mockito.*;
 class RequestServiceTest {
 
     private RequestRepository requestRepository;
-    private CourseService courseService;
+    private CourseRepository courseRepository;
     private RequestService requestService;
-    private MembersService membersService;
+
+    private GroupRepository groupRepository;
 
     @BeforeEach
     void setUp() {
         requestRepository = mock(RequestRepository.class);
-        courseService = mock(CourseService.class);
-        membersService = mock(MembersService.class);
-        requestService = new RequestService(requestRepository, courseService,membersService);
+        courseRepository = mock(CourseRepository.class);
+        groupRepository = mock(GroupRepository.class);
+        requestService = new RequestService(requestRepository, courseRepository,groupRepository);
     }
 
     @Test
@@ -59,7 +60,7 @@ class RequestServiceTest {
                 null
         );
 
-        when(courseService.findByCode(anyString()))
+        when(groupRepository.findByCode(anyString()))
                 .thenReturn(new Group("G1", "Prof", 10, 5));
         when(requestRepository.save(any(Request.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
@@ -89,7 +90,7 @@ class RequestServiceTest {
                 null
         );
 
-        when(courseService.findByCode(anyString())).thenReturn(null);
+        when(courseRepository.findByCode(anyString())).thenReturn(null);
 
         // Act + Assert
         assertThrows(IllegalArgumentException.class, () -> requestService.createRequest(dto));
@@ -142,16 +143,16 @@ class RequestServiceTest {
         assertEquals(2, stats.rejected());
     }
 
-
     @Test
     void respondToRequest_ShouldAddNewRequestDetailsIfNoneExist() {
         // Arrange
         Request request = new Request();
         request.setId("456");
 
-        RequestDetails responseDetails = new RequestDetails();
-        responseDetails.setManagedBy("professor2");
+        Request responseDetails = new Request();
+        responseDetails.setGestedBy("professor2");
         responseDetails.setAnswer("REJECTED");
+        responseDetails.setStatus("REJECTED");
 
         when(requestRepository.findById("456")).thenReturn(Optional.of(request));
         when(requestRepository.save(any(Request.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -160,16 +161,21 @@ class RequestServiceTest {
         Request updated = requestService.respondToRequest("456", responseDetails);
 
         // Assert
-        assertNotNull(updated.getRequestDetails());
-        assertEquals("456", updated.getRequestDetails().getRequestId());
-        assertEquals("REJECTED", updated.getStatus());
+        assertNotNull(updated.getAnswer(), "Answer should not be null");
+        assertEquals("456", updated.getId());
+        assertEquals("REJECTED", updated.getAnswer(), "Answer should be REJECTED");
+        assertEquals("REJECTED", updated.getStatus(), "Status should be updated to REJECTED");
+        assertEquals("professor2", updated.getGestedBy(), "GestedBy should be updated");
+
         verify(requestRepository).save(updated);
     }
+
+
 
     @Test
     void respondToRequest_ShouldReturnNullIfRequestNotFound() {
         // Arrange
-        RequestDetails responseDetails = new RequestDetails();
+        Request responseDetails = new Request();
         responseDetails.setAnswer("APPROVED");
 
         when(requestRepository.findById("999")).thenReturn(Optional.empty());

@@ -36,7 +36,7 @@ public class Request {
         this.requestId = UUID.randomUUID().toString();
         this.createdAt = LocalDateTime.now();
     }
-    
+
     public Request(String studentId, String description, String type, String originGroupId, String destinationGroup) {
         this();
         this.studentId = studentId;

@@ -29,8 +29,8 @@ public record RequestDTO(
                 request.getIsExceptional(),
                 request.getStatus(),
                 request.getDescription(),
-                request.getOriginGroupId() != null ? request.getOriginGroupId(): null,
-                request.getDestinationGroupId() != null ? request.getDestinationGroupId() : null,
+                request.getOriginGroupId() != null ? request.getOriginGroupId() : null,
+                request.getDestinationGroupId() != null ? request.getDestinationGroupId(): null,
                 request.getAnswer(),
                 request.getGestedBy()
         );

@@ -5,7 +5,6 @@ import edu.dosw.dto.RequestDTO;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
-import edu.dosw.model.RequestDetails;
 import edu.dosw.services.RequestService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +35,7 @@ class RequestControllerTest {
 
     @Test
     void should_create_request() throws Exception {
+
         RequestDTO dto = new RequestDTO(
                 null,
                 "student123",
@@ -49,10 +49,24 @@ class RequestControllerTest {
                 null
         );
 
-        Request response = new Request();
 
-        when(requestService.createRequest(any(RequestDTO.class))).thenReturn(response);
+        RequestDTO responseDTO = new RequestDTO(
+                "req1",
+                "student123",
+                "GROUP_CHANGE",
+                false,
+                "PENDING",
+                "Cambio de grupo",
+                "G1",
+                "G2",
+                null,
+                null
+        );
 
+
+        when(requestService.createRequest(any(RequestDTO.class))).thenReturn(responseDTO.toEntity());
+
+        // Act & Assert
         mockMvc.perform(post("/api/requests")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
@@ -131,9 +145,9 @@ class RequestControllerTest {
 
         when(requestService.respondToRequest(any(), any())).thenReturn(request);
 
-        RequestDetails details = new RequestDetails();
+        Request details = new Request();
         details.setAnswer("APPROVED");
-        details.setManagedBy("professor1");
+        details.setGestedBy("professor1");
 
         mockMvc.perform(post("/api/requests/123/respond")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -147,7 +161,7 @@ class RequestControllerTest {
     void respondToRequest_ShouldReturnNotFound_WhenRequestDoesNotExist() throws Exception {
         when(requestService.respondToRequest(any(), any())).thenReturn(null);
 
-        RequestDetails details = new RequestDetails();
+        Request details = new Request();
         details.setAnswer("REJECTED");
 
         mockMvc.perform(post("/requests/999/respond")

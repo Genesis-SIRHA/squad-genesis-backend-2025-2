@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.dosw.dto.CourseRequest;
 import edu.dosw.dto.GroupRequest;
 import edu.dosw.model.Course;
+import edu.dosw.model.Group;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -43,15 +45,15 @@ class CourseControllerTest {
 
         when(courseService.createCourse(any(CourseRequest.class)))
                 .thenReturn(new Course(
-                        "12345",
-                        "CS101"
+                        "CS101",
+                        "Intro a la Programación",
+                        List.of(new Group("G1", "Profesor A", 30, 0))
                 ));
 
         mockMvc.perform(post("/api/courses")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value("12345"))
                 .andExpect(jsonPath("$.code").value("CS101"))
                 .andExpect(jsonPath("$.name").value("Intro a la Programación"));
     }
@@ -60,8 +62,16 @@ class CourseControllerTest {
     void should_get_all_courses() throws Exception {
         when(courseService.getAllCourses())
                 .thenReturn(List.of(
-                        new Course("1", "CS101"),
-                        new Course("2", "CS102")
+                        new Course(
+                                "CS101",
+                                "Intro a la Programación",
+                                List.of(new Group("G1", "Profesor A", 30, 0))
+                        ),
+                        new Course(
+                                "CS102",
+                                "Estructuras de Datos",
+                                List.of(new Group("G1", "Profesor A", 30, 0))
+                        )
                 ));
 
         mockMvc.perform(get("/api/courses"))
@@ -71,24 +81,11 @@ class CourseControllerTest {
                 .andExpect(jsonPath("$[1].code").value("CS102"));
     }
 
-    @Test
-    void should_get_course_by_id() throws Exception {
-        when(courseService.getCourseByAbbreviation("12345"))
-                .thenReturn(Optional.of(new Course(
-                        "12345",
-                        "CS101"
-                )));
 
-        mockMvc.perform(get("/api/courses/12345"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value("12345"))
-                .andExpect(jsonPath("$.code").value("CS101"))
-                .andExpect(jsonPath("$.name").value("Intro a la Programación"));
-    }
 
     @Test
     void should_return_404_when_course_not_found() throws Exception {
-        when(courseService.getCourseByAbbreviation("999"))
+        when(courseService.findByCode("999"))
                 .thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/courses/999"))
@@ -105,8 +102,9 @@ class CourseControllerTest {
 
         when(courseService.updateCourse(any(String.class), any(CourseRequest.class)))
                 .thenReturn(Optional.of(new Course(
-                        "12345",
-                        "CS101"
+                        "CS101",
+                        "Programación Avanzada",
+                        List.of()
                 )));
 
         mockMvc.perform(put("/api/courses/12345")
@@ -145,8 +143,9 @@ class CourseControllerTest {
 
         when(courseService.addGroupToCourse(eq("12345"), eq(groupRequest)))
                 .thenReturn(Optional.of(new Course(
-                        "12345",
-                        "CS101"
+                        "CS101",
+                        "Intro a la Programación",
+                        List.of(new Group("G2", "Profesor B", 25, 0))
                 )));
 
         mockMvc.perform(post("/api/courses/12345/groups")
