@@ -106,9 +106,10 @@ ___
 
 ### 15. Obtener Pensum
 ![img.png](docs/UML/diagramaObtenerPEnsum.png)
-## Pasando a Codigo:
+
+## Calidad del código
 ___
-### Jacoco build
+### Cobertura de pruebas unitarias
 
 En la sprint número dos se presenta la siguiente cobertura de pruebas unitarias
 ![img.png](docs/Img/jacocoS2.png)
@@ -116,3 +117,6 @@ En la sprint número dos se presenta la siguiente cobertura de pruebas unitarias
 Se hace aumento de pruebas unitarias, en base a ...
 
 ![img.png](docs/Img/jacocoS3.png)
+
+### Calidad del código estático Sonarqube
+![img.png](docs/Img/sonarQubeS3.png)
