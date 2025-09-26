@@ -38,14 +38,14 @@ public class Request {
         this.description = description;
         this.type = type;
         this.originGroupId = originGroupId;
-        this.destinationGroupId= destinationGroup;
+        this.destinationGroupId = destinationGroup;
     }
 
-    public String getId() {
+    public String getRequestId() {
         return requestId;
     }
 
-    public void setId(String requestId) {
+    public void setRequestId(String requestId) {
         this.requestId = requestId;
     }
 
@@ -57,12 +57,12 @@ public class Request {
         this.studentId = studentId;
     }
 
-    public String getDescription() {
-        return description;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public String getStatus() {
@@ -73,25 +73,52 @@ public class Request {
         this.status = status;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
     public String getType() {
         return type;
     }
+
     public void setType(String type) {
         this.type = type;
     }
 
-    public Boolean getIsExceptional() {
+    public Boolean getExceptional() {
         return isExceptional;
     }
-    public void setIsExceptional(Boolean isExceptional) {
-        this.isExceptional = isExceptional;
+
+    public void setExceptional(Boolean exceptional) {
+        isExceptional = exceptional;
+    }
+
+    public String getDestinationGroupId() {
+        return destinationGroupId;
+    }
+
+    public void setDestinationGroupId(String destinationGroupId) {
+        this.destinationGroupId = destinationGroupId;
+    }
+
+    public String getOriginGroupId() {
+        return originGroupId;
+    }
+
+    public void setOriginGroupId(String originGroupId) {
+        this.originGroupId = originGroupId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getGestedBy() {
+        return gestedBy;
+    }
+
+    public void setGestedBy(String gestedBy) {
+        this.gestedBy = gestedBy;
     }
 
     public LocalDate getAnswerAt() {
@@ -102,35 +129,11 @@ public class Request {
         this.answerAt = answerAt;
     }
 
-    public String getGestedBy() {
-        return gestedBy;
-    }
-
-    public void setGestedBy(String managedBy) {
-        this.gestedBy = managedBy;
-    }
-
     public String getAnswer() {
         return answer;
     }
 
     public void setAnswer(String answer) {
         this.answer = answer;
-    }
-
-    public String getOriginGroupId() {
-        return originGroupId;
-    }
-
-    public void setOriginGroupId(String originGroup) {
-        this.originGroupId = originGroup;
-    }
-
-    public String getDestinationGroupId() {
-        return destinationGroupId;
-    }
-
-    public void setDestinationGroup(String destinationGroup) {
-        this.destinationGroupId = destinationGroup;
     }
 }
