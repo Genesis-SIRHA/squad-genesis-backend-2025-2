@@ -151,6 +151,8 @@
                                 <exclude>**/dto/**</exclude>
                                 <exclude>**/strategy/**</exclude>
                                 <exclude>**/configurators/**</exclude>
+                                <exclude>**/exception/**</exclude>
+                                <exclude>**/default/**</exclude>
                             </excludes>
                         </configuration>
                     </execution>
