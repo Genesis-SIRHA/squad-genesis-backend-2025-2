@@ -3,9 +3,11 @@ ___
 
 ## Miembros del equipo:
 
-- Carolina 
+- Sofía Ariza Goenaga
+- Carolina Cepeda Valencia
 - Marlio Jose Charry Espitia
 - Manuel Alejandro Guarnizo Garcia
+- Daniel Palacios Moreno
 
 ## Estructura del proyecto
 ![img.png](docs/Img/Estructura.png)
