@@ -1,16 +1,17 @@
 package edu.dosw.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Faculty {
     private String facultyName;
     private String plan;
-    private ArrayList<Course> courses;
+    private List<Course> courses;
 
-    public Faculty(String facultyName, String plan, ArrayList<Course> courses) {
+    public Faculty(String facultyName, String plan, List<Course> courses) {
         this.facultyName = facultyName;
         this.plan = plan;
-        this.courses = courses;
+        this.courses = new ArrayList<>(courses);
     }
 
     public String getFacultyName() {
@@ -29,11 +30,11 @@ public class Faculty {
         this.plan = plan;
     }
 
-    public ArrayList<Course> getCourses() {
+    public List<Course> getCourses() {
         return courses;
     }
 
-    public void setCourses(ArrayList<Course> courses) {
-        this.courses = courses;
+    public void setCourses(List<Course> courses) {
+        this.courses = new ArrayList<>(courses);
     }
 }

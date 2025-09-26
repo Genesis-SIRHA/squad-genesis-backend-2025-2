@@ -4,7 +4,7 @@ import edu.dosw.dto.RequestDTO;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
-import edu.dosw.repositories.CourseRepository;
+import edu.dosw.repositories.FacultyRepository;
 import edu.dosw.repositories.GroupRepository;
 import edu.dosw.repositories.RequestRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,16 +24,16 @@ import static org.mockito.Mockito.*;
 class RequestServiceTest {
 
     private RequestRepository requestRepository;
-    private CourseRepository courseRepository;
+    private FacultyRepository facultyRepository;
     private GroupRepository groupRepository;
     private RequestService requestService;
 
     @BeforeEach
     void setUp() {
         requestRepository = mock(RequestRepository.class);
-        courseRepository = mock(CourseRepository.class);
+        facultyRepository = mock(FacultyRepository.class);
         groupRepository = mock(GroupRepository.class);
-        requestService = new RequestService(requestRepository, courseRepository, groupRepository);
+        requestService = new RequestService(requestRepository, facultyRepository, groupRepository);
     }
 
     @Test

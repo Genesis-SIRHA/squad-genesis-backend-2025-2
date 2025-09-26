@@ -5,6 +5,7 @@ import edu.dosw.repositories.MembersRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,26 +27,25 @@ class MembersServiceTest {
 
     @Test
     void listById_shouldReturnUserWhenExists() {
-        // Arrange
+
         User user = new User("U1", "student", "John Doe", "Engineering", "F1");
         when(membersRepository.findById("U1")).thenReturn(Optional.of(user));
 
-        // Act
+
         User result = membersService.listById("U1");
 
-        // Assert
         assertNotNull(result);
         assertEquals("U1", result.getUserId());
-        assertEquals("F1", result.getFacultyId());
+        assertEquals("F1", result.getFacultyName()); // corregido
         verify(membersRepository).findById("U1");
     }
 
     @Test
     void listById_shouldThrowWhenUserNotFound() {
-        // Arrange
+
         when(membersRepository.findById("U1")).thenReturn(Optional.empty());
 
-        // Act + Assert
+
         RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> membersService.listById("U1"));
 
@@ -54,29 +54,26 @@ class MembersServiceTest {
     }
 
     @Test
-    void getFaculty_shouldReturnFacultyId() {
-        // Arrange
+    void getFaculty_shouldReturnFacultyName() {
+
         User user = new User("U1", "student", "John Doe", "Engineering", "F1");
         when(membersRepository.findById("U1")).thenReturn(Optional.of(user));
 
-        // Act
+
         String faculty = membersService.getFaculty("U1");
 
-        // Assert
+
         assertEquals("F1", faculty);
         verify(membersRepository).findById("U1");
     }
 
     @Test
     void getFaculty_shouldThrowWhenUserNotFound() {
-        // Arrange
-        when(membersRepository.findById("U1")).thenReturn(Optional.empty());
 
-        // Act + Assert
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        when(membersRepository.findById("U1")).thenReturn(Optional.empty());
+        assertThrows(NoSuchElementException.class,  // corregido
                 () -> membersService.getFaculty("U1"));
 
-        assertEquals("No value present", exception.getMessage());
         verify(membersRepository).findById("U1");
     }
 }

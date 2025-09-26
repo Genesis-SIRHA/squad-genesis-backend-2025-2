@@ -9,10 +9,7 @@ import edu.dosw.model.Group;
 import edu.dosw.repositories.FacultyRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Service class that handles business logic related to courses and groups.
@@ -30,19 +27,19 @@ public class FacultyService {
 
     public Map<String, String> getAllFacultyName() {
         Map<String, String> facultyInfo = new HashMap<>();
-        ArrayList<Faculty> faculties = (ArrayList<Faculty>) facultyRepository.findAll();
+        List<Faculty> faculties = facultyRepository.findAll(); // ✅ sin cast
         for (Faculty faculty : faculties) {
             facultyInfo.put(faculty.getFacultyName(), faculty.getPlan());
         }
         return facultyInfo;
     }
 
-    public ArrayList<Course> findCoursesByFacultyNameAndPlan(String facultyName, String plan) {
+    public List<Course> findCoursesByFacultyNameAndPlan(String facultyName, String plan) {
         Optional<Faculty> faculty = facultyRepository.findByNameAndPlan(facultyName, plan);
         if (faculty.isEmpty()) {
-            throw new BusinessException("Faculty not found: "+facultyName);
+            throw new BusinessException("Faculty not found: " + facultyName);
         }
-        return faculty.get().getCourses();
+        return new ArrayList<>(faculty.get().getCourses());
     }
 
     /**
@@ -52,25 +49,17 @@ public class FacultyService {
      * @throws BusinessException if a course with the same abbreviation already exists
      */
     public Faculty createCourse(CourseRequest request) {
-        Optional<Faculty> faculty = facultyRepository.findByNameAndPlan(request.facultyName(), request.plan());
+        Faculty faculty = facultyRepository.findByNameAndPlan(request.facultyName(), request.plan())
+                .orElseThrow(() -> new BusinessException("Faculty not found: " + request.facultyName()));
 
-        if (faculty.isEmpty()) {
-            throw new BusinessException("Faculty not found: "+request.facultyName());
+        if (faculty.getCourses().stream().anyMatch(c -> c.getAbbreviation().equals(request.abbreviation()))) {
+            throw new BusinessException("Course already exists: " + request.abbreviation());
         }
 
-        if (faculty.get().getCourses().stream().anyMatch(c -> c.getAbbreviation().equals(request.abbreviation()))) {
-            throw new BusinessException("Course already exists: "+request.abbreviation());
-        }
+        Course course = request.toEntity();
+        faculty.getCourses().add(course);
 
-
-        Course course = new Course();
-        course.setAbbreviation(request.abbreviation());
-        course.setCourseName(request.courseName());
-
-        faculty.get().getCourses().add(course);
-        Faculty facultyToSave = faculty.get();
-
-        return facultyRepository.save(facultyToSave);
+        return facultyRepository.save(faculty);
     }
 
     /**
@@ -80,31 +69,29 @@ public class FacultyService {
      * @return An Optional containing the updated Course if found, or empty if not found
      */
     public Faculty updateCourse(String id, CourseRequest request) {
-        Optional<Faculty> faculty = facultyRepository.findByNameAndPlan(request.facultyName(), request.plan());
+        Faculty faculty = facultyRepository.findByNameAndPlan(request.facultyName(), request.plan())
+                .orElseThrow(() -> new BusinessException("Faculty not found: " + request.facultyName()));
 
-        if (faculty.isEmpty()) {
-            throw new BusinessException("Faculty not found: "+request.facultyName());
+        if (faculty.getCourses().stream().anyMatch(c -> c.getAbbreviation().equals(request.abbreviation()))) {
+            throw new BusinessException("Course already exists: " + request.abbreviation());
         }
 
-        if (faculty.get().getCourses().stream().anyMatch(c -> c.getAbbreviation().equals(request.abbreviation()))) {
-            throw new BusinessException("Course already exists: "+request.abbreviation());
-        }
         Course course = request.toEntity();
-        faculty.get().getCourses().add(course);
-        Faculty facultyToSave = faculty.get();
-        return facultyRepository.save(facultyToSave);
+        faculty.getCourses().add(course);
+
+        return facultyRepository.save(faculty);
     }
 
     /**
      * Adds a new group to an existing course.
      * @param groupRequest The details of the group to add
-     * @return An Optional containing the updated Course if found, or empty if course not found
-     * @throws BusinessException if a group with the same abbreviation already exists in the course
+     * @return true if the group was added successfully
+     * @throws BusinessException if course is not found
      */
     public Boolean addGroupToCourse(GroupRequest groupRequest) {
         Optional<Course> course = findCourseByCode(groupRequest.abbreviation());
         if (course.isEmpty()) {
-            throw new BusinessException("Faculty not found: "+ groupRequest.abbreviation());
+            throw new BusinessException("Faculty not found: " + groupRequest.abbreviation());
         }
         Group group = groupService.createGroup(groupRequest);
         return group != null;
@@ -119,34 +106,15 @@ public class FacultyService {
     }
 
     /**
-     * Maps a GroupRequest to a Group entity.
-     * @param groupRequest The GroupRequest to map
-     * @return A new Group entity with the request details
-     */
-    private Group mapToGroup(GroupRequest groupRequest) {
-        Group group = new Group();
-        group.setGroupCode(groupRequest.groupCode());
-        group.setTeacherId(groupRequest.teacherId());
-        group.setMaxCapacity(groupRequest.maxCapacity());
-        group.setEnrolled(groupRequest.enrolled());
-        return group;
-    }
-
-    /**
      * Finds a course by its abbreviation.
      * @param code The course abbreviation to search for
      * @return An Optional containing the Course if found, or empty if not found
      */
     public Optional<Course> findCourseByCode(String code) {
-        ArrayList<Faculty> faculties = (ArrayList<Faculty>) facultyRepository.findAll();
+        List<Faculty> faculties = facultyRepository.findAll();
         return faculties.stream()
-                .map(faculty -> faculty.getCourses().stream()
-                        .filter(course -> course.getAbbreviation().equals(code))
-                        .findFirst())
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(faculty -> faculty.getCourses().stream())
+                .filter(course -> course.getAbbreviation().equals(code))
                 .findFirst();
     }
-
 }
-
