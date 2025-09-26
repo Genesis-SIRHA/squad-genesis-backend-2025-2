@@ -37,6 +37,8 @@ ___
 ___
 ### Diagramas de Contexto
 
+Se representa la interacción entre los actores principales y el sistema SIHRA. Mientras el
+estudiante crea solicitudes y observa las respuestas dadas por el administrativo.
 ![img.png](docs/UML/diagramaContexto.png)
 
 ### Diagramas de casos de Uso
@@ -50,15 +52,37 @@ ___
 ![img.png](docs/UML/diagramaComponentesEspecifico.png)
 
 ### Diagrama de Bases de Datos
+Se muestra la estructura de los documentos NOSQL. Las colecciones principales son las
+siguientes:
+- historical : historial académio de los estudiantes.
+- faculties : información de facultades y sus cursos.
+- groups : datos de los grupos (clases).
+- sessions : los horarios de las sesiones de clase.
+- requests : Solicitudes realizadas por los estudiantes.
+- universityMembers : miembros de la universidad ( estudiante, administrativo)
 ![img.png](docs/UML/diagramaBaseDatos.png)
 
-### Diagrama de clases
+### Diagrama de clases basado en 3 servicios principales
 
+#### Scheduler Service
+Se definen las clases relacionadas con la gestión de horarios y sesiones. Se incluyen servicios que
+permiten obtener las sesiones actuales, consultar horarios por grupo y manejar periodos académicos (1,2,I).
 ![img.png](docs/UML/diagramaClases1.png)
 
+#### Request Service
+Este servicio está centrado en la gestión de solicitudes. Maneja la creación,
+gestión y respuesta de solicitudes, además de estadísticas asociadas. Tiene conexión con
+el servicio MembersService y FacultyService para validar la información de usuarios y usar estrategias
+de consulta dependiendo de su rol.
 ![img.png](docs/UML/diagramaClases2.png)
 
+### Pensum Service
+Este servicio está relacionado con la validación de planes de estudio y sus
+respectivos cursos.Permite construir el perfil académico del estudiante, validar cursos aprobados
+y su plan de estudio. Se apoya en FacultyService para manejar la información académica.
+
 ![img.png](docs/UML/diagramaClases3.png)
+
 ### Diagramas de secuencia
 
 #### 1. Login
