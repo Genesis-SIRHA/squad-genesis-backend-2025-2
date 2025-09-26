@@ -33,7 +33,7 @@ class SessionServiceTest {
         when(sessionRepository.findByGroupCode(groupCode)).thenReturn(sessions);
 
         // Act
-        ArrayList<Session> result = sessionService.getSessionsByGroupCode(groupCode);
+        List<Session> result = sessionService.getSessionsByGroupCode(groupCode);
 
         // Assert
         assertThat(result).isNotNull().hasSize(1);
@@ -49,7 +49,7 @@ class SessionServiceTest {
         when(sessionRepository.findByGroupCode(groupCode)).thenReturn(new ArrayList<>());
 
         // Act
-        ArrayList<Session> result = sessionService.getSessionsByGroupCode(groupCode);
+        List<Session> result = sessionService.getSessionsByGroupCode(groupCode);
 
         // Assert
         assertThat(result).isNotNull().isEmpty();

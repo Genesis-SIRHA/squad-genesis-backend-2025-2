@@ -8,8 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Service class that handles business logic related to student historical records.
@@ -33,7 +31,7 @@ public class HistorialService {
      * @param period the academic period to filter by (e.g., '1' for first semester, '2' for second semester)
      * @return ArrayList of group codes representing the student's current sessions
      */
-    public ArrayList<String> getCurrentSessionsByStudentIdAndPeriod(String studentId, String year, String period) {
+    public List<String> getCurrentSessionsByStudentIdAndPeriod(String studentId, String year, String period) {
         ArrayList<Historial> historial = historialRepository.findCurrentSessionsByStudentIdAndYearAndPeriod(studentId, year, period);
         ArrayList<String> groupCodes = new ArrayList<>();
         for (Historial h : historial) {
@@ -46,11 +44,11 @@ public class HistorialService {
         return historialRepository.findCurrentSessionsByStudentIdAndYearAndPeriod(studentId, year, period);
     }
 
-    public List<Historial> getSessionsByCourses(String studentId, ArrayList<Course> courses) {
+    public List<Historial> getSessionsByCourses(String studentId, List<Course> courses) {
         List<Historial> completeHistorial = historialRepository.findByStudentId(studentId);
         ArrayList<Historial> lastCourseState = new ArrayList<>();
         for (Course course : courses) {
-            ArrayList<Historial> historialByCourse = (ArrayList<Historial>) completeHistorial.stream().filter(h -> h.getGroupCode().equals(course.getAbbreviation())).collect(Collectors.toList());
+            ArrayList<Historial> historialByCourse = (ArrayList<Historial>) completeHistorial.stream().filter(h -> h.getGroupCode().equals(course.getAbbreviation())).toList();
             lastCourseState.add(historialByCourse.get(historialByCourse.size() - 1));
         }
         return lastCourseState;
