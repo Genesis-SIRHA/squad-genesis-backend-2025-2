@@ -31,7 +31,6 @@ edu\dosw\repositories\RequestRepository.class
 edu\dosw\services\PeriodService.class
 edu\dosw\model\Course.class
 edu\dosw\model\Group.class
-OpenAPIConfig.class
 edu\dosw\model\Historial.class
 edu\dosw\services\strategy\QueryStrategy.class
 edu\dosw\model\Pemsum$Builder.class
