@@ -1,5 +1,5 @@
 # Squad-genesis-backend-2025-2
-Back Proyecto DOSW
+___
 
 ## Miembros del equipo:
 
@@ -19,17 +19,22 @@ Back Proyecto DOSW
 - develop: En esta rama nos encargamos de desarrollar y de integrar las nuevas funcionalidades antes de pasar a main.
 
 2. Otras ramas utilizadas:
--feature/create_courses: Verificamos funcionalidades de crear los cursos.
--feature/request-query: Para implementar la logica de consulta de solicitudes.
--feature/respondRequests: Para desarrollar la parte encargada de resolver las solicitudes.
--feature/unit-tests: Esta fue creada con el fin de llevar a cabo los test necesarios del back.
--prueba1: Esta rama fue temporal con el fin de los primeros bosquejos de codigo que teniamso pensados.
+* feature/create_courses: Verificamos funcionalidades de crear los cursos.
+* feature/request-query: Para implementar la logica de consulta de solicitudes.
+* feature/respondRequests: Para desarrollar la parte encargada de resolver las solicitudes.
+* feature/unit-tests: Esta fue creada con el fin de llevar a cabo los test necesarios del back.
+* prueba1: Esta rama fue temporal con el fin de los primeros bosquejos de codigo que teniamso pensados.
+* feature/README: Rama para actualizar o modificar el archivo README del proyecto.
+* hotfix/refactorizacion: Rama para correcciones rápidas y mejoras en la estructura del código.
+* revert-10-feature/respondRequests: Rama creada para revertir cambios específicos relacionados con la funcionalidad de responder solicitudes.
+* feature/pemsum: Rama para implementar o mejorar una funcionalidad específica (detalles no claros por el nombre).
+* feature/new-unit-tests: Rama creada para agregar nuevos tests unitarios al proyecto.
 
-## Analisis y diseño
-
+# Analisis y diseño
+___
 ### Diagramas de Contexto
 
-![img.png](docs/UML/diagramasContexto.png)
+![img.png](docs/UML/diagramaContexto.png)
 
 ### Diagramas de casos de Uso
 
@@ -42,11 +47,13 @@ Back Proyecto DOSW
 ![img.png](docs/UML/diagramaComponentesEspecifico.png)
 
 ### Diagrama de Bases de Datos
-![img.png](docs/UML/diagramaBasesDatos.png)
+![img.png](docs/UML/diagramaBaseDatos.png)
 
 ### Diagrama de clases
 
-![img.png](docs/UML/diagramaClases.png)
+![img.png](docs/UML/diagramaClases1.png)
+
+![img.png](docs/UML/diagramaClases2.png)
 ### Diagramas de secuencia
 
 #### 1. Login
@@ -91,10 +98,11 @@ Back Proyecto DOSW
 
 ### 14. Consultar horario
 ![img.png](docs/UML/diagramaConsultarHorario.png)
+
+### 15. Obtener Pensum
+![img.png](docs/UML/diagramaObtenerPEnsum.png)
 ## Pasando a Codigo:
-
+___
 ### Jacoco build
-![img.png](docs/Img/jacoco build.png)
-
-
-
+Se hace aumento en las pruebas unitarias
+![img.png](docs/Img/coberturaJacoco.png)
