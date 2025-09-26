@@ -19,7 +19,6 @@ edu\dosw\model\Faculty.class
 edu\dosw\services\PemsumService.class
 edu\dosw\model\DayOfWeek.class
 edu\dosw\services\RequestService.class
-dto\SessionDTO.class
 edu\dosw\repositories\SessionRepository.class
 edu\dosw\services\GroupService.class
 edu\dosw\config\OpenAPIConfig.class
@@ -36,9 +35,11 @@ OpenAPIConfig.class
 edu\dosw\model\Historial.class
 edu\dosw\services\strategy\QueryStrategy.class
 edu\dosw\model\Pemsum$Builder.class
+edu\dosw\config\TimeConfig.class
 edu\dosw\dto\CourseRequest.class
 edu\dosw\controller\RequestController.class
 edu\dosw\services\MembersService.class
 edu\dosw\services\SchedulerService.class
+edu\dosw\dto\SessionDTO.class
 edu\dosw\repositories\HistorialRepository.class
 edu\dosw\exception\GlobalExceptionHandler.class

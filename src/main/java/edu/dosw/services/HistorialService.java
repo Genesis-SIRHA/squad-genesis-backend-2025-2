@@ -1,11 +1,15 @@
 package edu.dosw.services;
 
+import edu.dosw.model.Course;
 import edu.dosw.model.Historial;
 import edu.dosw.repositories.HistorialRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service class that handles business logic related to student historical records.
@@ -38,7 +42,17 @@ public class HistorialService {
         return groupCodes;
     }
 
-    public ArrayList<Historial> getSessionsByStudentIdAndPeriod(String studentId, String year, String period) {
+    public List<Historial> getSessionsByStudentIdAndPeriod(String studentId, String year, String period) {
         return historialRepository.findCurrentSessionsByStudentIdAndYearAndPeriod(studentId, year, period);
+    }
+
+    public List<Historial> getSessionsByCourses(String studentId, ArrayList<Course> courses) {
+        List<Historial> completeHistorial = historialRepository.findByStudentId(studentId);
+        ArrayList<Historial> lastCourseState = new ArrayList<>();
+        for (Course course : courses) {
+            ArrayList<Historial> historialByCourse = (ArrayList<Historial>) completeHistorial.stream().filter(h -> h.getGroupCode().equals(course.getAbbreviation())).collect(Collectors.toList());
+            lastCourseState.add(historialByCourse.get(historialByCourse.size() - 1));
+        }
+        return lastCourseState;
     }
 }

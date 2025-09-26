@@ -8,8 +8,10 @@ import edu.dosw.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,6 +23,7 @@ public class PemsumService {
     private final FacultyService facultyService;
     private final MembersService membersService;
     private final HistorialService historialService;
+    private final PeriodService periodService;
 
     /**
      * Constructs a new PemsumService with required dependencies.
@@ -34,6 +37,8 @@ public class PemsumService {
         this.facultyService = facultyService;
         this.membersService = membersService;
         this.historialService = historialService;
+        Clock clock = Clock.systemDefaultZone();
+        this.periodService = new PeriodService(clock);
     }
 
     /**
@@ -63,9 +68,9 @@ public class PemsumService {
             throw new BusinessException("Invalid faculty name or plan: " + facultyName + " - " + plan);
         }
 
-        String year = PeriodService.getYear();
-        String period = PeriodService.getPeriod();
-        ArrayList<Historial> historials = historialService.getSessionsByStudentIdAndPeriod(studentId, year, period);
+        String year = periodService.getYear();
+        String period = periodService.getPeriod();
+        List<Historial> historials = historialService.getSessionsByCourses(studentId, courses);
 
         Map<Course, String> coursesMap = getCoursesMap(courses, historials);
         int totalCredits = courses.stream().mapToInt(Course::getCredits).sum();
@@ -105,7 +110,7 @@ public class PemsumService {
      * @param historials List of the student's academic history records
      * @return A map of courses with their current status
      */
-    private Map<Course, String> getCoursesMap(ArrayList<Course> courses, ArrayList<Historial> historials) {
+    private Map<Course, String> getCoursesMap(ArrayList<Course> courses, List<Historial> historials) {
         Map<Course, String> coursesMap = new HashMap<>();
         for (Course course : courses) {
             if (historials.stream().anyMatch(h -> h.getGroupCode().equals(course.getAbbreviation()))) {
