@@ -37,6 +37,11 @@ public class MembersService {
      * @throws RuntimeException if no user is found with the given ID
      */
     public String getFaculty(String id) {
-        return  membersRepository.findById(id).get().getFacultyId();
+        return  membersRepository.findById(id).get().getFacultyName();
     }
+
+    public String getPlan(String studentId) {
+        return membersRepository.findById(studentId).get().getPlan();
+    }
+
 }
