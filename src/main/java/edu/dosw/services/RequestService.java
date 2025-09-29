@@ -144,24 +144,39 @@ public class RequestService {
         return new RequestStats(total, pending, approved, rejected);
     }
 
+    /**
+     *  Method that returns an answered request
+     * @param requestId  : id of the request selected
+     * @param response : the response of administration
+     * @return  answered request
+     */
     public Request respondToRequest(String requestId, Request response) {
         return requestRepository.findById(requestId)
                 .map(existing -> {
                     existing.setAnswer(response.getAnswer());
                     existing.setGestedBy(response.getGestedBy());
                     existing.setAnswerAt(LocalDate.from(LocalDateTime.now()));
-                    if ("APPROVED".equalsIgnoreCase(response.getStatus()) ||
-                            "REJECTED".equalsIgnoreCase(response.getStatus()) ||
-                            "PENDING".equalsIgnoreCase(response.getStatus())) {
 
+                    if (isValidStatus(response.getStatus())) {
                         existing.setStatus(response.getStatus());
                     } else {
                         throw new IllegalArgumentException("Invalid status. Must be APPROVED, REJECTED or PENDING");
                     }
 
-
                     return requestRepository.save(existing);
                 })
                 .orElse(null);
     }
+
+    /**
+     * method to validate status of requests
+     * @param status : status of the request
+     * @return boolean, is valid or invalid
+     */
+    private boolean isValidStatus(String status) {
+        return "APPROVED".equalsIgnoreCase(status) ||
+                "REJECTED".equalsIgnoreCase(status) ||
+                "PENDING".equalsIgnoreCase(status);
+    }
+
 }
