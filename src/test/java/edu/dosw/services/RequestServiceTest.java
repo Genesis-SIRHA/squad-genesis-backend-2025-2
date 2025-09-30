@@ -68,8 +68,8 @@ class RequestServiceTest {
         Group dest = new Group();
         dest.setGroupCode("destGroup");
 
-        when(groupRepository.findByCode("originGroup")).thenReturn(origin);
-        when(groupRepository.findByCode("destGroup")).thenReturn(dest);
+        when(groupRepository.findByGroupCode("originGroup")).thenReturn(origin);
+        when(groupRepository.findByGroupCode("destGroup")).thenReturn(dest);
         when(requestRepository.save(any(Request.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Request result = requestService.createRequest(dto);
@@ -87,7 +87,7 @@ class RequestServiceTest {
         RequestDTO dto = new RequestDTO("1", "student1", "TYPE_A", false, "PENDING",
                 "desc", "invalidGroup", "destGroup", "answer", "admin");
 
-        when(groupRepository.findByCode("invalidGroup")).thenReturn(null);
+        when(groupRepository.findByGroupCode("invalidGroup")).thenReturn(null);
 
         assertThrows(IllegalArgumentException.class, () -> requestService.createRequest(dto));
     }
@@ -100,8 +100,8 @@ class RequestServiceTest {
         Group origin = new Group();
         origin.setGroupCode("originGroup");
 
-        when(groupRepository.findByCode("originGroup")).thenReturn(origin);
-        when(groupRepository.findByCode("invalidGroup")).thenReturn(null);
+        when(groupRepository.findByGroupCode("originGroup")).thenReturn(origin);
+        when(groupRepository.findByGroupCode("invalidGroup")).thenReturn(null);
 
         assertThrows(IllegalArgumentException.class, () -> requestService.createRequest(dto));
     }

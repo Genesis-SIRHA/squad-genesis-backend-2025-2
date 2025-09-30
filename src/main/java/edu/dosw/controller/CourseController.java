@@ -77,7 +77,7 @@ public class CourseController {
      * @param groupRequest The details of the group to add
      * @return The updated course with the new group if found, 404 otherwise
      */
-    @PostMapping
+    @PostMapping("/{courseId}/groups")
     @Operation(summary = "Add group to course", description = "Adds a new group to an existing course")
     public ResponseEntity<Course> addGroupToCourse(
             @PathVariable String courseId,

@@ -10,5 +10,5 @@ public interface GroupRepository extends MongoRepository<Group, String> {
     @Query("{ 'abbreviation': ?0 }")
     List<Group> findAllByCourseId(String abbreviation);
 
-    Group findByCode(String code);
+    Group findByGroupCode(String code);
 }

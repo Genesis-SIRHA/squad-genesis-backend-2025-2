@@ -96,12 +96,12 @@ public class RequestService {
         request.setAnswer(requestDTO.description());
         request.setAnswerAt(LocalDate.now());
 
-        Group origin = groupRepository.findByCode(requestDTO.originGroupId());
+        Group origin = groupRepository.findByGroupCode(requestDTO.originGroupId());
         if (origin == null) {
             throw new IllegalArgumentException("Origin group not found: " + requestDTO.originGroupId());
         }
 
-        Group destination = groupRepository.findByCode(requestDTO.destinationGroupId());
+        Group destination = groupRepository.findByGroupCode(requestDTO.destinationGroupId());
         if (destination == null) {
             throw new IllegalArgumentException("Destination group not found: " + requestDTO.destinationGroupId());
         }

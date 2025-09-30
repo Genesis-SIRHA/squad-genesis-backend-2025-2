@@ -11,8 +11,6 @@ import java.util.Optional;
  * Extends MongoRepository to provide CRUD operations and custom query methods.
  */
 public interface FacultyRepository extends MongoRepository<Faculty, String> {
-
-    boolean existsByCode(String code);
     @Query("{ 'facultyName': ?0 , 'plan': ?1 }")
     Optional<Faculty> findByNameAndPlan(String facultyName, String plan);
 

@@ -4,6 +4,7 @@ import edu.dosw.dto.RequestDTO;
 import edu.dosw.dto.RequestStats;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,20 +20,12 @@ import edu.dosw.model.Request;
  */
 @RestController
 @RequestMapping("/api/requests")
+@RequiredArgsConstructor
 @Tag(name = "Request Controller", description = "APIs for managing requests")
 public class RequestController {
 
-    private final RequestService requestService;
 
-    /**
-     * Constructs a new RequestController with the provided RequestService.
-     *
-     * @param requestService The service to handle request operations
-     */
-    @Autowired
-    public RequestController(RequestService requestService) {
-        this.requestService = requestService;
-    }
+    private final RequestService requestService;
 
     /**
      * Creates a new request with the provided details.
