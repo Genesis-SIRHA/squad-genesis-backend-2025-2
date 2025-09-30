@@ -30,9 +30,6 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Validate Maven Wrapper
-        uses: gradle/wrapper-validation-action@v1
-
       - name: Check Code Format (Spotless)
         run: mvn spotless:check
 
