@@ -7,7 +7,7 @@ import edu.dosw.services.RequestService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,11 +17,15 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/requests")
-@RequiredArgsConstructor
 @Tag(name = "Request Controller", description = "APIs for managing requests")
 public class RequestController {
 
   private final RequestService requestService;
+
+  @Autowired
+  public RequestController(RequestService requestService) {
+    this.requestService = requestService;
+  }
 
   /**
    * Creates a new request with the provided details.
