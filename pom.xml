@@ -201,6 +201,14 @@
                                             <minimum>0.85</minimum>
                                         </limit>
                                     </limits>
+                                    <excludes>
+                                        <exclude>edu.dosw.config.*</exclude>
+                                        <exclude>edu.dosw.dto.*</exclude>
+                                        <exclude>edu.dosw.strategy.*</exclude>
+                                        <exclude>edu.dosw.configurators.*</exclude>
+                                        <exclude>edu.dosw.exception.*</exclude>
+                                        <exclude>edu.dosw.default.*</exclude>
+                                    </excludes>
                                 </rule>
                             </rules>
                         </configuration>

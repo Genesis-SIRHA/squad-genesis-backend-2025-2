@@ -90,26 +90,3 @@ jobs:
         run: |
           echo "🚀 Desplegando en Producción..."
           ls build/
-
-  notify:
-    runs-on: ubuntu-latest
-    if: always()
-    needs: [build-and-test, code-analysis, deploy-staging, deploy-production]
-    steps:
-      - name: Notify Slack (Failure)
-        if: failure()
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_COLOR: '#ff0000'
-          SLACK_TITLE: '🚨 Pipeline failed'
-          SLACK_MESSAGE: 'Revisa los detalles: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
-
-      - name: Notify Slack (Success)
-        if: success()
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_COLOR: '#36a64f'
-          SLACK_TITLE: '✅ Pipeline success'
-          SLACK_MESSAGE: 'Todas las etapas completadas con éxito 🎉'
