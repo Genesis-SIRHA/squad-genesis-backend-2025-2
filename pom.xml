@@ -164,26 +164,6 @@
                             </excludes>
                         </configuration>
                     </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
                     <execution>
                         <id>jacoco-check</id>
                         <phase>verify</phase>
@@ -201,20 +181,21 @@
                                             <minimum>0.85</minimum>
                                         </limit>
                                     </limits>
-                                    <excludes>
-                                        <exclude>edu.dosw.config.*</exclude>
-                                        <exclude>edu.dosw.dto.*</exclude>
-                                        <exclude>edu.dosw.strategy.*</exclude>
-                                        <exclude>edu.dosw.configurators.*</exclude>
-                                        <exclude>edu.dosw.exception.*</exclude>
-                                        <exclude>edu.dosw.default.*</exclude>
-                                    </excludes>
                                 </rule>
                             </rules>
+                            <excludes>
+                                <exclude>**/config/**</exclude>
+                                <exclude>**/dto/**</exclude>
+                                <exclude>**/strategy/**</exclude>
+                                <exclude>**/configurators/**</exclude>
+                                <exclude>**/exception/**</exclude>
+                                <exclude>**/default/**</exclude>
+                            </excludes>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
 
             <!-- Sonar -->
             <plugin>
