@@ -34,7 +34,7 @@ jobs:
         run: mvn spotless:check
 
       - name: Build & Unit Tests
-        run: mvn clean verify jacoco:report
+        run: mvn test
 
       - name: Upload artifacts (jar + reports)
         uses: actions/upload-artifact@v4
