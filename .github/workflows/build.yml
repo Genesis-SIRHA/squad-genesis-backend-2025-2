@@ -30,13 +30,13 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Check Code Format (Spotless)
+      - name: Check Code Format
         run: mvn spotless:check
 
       - name: Build & Unit Tests
         run: mvn test
 
-      - name: Upload artifacts (jar + reports)
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
@@ -44,6 +44,15 @@ jobs:
             target/*.jar
             target/surefire-reports/*
             target/site/jacoco/*
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'sirha-genesis'
+          slot-name: 'Production'
+          package: '*.jar'
+          publish-profile: ${{ secrets.AzureAppService_PublishProfile_1234 }}
 
   code-analysis:
     runs-on: ubuntu-latest
@@ -55,11 +64,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: SonarQube Analysis
-        uses: sonarsource/sonarqube-scan@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          mvn clean verify sonar:sonar \
+            -Dsonar.projectKey=Genesis-SIRHA_squad-genesis-backend-2025-2 \
+            -Dsonar.host.url=${SONAR_HOST_URL} \
+            -Dsonar.login=${SONAR_TOKEN}
 
   deploy-staging:
     runs-on: ubuntu-latest
