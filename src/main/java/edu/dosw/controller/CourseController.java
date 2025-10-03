@@ -12,6 +12,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * Controller that handles all course-related HTTP requests. Provides endpoints for CRUD operations
  * on courses and their groups.
@@ -32,6 +34,11 @@ public class CourseController {
     this.facultyService = facultyService;
   }
 
+
+    @GetMapping("/")
+    public Map<String, String> home() {
+        return Map.of("message", "SIRHA API", "docs", "/swagger-ui/index.html");
+    }
   /**
    * Retrieves a specific course by its ID.
    *

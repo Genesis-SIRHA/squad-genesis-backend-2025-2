@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sirha-api
+  namespace: sirha
+  labels: { app: sirha-api }
+spec:
+  selector:
+    matchLabels: { app: sirha-api }
+  template:
+    metadata:
+      labels: { app: sirha-api }
+    spec:
+      containers:
+        - name: api
+          #image: komiyes/sirha-api:1.0.0   # o
+          image : sirha-api:dev #si usas minikube image load
+          imagePullPolicy: IfNotPresent
+          ports: [ { containerPort: 8080 } ]
+          env:
+            - name: SPRING_DATA_MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-uri
+                  key: SPRING_DATA_MONGODB_URI
+             # kubectl -n sirha create secret generic mongo-uri --from-literal=SPRING_DATA_MONGODB_URI='mongodb+srv://prueba:prueba1234@sirhadb.e43oxls.mongodb.net/?retryWrites=true&w=majority&appName=SIRHADB'
+            kubectl -n sirha set probe deploy/sirha-api --readiness --get-url=http://:8080/api/actuator/health --initial-delay-seconds=15 --period-seconds=5 --failure-threshold=6 --timeout-seconds=2
+          resources:
+            requests: { cpu: "100m", memory: "256Mi" }
+            limits:   { cpu: "500m", memory: "512Mi" }
+          startupProbe:
+            httpGet: { path: /actuator/health, port: 8080 }
+            failureThreshold: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet: { path: /actuator/health, port: 8080 }
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet: { path: /actuator/health, port: 8080 }
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+      terminationGracePeriodSeconds: 30
