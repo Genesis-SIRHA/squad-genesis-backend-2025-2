@@ -151,7 +151,7 @@ public class RequestService {
   public RequestStats getRequestStats() {
     long total = requestRepository.count();
     long pending = requestRepository.countByStatus("PENDING");
-    long approved = requestRepository.countByStatus("APPROVED");
+    long approved = requestRepository.countByStatus("ACCEPTED");
     long rejected = requestRepository.countByStatus("REJECTED");
     return new RequestStats(total, pending, approved, rejected);
   }
@@ -164,14 +164,14 @@ public class RequestService {
               existing.setAnswer(response.getAnswer());
               existing.setGestedBy(response.getGestedBy());
               existing.setAnswerAt(LocalDate.from(LocalDateTime.now()));
-              if ("APPROVED".equalsIgnoreCase(String.valueOf(response.getStatus()))
+              if ("ACCEPTED".equalsIgnoreCase(String.valueOf(response.getStatus()))
                   || "REJECTED".equalsIgnoreCase(String.valueOf(response.getStatus()))
                   || "PENDING".equalsIgnoreCase(String.valueOf(response.getStatus()))) {
 
                 existing.setStatus(response.getStatus());
               } else {
                 throw new IllegalArgumentException(
-                    "Invalid status. Must be APPROVED, REJECTED or PENDING");
+                    "Invalid status. Must be ACCEPTED, REJECTED or PENDING");
               }
 
               return requestRepository.save(existing);

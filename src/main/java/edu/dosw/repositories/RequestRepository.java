@@ -48,7 +48,7 @@ public interface RequestRepository extends MongoRepository<Request, String> {
   /**
    * Counts the number of requests with a specific status.
    *
-   * @param status The status to count (e.g., 'PENDING', 'APPROVED', 'REJECTED')
+   * @param status The status to count (e.g., 'PENDING', 'ACCEPTED', 'REJECTED')
    * @return The count of requests with the specified status
    */
   long countByStatus(String status);

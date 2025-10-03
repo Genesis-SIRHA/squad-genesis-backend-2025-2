@@ -77,15 +77,15 @@ class RequestControllerTest {
 
   @Test
   void updateRequestStatus_ShouldReturnUpdatedRequest() {
-    request.setStatus(Status.APPROVED);
-    when(requestService.updateRequestStatus("123", Status.APPROVED)).thenReturn(request);
+    request.setStatus(Status.ACCEPTED);
+    when(requestService.updateRequestStatus("123", Status.ACCEPTED)).thenReturn(request);
 
     ResponseEntity<Request> response =
-        requestController.updateRequestStatus("123", Status.APPROVED);
+        requestController.updateRequestStatus("123", Status.ACCEPTED);
 
     assertEquals(200, response.getStatusCodeValue());
-    assertEquals(Status.APPROVED, response.getBody().getStatus());
-    verify(requestService, times(1)).updateRequestStatus("123", Status.APPROVED);
+    assertEquals(Status.ACCEPTED, response.getBody().getStatus());
+    verify(requestService, times(1)).updateRequestStatus("123", Status.ACCEPTED);
   }
 
   @Test

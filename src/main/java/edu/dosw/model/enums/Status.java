@@ -2,7 +2,7 @@ package edu.dosw.model.enums;
 
 public enum Status {
   PENDING,
-  APPROVED,
+  ACCEPTED,
   IN_PROGRESS,
   REJECTED,
   CANCELLED,

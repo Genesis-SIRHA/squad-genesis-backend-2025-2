@@ -146,9 +146,9 @@ class RequestServiceTest {
     when(requestRepository.findById("123")).thenReturn(Optional.of(request));
     when(requestRepository.save(any(Request.class))).thenAnswer(inv -> inv.getArgument(0));
 
-    Request result = requestService.updateRequestStatus("123", Status.APPROVED);
+    Request result = requestService.updateRequestStatus("123", Status.ACCEPTED);
 
-    assertEquals(Status.APPROVED, result.getStatus());
+    assertEquals(Status.ACCEPTED, result.getStatus());
   }
 
   @Test
@@ -156,14 +156,14 @@ class RequestServiceTest {
     when(requestRepository.findById("123")).thenReturn(Optional.empty());
 
     assertThrows(
-        RuntimeException.class, () -> requestService.updateRequestStatus("123", Status.APPROVED));
+        RuntimeException.class, () -> requestService.updateRequestStatus("123", Status.ACCEPTED));
   }
 
   @Test
   void getRequestStats_shouldReturnStats() {
     when(requestRepository.count()).thenReturn(10L);
     when(requestRepository.countByStatus("PENDING")).thenReturn(4L);
-    when(requestRepository.countByStatus("APPROVED")).thenReturn(3L);
+    when(requestRepository.countByStatus("ACCEPTED")).thenReturn(3L);
     when(requestRepository.countByStatus("REJECTED")).thenReturn(3L);
 
     RequestStats stats = requestService.getRequestStats();
@@ -181,7 +181,7 @@ class RequestServiceTest {
     existing.setStatus(Status.PENDING);
 
     Request response = new Request();
-    response.setStatus(Status.APPROVED);
+    response.setStatus(Status.ACCEPTED);
     response.setAnswer("OK");
     response.setGestedBy("admin");
 
@@ -191,7 +191,7 @@ class RequestServiceTest {
     Request result = requestService.respondToRequest("1", response);
 
     assertNotNull(result);
-    assertEquals(Status.APPROVED, result.getStatus());
+    assertEquals(Status.ACCEPTED, result.getStatus());
     assertEquals("OK", result.getAnswer());
     assertEquals("admin", result.getGestedBy());
     assertEquals(LocalDate.now(), result.getAnswerAt());
@@ -217,7 +217,7 @@ class RequestServiceTest {
     when(requestRepository.findById("1")).thenReturn(Optional.empty());
 
     Request response = new Request();
-    response.setStatus(Status.APPROVED);
+    response.setStatus(Status.ACCEPTED);
 
     Request result = requestService.respondToRequest("1", response);
 
