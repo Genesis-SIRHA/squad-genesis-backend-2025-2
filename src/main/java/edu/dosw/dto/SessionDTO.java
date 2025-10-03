@@ -11,7 +11,7 @@ import jakarta.validation.constraints.NotNull;
  * the room, time slot, and day of the week for a session.
  */
 public class SessionDTO {
-  /** The name of the room where the session takes place. Cannot be blank. */
+  /** The fullName of the room where the session takes place. Cannot be blank. */
   @NotBlank(message = "El nombre del salón es obligatorio")
   private String roomName;
 
@@ -25,18 +25,18 @@ public class SessionDTO {
   private DayOfWeek day;
 
   /**
-   * Gets the name of the room where the session takes place.
+   * Gets the fullName of the room where the session takes place.
    *
-   * @return the room name
+   * @return the room fullName
    */
   public String getRoomName() {
     return roomName;
   }
 
   /**
-   * Sets the name of the room where the session takes place.
+   * Sets the fullName of the room where the session takes place.
    *
-   * @param roomName the room name to set
+   * @param roomName the room fullName to set
    */
   public void setRoomName(String roomName) {
     this.roomName = roomName;

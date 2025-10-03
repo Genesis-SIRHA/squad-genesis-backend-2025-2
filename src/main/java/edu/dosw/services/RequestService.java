@@ -36,7 +36,7 @@ public class RequestService {
   private static final Logger logger = LoggerFactory.getLogger(RequestController.class);
   private final RequestRepository requestRepository;
   private final FacultyRepository facultyRepository;
-  private final MembersService membersService;
+  private final AdministrativeService administrativeService;
   private final GroupRepository groupRepository;
   private final Map<Role, QueryStrategy> strategyMap;
 
@@ -52,15 +52,15 @@ public class RequestService {
       RequestRepository requestRepository,
       FacultyRepository facultyRepository,
       GroupRepository groupRepository,
-      MembersService membersService) {
+      AdministrativeService administrativeService) {
     this.requestRepository = requestRepository;
     this.facultyRepository = facultyRepository;
     this.groupRepository = groupRepository;
-    this.membersService = membersService;
+    this.administrativeService = administrativeService;
     this.strategyMap =
         Map.of(
             Role.STUDENT, new StudentStrategy(requestRepository),
-            Role.ADMINISTRATIVE, new AdministrativeStrategy(requestRepository, membersService),
+            Role.ADMINISTRATIVE, new AdministrativeStrategy(requestRepository,administrativeService ),
             Role.ADMINISTRATOR, new AdministratorStrategy(requestRepository));
   }
 

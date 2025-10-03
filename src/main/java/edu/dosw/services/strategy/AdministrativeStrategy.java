@@ -2,6 +2,7 @@ package edu.dosw.services.strategy;
 
 import edu.dosw.model.Request;
 import edu.dosw.repositories.RequestRepository;
+import edu.dosw.services.AdministrativeService;
 import edu.dosw.services.MembersService;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,19 +18,19 @@ public class AdministrativeStrategy implements QueryStrategy {
 
   private static final Logger logger = LoggerFactory.getLogger(AdministrativeStrategy.class);
   private final RequestRepository requestRepository;
-  private final MembersService membersService;
+  private final AdministrativeService administrativeService;
 
   /**
    * Constructs a new AdministrativeStrategy with the given request repository.
    *
    * @param requestRepository The repository used to access request data
-   * @param membersService the service that manages persons in the university
+   * @param administrativeService the service that manages persons in the university
    */
   @Autowired
   public AdministrativeStrategy(
-      RequestRepository requestRepository, MembersService membersService) {
+      RequestRepository requestRepository, AdministrativeService administrativeService) {
     this.requestRepository = requestRepository;
-    this.membersService = membersService;
+    this.administrativeService = administrativeService;
   }
 
   /**
@@ -40,7 +41,7 @@ public class AdministrativeStrategy implements QueryStrategy {
    */
   @Override
   public List<Request> queryRequests(String userId) {
-    String professorFaculty = membersService.getFaculty(userId);
+    String professorFaculty = administrativeService.getFaculty(userId);
 
     if (professorFaculty == null) {
       logger.error("User not found with id: " + userId);
@@ -52,7 +53,7 @@ public class AdministrativeStrategy implements QueryStrategy {
 
     for (Request request : allRequest) {
       String studentId = request.getStudentId();
-      String studentFaculty = membersService.getFaculty(studentId);
+      String studentFaculty = administrativeService.getFaculty(studentId);
       if (professorFaculty.equals(studentFaculty)) {
         allAvailable.add(request);
       }
