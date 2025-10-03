@@ -45,14 +45,14 @@ jobs:
             target/surefire-reports/*
             target/site/jacoco/*
 
-#      - name: Deploy to Azure Web App
-#        id: deploy-to-webapp
-#        uses: azure/webapps-deploy@v3
-#        with:
-#          app-name: 'sirha-genesis'
-#          slot-name: 'Production'
-#          package: '*.jar'
-#          publish-profile: ${{ secrets.AzureAppService_PublishProfile_1234 }}
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'sirha-genesis'
+          slot-name: 'Production'
+          package: '*.jar'
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
 
   code-analysis:
     runs-on: ubuntu-latest
