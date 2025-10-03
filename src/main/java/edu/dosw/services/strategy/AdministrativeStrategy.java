@@ -3,12 +3,11 @@ package edu.dosw.services.strategy;
 import edu.dosw.model.Request;
 import edu.dosw.repositories.RequestRepository;
 import edu.dosw.services.MembersService;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Implementation of QueryStrategy for administrative users. This strategy allows administrative
@@ -27,7 +26,8 @@ public class AdministrativeStrategy implements QueryStrategy {
    * @param membersService the service that manages persons in the university
    */
   @Autowired
-  public AdministrativeStrategy(RequestRepository requestRepository, MembersService membersService) {
+  public AdministrativeStrategy(
+      RequestRepository requestRepository, MembersService membersService) {
     this.requestRepository = requestRepository;
     this.membersService = membersService;
   }
@@ -50,7 +50,7 @@ public class AdministrativeStrategy implements QueryStrategy {
     List<Request> allRequest = requestRepository.findAllAvailable();
     List<Request> allAvailable = new ArrayList<>();
 
-    for (Request request: allRequest){
+    for (Request request : allRequest) {
       String studentId = request.getStudentId();
       String studentFaculty = membersService.getFaculty(studentId);
       if (professorFaculty.equals(studentFaculty)) {

@@ -8,16 +8,16 @@ import jakarta.validation.constraints.NotBlank;
  * list of groups.
  */
 public record CourseRequest(
-        /** The unique abbreviation that identifies the course. Cannot be blank. */
-        @NotBlank(message = "El código del curso es obligatorio") String abbreviation,
+    /** The unique abbreviation that identifies the course. Cannot be blank. */
+    @NotBlank(message = "El código del curso es obligatorio") String abbreviation,
 
-        /** The name of the course. Cannot be blank. */
-        @NotBlank(message = "El nombre del curso es obligatorio") String courseName,
-        int credits,
-        String facultyName,
-        String plan) {
+    /** The name of the course. Cannot be blank. */
+    @NotBlank(message = "El nombre del curso es obligatorio") String courseName,
+    int credits,
+    String facultyName,
+    String plan) {
 
-    public Course toEntity() {
-        return new Course(this.abbreviation(), this.courseName(), this.credits());
-    }
+  public Course toEntity() {
+    return new Course(this.abbreviation(), this.courseName(), this.credits());
+  }
 }

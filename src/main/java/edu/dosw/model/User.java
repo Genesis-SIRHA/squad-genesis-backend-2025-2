@@ -20,5 +20,4 @@ public class User {
     this.plan = plan;
     this.facultyName = facultyName;
   }
-
 }

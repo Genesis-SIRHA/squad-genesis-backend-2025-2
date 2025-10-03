@@ -15,5 +15,4 @@ public class Group {
   private int groupNum;
   private int enrolled;
   private int maxCapacity;
-
 }

@@ -1,8 +1,7 @@
 package edu.dosw.model;
 
-import lombok.Data;
-import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -15,10 +14,11 @@ public class Course {
 
   private int credits;
 
-    public Course(String abbreviation, String courseName) {
-        this.abbreviation = abbreviation;
-        this.courseName = courseName;
-    }
+  public Course(String abbreviation, String courseName) {
+    this.abbreviation = abbreviation;
+    this.courseName = courseName;
+  }
+
   public Course() {}
 
   public Course(String abbreviation, String courseName, int credits) {

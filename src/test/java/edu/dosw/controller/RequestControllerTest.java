@@ -80,7 +80,8 @@ class RequestControllerTest {
     request.setStatus(Status.APPROVED);
     when(requestService.updateRequestStatus("123", Status.APPROVED)).thenReturn(request);
 
-    ResponseEntity<Request> response = requestController.updateRequestStatus("123", Status.APPROVED);
+    ResponseEntity<Request> response =
+        requestController.updateRequestStatus("123", Status.APPROVED);
 
     assertEquals(200, response.getStatusCodeValue());
     assertEquals("APPROVED", response.getBody().getStatus());

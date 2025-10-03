@@ -9,7 +9,6 @@ import edu.dosw.services.RequestService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +41,10 @@ public class RequestController {
    */
   @GetMapping("/{role}/{userId}")
   @Operation(
-          summary = "Get requests by role",
-          description = "Retrieves requests based on user role and userId")
+      summary = "Get requests by role",
+      description = "Retrieves requests based on user role and userId")
   public ResponseEntity<List<Request>> fetchRequests(
-          @PathVariable String userId, @PathVariable Role role) {
+      @PathVariable String userId, @PathVariable Role role) {
     List<Request> requests = requestService.fetchRequests(role, userId);
     return ResponseEntity.ok(requests);
   }
@@ -64,7 +63,6 @@ public class RequestController {
     Request createdRequest = requestService.createRequest(request);
     return ResponseEntity.ok(createdRequest);
   }
-
 
   /**
    * Updates the status of an existing request.

@@ -34,7 +34,8 @@ class RequestServiceTest {
     facultyRepository = mock(FacultyRepository.class);
     groupRepository = mock(GroupRepository.class);
     membersService = mock(MembersService.class);
-    requestService = new RequestService(requestRepository, facultyRepository, groupRepository, membersService);
+    requestService =
+        new RequestService(requestRepository, facultyRepository, groupRepository, membersService);
   }
 
   @Test
@@ -55,7 +56,8 @@ class RequestServiceTest {
   @Test
   void fetchRequests_shouldThrowForInvalidRole() {
     assertThrows(
-        IllegalArgumentException.class, () -> requestService.fetchRequests(Role.valueOf("INVALID"), "s1"));
+        IllegalArgumentException.class,
+        () -> requestService.fetchRequests(Role.valueOf("INVALID"), "s1"));
   }
 
   @Test

@@ -1,8 +1,7 @@
 package edu.dosw.model;
 
-import lombok.Data;
-import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.DayOfWeek;
+import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
@@ -17,13 +16,13 @@ public class Session {
 
   public Session() {}
 
-    public Session(String groupCode, String classroomName, int slot, DayOfWeek day, int year, int period) {
-        this.groupCode = groupCode;
-        this.classroomName = classroomName;
-        this.slot = slot;
-        this.day = day;
-        this.year = year;
-        this.period = period;
-    }
-
+  public Session(
+      String groupCode, String classroomName, int slot, DayOfWeek day, int year, int period) {
+    this.groupCode = groupCode;
+    this.classroomName = classroomName;
+    this.slot = slot;
+    this.day = day;
+    this.year = year;
+    this.period = period;
+  }
 }
