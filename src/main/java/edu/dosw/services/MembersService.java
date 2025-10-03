@@ -44,7 +44,7 @@ public class MembersService {
    * @throws BusinessException if no user is found with the given ID
    */
   public String getFaculty(String id) {
-    Optional<User> user = membersRepository.findByUserId(id);
+    Optional<User> user = membersRepository.findById(id);
     if (user.isEmpty()) {
       logger.error("User not found with id: " + id);
       throw new BusinessException("User not found with id: " + id);
@@ -53,7 +53,7 @@ public class MembersService {
   }
 
   public String getPlan(String studentId) {
-    Optional<User> user = membersRepository.findByUserId(studentId);
+    Optional<User> user = membersRepository.findById(studentId);
     if (user.isEmpty()) {
       logger.error("Student not found with id: " + studentId);
       throw new BusinessException("Student not found with id: " + studentId);
