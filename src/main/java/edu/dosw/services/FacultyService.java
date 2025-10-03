@@ -8,7 +8,6 @@ import edu.dosw.model.Faculty;
 import edu.dosw.model.Group;
 import edu.dosw.repositories.FacultyRepository;
 import java.util.*;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
