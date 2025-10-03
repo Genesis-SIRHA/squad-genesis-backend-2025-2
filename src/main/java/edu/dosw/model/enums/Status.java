@@ -6,4 +6,5 @@ public enum Status {
   IN_PROGRESS,
   REJECTED,
   CANCELLED,
+  INVALID
 }

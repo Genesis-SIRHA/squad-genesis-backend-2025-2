@@ -84,7 +84,7 @@ class RequestControllerTest {
         requestController.updateRequestStatus("123", Status.APPROVED);
 
     assertEquals(200, response.getStatusCodeValue());
-    assertEquals("APPROVED", response.getBody().getStatus());
+    assertEquals(Status.APPROVED, response.getBody().getStatus());
     verify(requestService, times(1)).updateRequestStatus("123", Status.APPROVED);
   }
 

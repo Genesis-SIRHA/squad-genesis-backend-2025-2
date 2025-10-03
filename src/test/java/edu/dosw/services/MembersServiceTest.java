@@ -3,6 +3,7 @@ package edu.dosw.services;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import edu.dosw.exception.BusinessException;
 import edu.dosw.model.User;
 import edu.dosw.repositories.MembersRepository;
 import java.util.NoSuchElementException;
@@ -65,7 +66,7 @@ class MembersServiceTest {
 
     when(membersRepository.findById("U1")).thenReturn(Optional.empty());
     assertThrows(
-        NoSuchElementException.class, // corregido
+        BusinessException.class,
         () -> membersService.getFaculty("U1"));
 
     verify(membersRepository).findById("U1");
