@@ -92,8 +92,25 @@ siguientes:
 ![img.png](docs/UML/diagramaResponderSolicitudes.png)
 
 ### 5. Diagrama de clases 
+#### Scheduler Service
+Se definen las clases relacionadas con la gestión de horarios y sesiones. Se incluyen servicios que
+permiten obtener las sesiones actuales, consultar horarios por grupo y manejar periodos académicos (1,2,I).
+![img.png](docs/UML/schedulerService.png)
 
-![img.png](docs/UML/diagramaClases.png)
+#### Request Service
+Este servicio está centrado en la gestión de solicitudes. Maneja la creación,
+gestión y respuesta de solicitudes, además de estadísticas asociadas. Tiene conexión con
+el servicio MembersService y FacultyService para validar la información de usuarios y usar estrategias
+de consulta dependiendo de su rol.
+![img_1.png](docs/UML/requestService.png)
+
+### Pensum Service
+Este servicio está relacionado con la validación de planes de estudio y sus
+respectivos cursos.Permite construir el perfil académico del estudiante, validar cursos aprobados
+y su plan de estudio. Se apoya en FacultyService para manejar la información académica.
+
+![img_2.png](docs/UML/pensumService.png)
+
 ## Pasando a Codigo:
 
 ### Jacoco build
