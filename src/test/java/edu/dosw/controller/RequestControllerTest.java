@@ -6,6 +6,8 @@ import static org.mockito.Mockito.*;
 import edu.dosw.dto.RequestDTO;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Request;
+import edu.dosw.model.enums.Role;
+import edu.dosw.model.enums.Status;
 import edu.dosw.services.RequestService;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,7 +34,7 @@ class RequestControllerTest {
 
     request = new Request("student123", "Need schedule change", "TRANSFER", "G1", "G2");
     request.setRequestId(UUID.randomUUID().toString());
-    request.setStatus("PENDING");
+    request.setStatus(Status.PENDING);
     request.setCreatedAt(LocalDateTime.now());
 
     requestDTO =
@@ -40,7 +42,7 @@ class RequestControllerTest {
             request.getRequestId(),
             request.getStudentId(),
             request.getType(),
-            request.getExceptional(),
+            request.getIsExceptional(),
             request.getStatus(),
             request.getDescription(),
             request.getOriginGroupId(),
@@ -62,10 +64,10 @@ class RequestControllerTest {
 
   @Test
   void fetchRequests_ShouldReturnListOfRequests() {
-    when(requestService.fetchRequests("STUDENT", "student123")).thenReturn(List.of(request));
+    when(requestService.fetchRequests(Role.STUDENT, "student123")).thenReturn(List.of(request));
 
     ResponseEntity<List<Request>> response =
-        requestController.fetchRequests("student123", "STUDENT");
+        requestController.fetchRequests("student123", Role.STUDENT);
 
     assertEquals(200, response.getStatusCodeValue());
     assertNotNull(response.getBody());
@@ -75,14 +77,15 @@ class RequestControllerTest {
 
   @Test
   void updateRequestStatus_ShouldReturnUpdatedRequest() {
-    request.setStatus("APPROVED");
-    when(requestService.updateRequestStatus("123", "APPROVED")).thenReturn(request);
+    request.setStatus(Status.ACCEPTED);
+    when(requestService.updateRequestStatus("123", Status.ACCEPTED)).thenReturn(request);
 
-    ResponseEntity<Request> response = requestController.updateRequestStatus("123", "APPROVED");
+    ResponseEntity<Request> response =
+        requestController.updateRequestStatus("123", Status.ACCEPTED);
 
     assertEquals(200, response.getStatusCodeValue());
-    assertEquals("APPROVED", response.getBody().getStatus());
-    verify(requestService, times(1)).updateRequestStatus("123", "APPROVED");
+    assertEquals(Status.ACCEPTED, response.getBody().getStatus());
+    verify(requestService, times(1)).updateRequestStatus("123", Status.ACCEPTED);
   }
 
   @Test
@@ -101,7 +104,7 @@ class RequestControllerTest {
     ResponseEntity<Void> response = requestController.deleteRequest("123");
 
     assertEquals(204, response.getStatusCodeValue());
-    verify(requestService, times(1)).updateRequestStatus("123", "CANCELLED");
+    verify(requestService, times(1)).updateRequestStatus("123", Status.CANCELLED);
   }
 
   @Test

@@ -3,9 +3,9 @@ package edu.dosw.services;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import edu.dosw.exception.BusinessException;
 import edu.dosw.model.User;
 import edu.dosw.repositories.MembersRepository;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,9 +64,7 @@ class MembersServiceTest {
   void getFaculty_shouldThrowWhenUserNotFound() {
 
     when(membersRepository.findById("U1")).thenReturn(Optional.empty());
-    assertThrows(
-        NoSuchElementException.class, // corregido
-        () -> membersService.getFaculty("U1"));
+    assertThrows(BusinessException.class, () -> membersService.getFaculty("U1"));
 
     verify(membersRepository).findById("U1");
   }
