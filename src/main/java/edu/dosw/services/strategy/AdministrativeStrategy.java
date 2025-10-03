@@ -3,6 +3,11 @@ package edu.dosw.services.strategy;
 import edu.dosw.model.Request;
 import edu.dosw.repositories.RequestRepository;
 import edu.dosw.services.MembersService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,6 +15,8 @@ import java.util.List;
  * users to see all available requests as well as any requests they have created themselves.
  */
 public class AdministrativeStrategy implements QueryStrategy {
+
+  private static final Logger logger = LoggerFactory.getLogger(AdministrativeStrategy.class);
   private final RequestRepository requestRepository;
   private final MembersService membersService;
 
@@ -19,15 +26,10 @@ public class AdministrativeStrategy implements QueryStrategy {
    * @param requestRepository The repository used to access request data
    * @param membersService the service that manages persons in the university
    */
-  public AdministrativeStrategy(
-      RequestRepository requestRepository, MembersService membersService) {
+  @Autowired
+  public AdministrativeStrategy(RequestRepository requestRepository, MembersService membersService) {
     this.requestRepository = requestRepository;
     this.membersService = membersService;
-  }
-
-  public AdministrativeStrategy(RequestRepository requestRepository) {
-    this.requestRepository = requestRepository;
-    this.membersService = null;
   }
 
   /**
@@ -38,14 +40,25 @@ public class AdministrativeStrategy implements QueryStrategy {
    */
   @Override
   public List<Request> queryRequests(String userId) {
-    String faculty = membersService.getFaculty(userId);
+    String professorFaculty = membersService.getFaculty(userId);
 
-    if (faculty == null) {
+    if (professorFaculty == null) {
+      logger.error("User not found with id: " + userId);
       throw new IllegalArgumentException("User not found with id: " + userId);
     }
 
-    List<Request> result = requestRepository.findAllAvailable();
-    result.addAll(requestRepository.findOwnedBy(userId, faculty));
-    return result;
+    List<Request> allRequest = requestRepository.findAllAvailable();
+    List<Request> allAvailable = new ArrayList<>();
+
+    for (Request request: allRequest){
+      String studentId = request.getStudentId();
+      String studentFaculty = membersService.getFaculty(studentId);
+      if (professorFaculty.equals(studentFaculty)) {
+        allAvailable.add(request);
+      }
+    }
+
+    allAvailable.addAll(requestRepository.findOwnedBy(userId));
+    return allAvailable;
   }
 }

@@ -23,11 +23,10 @@ public interface RequestRepository extends MongoRepository<Request, String> {
    * Finds all requests managed by a specific professor.
    *
    * @param professorId The ID of the professor
-   * @param faculty The faculty of the professor
    * @return A list of requests managed by the specified professor
    */
-  @Query("{ 'managedBy': ?0 , 'faculty': ?1 }")
-  List<Request> findOwnedBy(String professorId, String faculty);
+  @Query("{ 'managedBy': ?0 }")
+  List<Request> findOwnedBy(String professorId);
 
   /**
    * Finds all requests with a status of 'EXCEPTIONAL'.

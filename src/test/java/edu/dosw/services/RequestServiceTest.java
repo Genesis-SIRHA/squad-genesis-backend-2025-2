@@ -7,6 +7,8 @@ import edu.dosw.dto.RequestDTO;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
+import edu.dosw.model.enums.Role;
+import edu.dosw.model.enums.Status;
 import edu.dosw.repositories.FacultyRepository;
 import edu.dosw.repositories.GroupRepository;
 import edu.dosw.repositories.RequestRepository;
@@ -24,13 +26,15 @@ class RequestServiceTest {
   private FacultyRepository facultyRepository;
   private GroupRepository groupRepository;
   private RequestService requestService;
+  private MembersService membersService;
 
   @BeforeEach
   void setUp() {
     requestRepository = mock(RequestRepository.class);
     facultyRepository = mock(FacultyRepository.class);
     groupRepository = mock(GroupRepository.class);
-    requestService = new RequestService(requestRepository, facultyRepository, groupRepository);
+    membersService = mock(MembersService.class);
+    requestService = new RequestService(requestRepository, facultyRepository, groupRepository, membersService);
   }
 
   @Test
@@ -42,16 +46,16 @@ class RequestServiceTest {
 
     when(requestRepository.findByStudentId("s1")).thenReturn(List.of(oldReq, newReq));
 
-    List<Request> result = requestService.fetchRequests("STUDENT", "s1");
+    List<Request> result = requestService.fetchRequests(Role.STUDENT, "s1");
 
     assertEquals(2, result.size());
-    assertEquals(newReq, result.get(0)); // newest first
+    assertEquals(newReq, result.get(0));
   }
 
   @Test
   void fetchRequests_shouldThrowForInvalidRole() {
     assertThrows(
-        IllegalArgumentException.class, () -> requestService.fetchRequests("INVALID", "s1"));
+        IllegalArgumentException.class, () -> requestService.fetchRequests(Role.valueOf("INVALID"), "s1"));
   }
 
   @Test
@@ -84,8 +88,8 @@ class RequestServiceTest {
     assertEquals("student1", result.getStudentId());
     assertEquals("originGroup", result.getOriginGroupId());
     assertEquals("destGroup", result.getDestinationGroupId());
-    assertEquals("PENDING", result.getStatus()); // default from DTO
-    assertFalse(result.getExceptional()); // default from DTO
+    assertEquals(Status.PENDING, result.getStatus());
+    assertFalse(result.getIsExceptional());
   }
 
   @Test
@@ -96,7 +100,7 @@ class RequestServiceTest {
             "student1",
             "TYPE_A",
             false,
-            "PENDING",
+            Status.PENDING,
             "desc",
             "invalidGroup",
             "destGroup",
@@ -116,7 +120,7 @@ class RequestServiceTest {
             "student1",
             "TYPE_A",
             false,
-            "PENDING",
+            Status.PENDING,
             "desc",
             "originGroup",
             "invalidGroup",
@@ -135,14 +139,14 @@ class RequestServiceTest {
   @Test
   void updateRequestStatus_shouldUpdateStatus() {
     Request request = new Request();
-    request.setStatus("PENDING");
+    request.setStatus(Status.PENDING);
 
     when(requestRepository.findById("123")).thenReturn(Optional.of(request));
     when(requestRepository.save(any(Request.class))).thenAnswer(inv -> inv.getArgument(0));
 
-    Request result = requestService.updateRequestStatus("123", "APPROVED");
+    Request result = requestService.updateRequestStatus("123", Status.APPROVED);
 
-    assertEquals("APPROVED", result.getStatus());
+    assertEquals(Status.APPROVED, result.getStatus());
   }
 
   @Test
@@ -150,7 +154,7 @@ class RequestServiceTest {
     when(requestRepository.findById("123")).thenReturn(Optional.empty());
 
     assertThrows(
-        RuntimeException.class, () -> requestService.updateRequestStatus("123", "APPROVED"));
+        RuntimeException.class, () -> requestService.updateRequestStatus("123", Status.APPROVED));
   }
 
   @Test
@@ -172,10 +176,10 @@ class RequestServiceTest {
   void respondToRequest_shouldUpdateAndSave() {
     Request existing = new Request();
     existing.setRequestId("1");
-    existing.setStatus("PENDING");
+    existing.setStatus(Status.PENDING);
 
     Request response = new Request();
-    response.setStatus("APPROVED");
+    response.setStatus(Status.APPROVED);
     response.setAnswer("OK");
     response.setGestedBy("admin");
 
@@ -185,7 +189,7 @@ class RequestServiceTest {
     Request result = requestService.respondToRequest("1", response);
 
     assertNotNull(result);
-    assertEquals("APPROVED", result.getStatus());
+    assertEquals(Status.APPROVED, result.getStatus());
     assertEquals("OK", result.getAnswer());
     assertEquals("admin", result.getGestedBy());
     assertEquals(LocalDate.now(), result.getAnswerAt());
@@ -195,10 +199,10 @@ class RequestServiceTest {
   void respondToRequest_shouldThrowForInvalidStatus() {
     Request existing = new Request();
     existing.setRequestId("1");
-    existing.setStatus("PENDING");
+    existing.setStatus(Status.PENDING);
 
     Request response = new Request();
-    response.setStatus("INVALID");
+    response.setStatus(Status.valueOf("INVALID"));
 
     when(requestRepository.findById("1")).thenReturn(Optional.of(existing));
 
@@ -211,7 +215,7 @@ class RequestServiceTest {
     when(requestRepository.findById("1")).thenReturn(Optional.empty());
 
     Request response = new Request();
-    response.setStatus("APPROVED");
+    response.setStatus(Status.APPROVED);
 
     Request result = requestService.respondToRequest("1", response);
 

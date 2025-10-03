@@ -1,6 +1,6 @@
 package edu.dosw.dto;
 
-import edu.dosw.model.DayOfWeek;
+import edu.dosw.model.enums.DayOfWeek;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

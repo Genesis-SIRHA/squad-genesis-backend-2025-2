@@ -3,10 +3,15 @@ package edu.dosw.controller;
 import edu.dosw.dto.RequestDTO;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Request;
+import edu.dosw.model.enums.Role;
+import edu.dosw.model.enums.Status;
 import edu.dosw.services.RequestService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Request Controller", description = "APIs for managing requests")
 public class RequestController {
 
+  private static final Logger logger = LoggerFactory.getLogger(RequestController.class);
   private final RequestService requestService;
 
   @Autowired
@@ -28,10 +34,27 @@ public class RequestController {
   }
 
   /**
+   * Retrieves requests based on user role and userId.
+   *
+   * @param userId The userId of the user making the request
+   * @param role The role of the user (e.g., STUDENT, PROFESSOR)
+   * @return List of requests filtered by user role and userId
+   */
+  @GetMapping("/{role}/{userId}")
+  @Operation(
+          summary = "Get requests by role",
+          description = "Retrieves requests based on user role and userId")
+  public ResponseEntity<List<Request>> fetchRequests(
+          @PathVariable String userId, @PathVariable Role role) {
+    List<Request> requests = requestService.fetchRequests(role, userId);
+    return ResponseEntity.ok(requests);
+  }
+
+  /**
    * Creates a new request with the provided details.
    *
    * @param request The request data to create
-   * @return The created request with its generated ID and status
+   * @return The created request with its generated userId and status
    */
   @PostMapping
   @Operation(
@@ -42,37 +65,21 @@ public class RequestController {
     return ResponseEntity.ok(createdRequest);
   }
 
-  /**
-   * Retrieves requests based on user role and ID.
-   *
-   * @param userId The ID of the user making the request
-   * @param role The role of the user (e.g., STUDENT, PROFESSOR)
-   * @return List of requests filtered by user role and ID
-   */
-  @GetMapping("/{userId}/role")
-  @Operation(
-      summary = "Get requests by role",
-      description = "Retrieves requests based on user role and ID")
-  public ResponseEntity<List<Request>> fetchRequests(
-      @PathVariable String userId, @RequestParam String role) {
-    List<Request> requests = requestService.fetchRequests(role, userId);
-    return ResponseEntity.ok(requests);
-  }
 
   /**
    * Updates the status of an existing request.
    *
-   * @param id The ID of the request to update
+   * @param userId The userId of the request to update
    * @param status The new status to set for the request
    * @return The updated request
    */
-  @PutMapping("/{id}/status")
+  @PutMapping("/status/{userId}")
   @Operation(
       summary = "Update request status",
       description = "Updates the status of an existing request")
   public ResponseEntity<Request> updateRequestStatus(
-      @PathVariable String id, @RequestParam String status) {
-    return ResponseEntity.ok(requestService.updateRequestStatus(id, status));
+      @PathVariable String userId, @RequestParam Status status) {
+    return ResponseEntity.ok(requestService.updateRequestStatus(userId, status));
   }
 
   /**
@@ -89,30 +96,30 @@ public class RequestController {
   }
 
   /**
-   * Cancels a request by its ID.
+   * Cancels a request by its userId.
    *
-   * @param id The ID of the request to cancel
+   * @param userId The userId of the request to cancel
    * @return 204 No Content if successful
    */
-  @DeleteMapping("/{id}")
-  @Operation(summary = "Cancel a request", description = "Cancels a request by its ID")
-  public ResponseEntity<Void> deleteRequest(@PathVariable String id) {
-    requestService.updateRequestStatus(id, "CANCELLED");
+  @DeleteMapping("/{userId}")
+  @Operation(summary = "Cancel a request", description = "Cancels a request by its userId")
+  public ResponseEntity<Void> deleteRequest(@PathVariable String userId) {
+    requestService.updateRequestStatus(userId, Status.CANCELLED);
     return ResponseEntity.noContent().build();
   }
 
   /**
    * Processes a response to a specific request.
    *
-   * @param id The unique identifier of the request to respond to
+   * @param userId The unique identifier of the request to respond to
    * @param response The response containing the answer and status update
    * @return ResponseEntity containing the updated request if found, or null if not found
    */
-  @PostMapping("/{id}/respond")
+  @PostMapping("/{userId}/respond")
   @Operation(summary = "Respond to a request", description = "Adds a response to a request")
   public ResponseEntity<Request> respondToRequest(
-      @PathVariable String id, @RequestBody Request response) {
-    Request request = requestService.respondToRequest(id, response);
+      @PathVariable String userId, @RequestBody Request response) {
+    Request request = requestService.respondToRequest(userId, response);
     if (request != null) {
       return ResponseEntity.ok(request);
     }

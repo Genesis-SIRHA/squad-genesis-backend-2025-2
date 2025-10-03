@@ -1,4 +1,4 @@
-package edu.dosw.model;
+package edu.dosw.model.enums;
 
 public enum DayOfWeek {
   MONDAY,
