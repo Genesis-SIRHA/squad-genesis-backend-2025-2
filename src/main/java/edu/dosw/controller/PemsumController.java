@@ -32,7 +32,7 @@ public class PemsumController {
    *
    * @return List of all courses with their details
    */
-  @GetMapping("/{id}/respond")
+  @GetMapping("/{studentId}/respond")
   @Operation(summary = "Get Pemsum", description = "Retrieves the Pemsum of a student")
   public ResponseEntity<Pemsum> getPemsum(@PathVariable String studentId) {
     return ResponseEntity.ok(pemsumService.getPemsum(studentId));

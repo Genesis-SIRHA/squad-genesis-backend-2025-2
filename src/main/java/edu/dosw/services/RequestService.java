@@ -1,9 +1,12 @@
 package edu.dosw.services;
 
+import edu.dosw.controller.RequestController;
 import edu.dosw.dto.RequestDTO;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
+import edu.dosw.model.enums.Role;
+import edu.dosw.model.enums.Status;
 import edu.dosw.repositories.FacultyRepository;
 import edu.dosw.repositories.GroupRepository;
 import edu.dosw.repositories.RequestRepository;
@@ -16,6 +19,8 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,10 +32,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class RequestService {
 
+  private static final Logger logger = LoggerFactory.getLogger(RequestController.class);
   private final RequestRepository requestRepository;
   private final FacultyRepository facultyRepository;
+  private final MembersService membersService;
   private final GroupRepository groupRepository;
-  private final Map<String, QueryStrategy> strategyMap;
+  private final Map<Role, QueryStrategy> strategyMap;
 
   /**
    * Constructs a new RequestService with the required repositories. Initializes the strategy map
@@ -43,15 +50,17 @@ public class RequestService {
   public RequestService(
       RequestRepository requestRepository,
       FacultyRepository facultyRepository,
-      GroupRepository groupRepository) {
+      GroupRepository groupRepository,
+      MembersService membersService) {
     this.requestRepository = requestRepository;
     this.facultyRepository = facultyRepository;
+    this.groupRepository = groupRepository;
+    this.membersService = membersService;
     this.strategyMap =
         Map.of(
-            "STUDENT", new StudentStrategy(requestRepository),
-            "ADMINISTRATIVE", new AdministrativeStrategy(requestRepository),
-            "ADMINISTRATOR", new AdministratorStrategy(requestRepository));
-    this.groupRepository = groupRepository;
+            Role.STUDENT, new StudentStrategy(requestRepository),
+            Role.ADMINISTRATIVE, new AdministrativeStrategy(requestRepository, membersService),
+            Role.ADMINISTRATOR, new AdministratorStrategy(requestRepository));
   }
 
   /**
@@ -63,10 +72,13 @@ public class RequestService {
    * @return A list of requests visible to the user, sorted by creation date (newest first)
    * @throws IllegalArgumentException if the provided role is not supported
    */
-  public List<Request> fetchRequests(String role, String userId) {
-    QueryStrategy strategy = strategyMap.get(role.toUpperCase());
+  public List<Request> fetchRequests(Role role, String userId) {
+    logger.info("Fetching requests for user: " + userId + " with role: " + role);
+
+    QueryStrategy strategy = strategyMap.get(role);
 
     if (strategy == null) {
+      logger.error("Unsupported role: " + role);
       throw new IllegalArgumentException("Unsupported role: " + role);
     }
     return strategy.queryRequests(userId).stream()
@@ -85,10 +97,10 @@ public class RequestService {
   public Request createRequest(RequestDTO requestDTO) {
     Request request = new Request();
     request.setCreatedAt(LocalDateTime.now());
-    request.setStatus("PENDING");
+    request.setStatus(Status.PENDING);
     request.setType(requestDTO.type());
     request.setStudentId(requestDTO.studentId());
-    request.setExceptional(requestDTO.isExceptional());
+    request.setIsExceptional(requestDTO.isExceptional());
 
     request.setAnswerAt(LocalDate.now());
     request.setGestedBy(requestDTO.studentId());
@@ -120,7 +132,7 @@ public class RequestService {
    * @return The updated Request
    * @throws RuntimeException if no request is found with the given ID
    */
-  public Request updateRequestStatus(String id, String status) {
+  public Request updateRequestStatus(String id, Status status) {
     return requestRepository
         .findById(id)
         .map(
@@ -139,7 +151,7 @@ public class RequestService {
   public RequestStats getRequestStats() {
     long total = requestRepository.count();
     long pending = requestRepository.countByStatus("PENDING");
-    long approved = requestRepository.countByStatus("APPROVED");
+    long approved = requestRepository.countByStatus("ACCEPTED");
     long rejected = requestRepository.countByStatus("REJECTED");
     return new RequestStats(total, pending, approved, rejected);
   }

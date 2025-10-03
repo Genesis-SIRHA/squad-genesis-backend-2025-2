@@ -8,6 +8,8 @@ import edu.dosw.model.Faculty;
 import edu.dosw.model.Group;
 import edu.dosw.repositories.FacultyRepository;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class FacultyService {
+
+  private static final Logger logger = LoggerFactory.getLogger(FacultyService.class);
   private final FacultyRepository facultyRepository;
   private final GroupService groupService;
 
@@ -26,7 +30,7 @@ public class FacultyService {
 
   public Map<String, String> getAllFacultyName() {
     Map<String, String> facultyInfo = new HashMap<>();
-    List<Faculty> faculties = facultyRepository.findAll(); // ✅ sin cast
+    List<Faculty> faculties = facultyRepository.findAll();
     for (Faculty faculty : faculties) {
       facultyInfo.put(faculty.getFacultyName(), faculty.getPlan());
     }
@@ -36,6 +40,7 @@ public class FacultyService {
   public List<Course> findCoursesByFacultyNameAndPlan(String facultyName, String plan) {
     Optional<Faculty> faculty = facultyRepository.findByNameAndPlan(facultyName, plan);
     if (faculty.isEmpty()) {
+      logger.error("Faculty not found: " + facultyName);
       throw new BusinessException("Faculty not found: " + facultyName);
     }
     return new ArrayList<>(faculty.get().getCourses());
@@ -57,6 +62,7 @@ public class FacultyService {
 
     if (faculty.getCourses().stream()
         .anyMatch(c -> c.getAbbreviation().equals(request.abbreviation()))) {
+      logger.error("Course already exists: " + request.abbreviation());
       throw new BusinessException("Course already exists: " + request.abbreviation());
     }
 
@@ -82,6 +88,7 @@ public class FacultyService {
 
     if (faculty.getCourses().stream()
         .anyMatch(c -> c.getAbbreviation().equals(request.abbreviation()))) {
+      logger.error("Course already exists: " + request.abbreviation());
       throw new BusinessException("Course already exists: " + request.abbreviation());
     }
 
@@ -101,6 +108,7 @@ public class FacultyService {
   public Boolean addGroupToCourse(GroupRequest groupRequest) {
     Optional<Course> course = findCourseByCode(groupRequest.abbreviation());
     if (course.isEmpty()) {
+      logger.error("Faculty not found: " + groupRequest.abbreviation());
       throw new BusinessException("Faculty not found: " + groupRequest.abbreviation());
     }
     Group group = groupService.createGroup(groupRequest);

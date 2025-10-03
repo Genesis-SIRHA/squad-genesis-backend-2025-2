@@ -6,7 +6,7 @@ package edu.dosw.dto;
  *
  * @param total Total number of requests
  * @param pending Number of requests with PENDING status
- * @param approved Number of requests with APPROVED status
+ * @param approved Number of requests with ACCEPTED status
  * @param rejected Number of requests with REJECTED status
  */
 public record RequestStats(long total, long pending, long approved, long rejected) {}

@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/schedules")
 @Tag(name = "Scheduler Controller", description = "APIs for managing class schedules")
 public class SchedulerController {
-
   private final SchedulerService schedulerService;
 
   /**

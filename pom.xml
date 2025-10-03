@@ -156,6 +156,7 @@
                         <configuration>
                             <excludes>
                                 <exclude>**/config/**</exclude>
+                                <exclude>**/model/**</exclude>
                                 <exclude>**/dto/**</exclude>
                                 <exclude>**/strategy/**</exclude>
                                 <exclude>**/configurators/**</exclude>
@@ -186,6 +187,7 @@
                             <excludes>
                                 <exclude>**/config/**</exclude>
                                 <exclude>**/dto/**</exclude>
+                                <exclude>**/model/**</exclude>
                                 <exclude>**/strategy/**</exclude>
                                 <exclude>**/configurators/**</exclude>
                                 <exclude>**/exception/**</exclude>

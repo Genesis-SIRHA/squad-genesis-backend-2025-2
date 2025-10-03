@@ -1,7 +1,11 @@
 package edu.dosw.services;
 
+import edu.dosw.exception.BusinessException;
 import edu.dosw.model.User;
 import edu.dosw.repositories.MembersRepository;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +16,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MembersService {
   private final MembersRepository membersRepository;
+  private static final Logger logger = LoggerFactory.getLogger(MembersService.class);
 
   @Autowired
   public MembersService(MembersRepository membersRepository) {
@@ -23,26 +28,36 @@ public class MembersService {
    *
    * @param id the unique identifier of the user to retrieve
    * @return the user entity if found
-   * @throws RuntimeException if no user is found with the given ID
+   * @throws BusinessException if no user is found with the given ID
    */
   public User listById(String id) {
     return membersRepository
         .findById(id)
-        .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        .orElseThrow(() -> new BusinessException("User not found with id: " + id));
   }
 
   /**
-   * Retrieves the faculty ID associated with a user.
+   * Retrieves the faculty name associated with a user.
    *
    * @param id the unique identifier of the user
-   * @return the faculty ID associated with the user
-   * @throws RuntimeException if no user is found with the given ID
+   * @return the faculty name associated with the user
+   * @throws BusinessException if no user is found with the given ID
    */
   public String getFaculty(String id) {
-    return membersRepository.findById(id).get().getFacultyName();
+    Optional<User> user = membersRepository.findById(id);
+    if (user.isEmpty()) {
+      logger.error("User not found with id: " + id);
+      throw new BusinessException("User not found with id: " + id);
+    }
+    return user.get().getFacultyName();
   }
 
   public String getPlan(String studentId) {
-    return membersRepository.findById(studentId).get().getPlan();
+    Optional<User> user = membersRepository.findById(studentId);
+    if (user.isEmpty()) {
+      logger.error("Student not found with id: " + studentId);
+      throw new BusinessException("Student not found with id: " + studentId);
+    }
+    return user.get().getPlan();
   }
 }
