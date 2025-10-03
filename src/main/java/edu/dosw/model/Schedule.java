@@ -6,8 +6,8 @@ import java.util.ArrayList;
 
 @Data
 public class Schedule {
-    private String studentId;
-    private ArrayList<Session> sessions;
+  private String studentId;
+  private ArrayList<Session> sessions;
 
     public Schedule(String studentId, ArrayList<Session> sessions) {
         this.studentId = studentId;

@@ -1,0 +1,8 @@
+repos:
+  - repo: local
+    hooks:
+      - id: maven-spotless-apply
+        name: Maven Spotless Apply
+        entry: mvn spotless:apply
+        language: system
+        pass_filenames: false

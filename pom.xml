@@ -26,6 +26,7 @@
         <mockito.version>5.12.0</mockito.version>
         <bytebuddy.version>1.15.8</bytebuddy.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <lombok.version>1.18.30</lombok.version>
 
         <sonar.projectKey>SIRHA</sonar.projectKey>
@@ -34,17 +35,11 @@
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.coverage.exclusions>src/**/configurators/**</sonar.coverage.exclusions>
         <jacoco.version>0.8.13</jacoco.version>
-        <jacoco.exclusions.pattern>
-            **/models/**,
-            **/dto/**,
-            **/enums/**,
-            **/exception/**,
-            **/config/**,
-            **/Application.class
-        </jacoco.exclusions.pattern>
+        <argLine></argLine>
     </properties>
 
     <dependencies>
+
         <!-- Spring Boot Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -67,7 +62,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.3.0</version>
+            <version>2.5.0</version>
         </dependency>
 
         <!-- Lombok -->
@@ -134,6 +129,12 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
         <plugins>
             <!-- Jacoco for coverage -->
             <plugin>
@@ -148,7 +149,7 @@
                     </execution>
                     <execution>
                         <id>report</id>
-                        <phase>test</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
@@ -197,6 +198,7 @@
                 </executions>
             </plugin>
 
+
             <!-- Sonar -->
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
@@ -211,8 +213,24 @@
                 <version>3.2.5</version>
                 <configuration>
                     <argLine>@{argLine} -Dnet.bytebuddy.experimental=true</argLine>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
                 </configuration>
             </plugin>
+
+            <!-- Google Java Format -->
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>2.43.0</version>
+                <configuration>
+                    <java>
+                        <googleJavaFormat/>
+                    </java>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 </project>

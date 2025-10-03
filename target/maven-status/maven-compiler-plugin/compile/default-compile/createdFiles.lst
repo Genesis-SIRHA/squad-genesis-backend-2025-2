@@ -1,6 +1,0 @@
-edu\dosw\Application.class
-edu\dosw\dto\GroupRequest.class
-edu\dosw\controller\CourseController.class
-edu\dosw\repositories\GroupRepository.class
-edu\dosw\model\Group.class
-edu\dosw\services\GroupService.class
