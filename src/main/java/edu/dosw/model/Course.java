@@ -1,9 +1,11 @@
 package edu.dosw.model;
 
+import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.annotation.Id;
 
+@Data
 @Document(collection = "courses")
 public class Course {
     @Id
@@ -18,22 +20,6 @@ public class Course {
 
     public Course(String abbreviation, String courseName) {
         this.abbreviation = abbreviation;
-        this.courseName = courseName;
-    }
-
-    public String getAbbreviation() {
-        return abbreviation;
-    }
-
-    public void setAbbreviation(String abbreviation) {
-        this.abbreviation = abbreviation;
-    }
-
-    public String getCourseName() {
-        return courseName;
-    }
-
-    public void setCourseName(String courseName) {
         this.courseName = courseName;
     }
 }

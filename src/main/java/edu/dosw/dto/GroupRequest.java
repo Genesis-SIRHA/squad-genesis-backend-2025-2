@@ -20,31 +20,31 @@ import jakarta.validation.constraints.NotNull;
  * @param enrolled Number of currently enrolled students. Cannot be negative.
  */
 public record GroupRequest(
-    @NotBlank(message = "El código del grupo es obligatorio")
+    @NotBlank(message = "Group code is required")
     String groupCode,
     
-    @NotBlank(message = "La abreviatura del curso es obligatoria")
+    @NotBlank(message = "Course abbreviation is required")
     String abbreviation,
     
-    @NotBlank(message = "El año académico es obligatorio")
+    @NotBlank(message = "Academic year is required")
     String year,
     
-    @NotBlank(message = "El período académico es obligatorio")
+    @NotBlank(message = "Academic period is required")
     String period,
     
-    @NotBlank(message = "El ID del profesor es obligatorio")
+    @NotBlank(message = "Professor ID is required")
     String teacherId,
     
-    @NotNull(message = "El indicador de laboratorio es obligatorio")
+    @NotNull(message = "Lab indicator is required")
     Boolean isLab,
     
-    @Min(value = 1, message = "El número de grupo debe ser mayor a 0")
+    @Min(value = 1, message = "Group number must be greater than 0")
     int groupNum,
     
-    @Min(value = 1, message = "La capacidad debe ser mayor a 0")
+    @Min(value = 1, message = "Capacity must be greater than 0")
     int maxCapacity,
     
-    @Min(value = 0, message = "El número de inscritos no puede ser negativo")
+    @Min(value = 0, message = "Number of enrolled students cannot be negative")
     int enrolled
 ) {
     /**

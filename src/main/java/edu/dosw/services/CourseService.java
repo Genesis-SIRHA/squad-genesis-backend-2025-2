@@ -6,6 +6,7 @@ import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Group;
 import edu.dosw.repositories.CourseRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final GroupService groupService;
 
+    @Autowired
     public CourseService(CourseRepository courseRepository, GroupService groupService) {
         this.courseRepository = courseRepository;
         this.groupService = groupService;

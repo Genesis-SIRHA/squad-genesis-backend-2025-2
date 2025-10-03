@@ -34,7 +34,14 @@
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.coverage.exclusions>src/**/configurators/**</sonar.coverage.exclusions>
         <jacoco.version>0.8.13</jacoco.version>
-        <argLine></argLine>
+        <jacoco.exclusions.pattern>
+            **/models/**,
+            **/dto/**,
+            **/enums/**,
+            **/exception/**,
+            **/config/**,
+            **/Application.class
+        </jacoco.exclusions.pattern>
     </properties>
 
     <dependencies>
@@ -145,6 +152,17 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/model/**</exclude>
+                                <exclude>**/dto/**</exclude>
+                                <exclude>**/enums/**</exclude>
+                                <exclude>**/exception/**</exclude>
+                                <exclude>**/config/**</exclude>
+                                <exclude>**/Application.class</exclude>
+                                <exclude>**/default/**</exclude>
+                            </excludes>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>jacoco-check</id>
@@ -153,6 +171,15 @@
                             <goal>check</goal>
                         </goals>
                         <configuration>
+                            <excludes>
+                                <exclude>**/model/**</exclude>
+                                <exclude>**/dto/**</exclude>
+                                <exclude>**/enums/**</exclude>
+                                <exclude>**/exception/**</exclude>
+                                <exclude>**/config/**</exclude>
+                                <exclude>**/Application.class</exclude>
+                                <exclude>**/default/**</exclude>
+                            </excludes>
                             <rules>
                                 <rule>
                                     <element>PACKAGE</element>

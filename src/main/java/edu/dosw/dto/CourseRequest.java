@@ -13,10 +13,10 @@ import java.util.List;
  * @param groups List of groups associated with this course.
  */
 public record CourseRequest(
-    @NotBlank(message = "El código del curso es obligatorio")
+    @NotBlank(message = "The course code is required")
     String code,
     
-    @NotBlank(message = "El nombre del curso es obligatorio")
+    @NotBlank(message = "The course name is required")
     String name,
     
     @Valid

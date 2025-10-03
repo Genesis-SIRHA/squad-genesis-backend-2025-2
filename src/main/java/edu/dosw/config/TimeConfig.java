@@ -7,7 +7,6 @@ import java.time.Clock;
 
 @Configuration
 public class TimeConfig {
-
     @Bean
     public Clock clock() {
         return Clock.systemDefaultZone();
