@@ -17,6 +17,7 @@ import edu.dosw.services.strategy.StudentStrategy;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -156,39 +157,41 @@ public class RequestService {
     return new RequestStats(total, pending, approved, rejected);
   }
 
-    /**
-     *  Method that returns an answered request
-     * @param requestId  : id of the request selected
-     * @param response : the response of administration
-     * @return  answered request
-     */
-    public Request respondToRequest(String requestId, Request response) {
-        return requestRepository.findById(requestId)
-                .map(existing -> {
-                    existing.setAnswer(response.getAnswer());
-                    existing.setGestedBy(response.getGestedBy());
-                    existing.setAnswerAt(LocalDate.from(LocalDateTime.now()));
+  /**
+   * Method that returns an answered request
+   *
+   * @param requestId : id of the request selected
+   * @param response : the response of administration
+   * @return answered request
+   */
+  public Request respondToRequest(String requestId, Request response) {
+    return requestRepository
+        .findById(requestId)
+        .map(
+            existing -> {
+              existing.setAnswer(response.getAnswer());
+              existing.setGestedBy(response.getGestedBy());
+              existing.setAnswerAt(LocalDate.from(LocalDateTime.now()));
 
-                    if (isValidStatus(response.getStatus())) {
-                        existing.setStatus(response.getStatus());
-                    } else {
-                        throw new IllegalArgumentException("Invalid status. Must be APPROVED, REJECTED or PENDING");
-                    }
+              Status status = response.getStatus();
+              if (!isValidStatus(status)) {
+                throw new IllegalArgumentException(
+                    "Invalid status. Must be one of " + EnumSet.allOf(Status.class));
+              }
 
-                    return requestRepository.save(existing);
-                })
-                .orElse(null);
-    }
+              existing.setStatus(status);
+              return requestRepository.save(existing);
+            })
+        .orElse(null);
+  }
 
-    /**
-     * method to validate status of requests
-     * @param status : status of the request
-     * @return boolean, is valid or invalid
-     */
-    private boolean isValidStatus(String status) {
-        return "APPROVED".equalsIgnoreCase(status) ||
-                "REJECTED".equalsIgnoreCase(status) ||
-                "PENDING".equalsIgnoreCase(status);
-    }
-
+  /**
+   * Checks if the status given is valid
+   *
+   * @param status status to validate
+   * @return true if valid, false otherwise
+   */
+  private boolean isValidStatus(Status status) {
+    return status != null && EnumSet.allOf(Status.class).contains(status);
+  }
 }

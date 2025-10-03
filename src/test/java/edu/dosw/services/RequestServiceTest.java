@@ -198,13 +198,13 @@ class RequestServiceTest {
   }
 
   @Test
-  void respondToRequest_shouldThrowForInvalidStatus() {
+  void respondToRequest_shouldThrowForNullStatus() {
     Request existing = new Request();
     existing.setRequestId("1");
     existing.setStatus(Status.PENDING);
 
     Request response = new Request();
-    response.setStatus(Status.valueOf("INVALID"));
+    response.setStatus(null);
 
     when(requestRepository.findById("1")).thenReturn(Optional.of(existing));
 
