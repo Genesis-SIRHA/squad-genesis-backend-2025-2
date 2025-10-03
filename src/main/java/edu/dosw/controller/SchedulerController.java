@@ -16,21 +16,19 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Scheduler Controller", description = "APIs for managing class schedules")
 public class SchedulerController {
 
-    private final SchedulerService schedulerService;
+  private final SchedulerService schedulerService;
 
-    @Autowired
-    public SchedulerController(SchedulerService schedulerService) {
-        this.schedulerService = schedulerService;
-    }
+  @Autowired
+  public SchedulerController(SchedulerService schedulerService) {
+    this.schedulerService = schedulerService;
+  }
 
-    /**
-     * Retrieves a student's schedule by their ID.
-     */
-    @GetMapping("/{studentId}")
-    @Operation(
-            summary = "Get schedule by ID",
-            description = "Retrieves a schedule by its unique identifier")
-    public Schedule getScheduleById(@PathVariable String studentId) {
-        return schedulerService.getScheduleById(studentId);
-    }
+  /** Retrieves a student's schedule by their ID. */
+  @GetMapping("/{studentId}")
+  @Operation(
+      summary = "Get schedule by ID",
+      description = "Retrieves a schedule by its unique identifier")
+  public Schedule getScheduleById(@PathVariable String studentId) {
+    return schedulerService.getScheduleById(studentId);
+  }
 }

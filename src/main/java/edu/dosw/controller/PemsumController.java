@@ -15,20 +15,20 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Pemsum Controller", description = "APIs for managing courses and groups")
 public class PemsumController {
 
-    private final PemsumService pemsumService;
+  private final PemsumService pemsumService;
 
-    public PemsumController(PemsumService pemsumService) {
-        this.pemsumService = pemsumService;
-    }
+  public PemsumController(PemsumService pemsumService) {
+    this.pemsumService = pemsumService;
+  }
 
-    /**
-     * Retrieves the Pemsum of a student.
-     *
-     * @return Pemsum details
-     */
-    @GetMapping("/{studentId}/respond")
-    @Operation(summary = "Get Pemsum", description = "Retrieves the Pemsum of a student")
-    public Pemsum getPemsum(@PathVariable String studentId) {
-        return pemsumService.getPemsum(studentId);
-    }
+  /**
+   * Retrieves the Pemsum of a student.
+   *
+   * @return Pemsum details
+   */
+  @GetMapping("/{studentId}/respond")
+  @Operation(summary = "Get Pemsum", description = "Retrieves the Pemsum of a student")
+  public Pemsum getPemsum(@PathVariable String studentId) {
+    return pemsumService.getPemsum(studentId);
+  }
 }

@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.ResponseEntity;
 
 class RequestControllerTest {
 
@@ -55,10 +54,9 @@ class RequestControllerTest {
   void createRequest_ShouldReturnCreatedRequest() {
     when(requestService.createRequest(requestDTO)).thenReturn(request);
 
-    ResponseEntity<Request> response = requestController.createRequest(requestDTO);
+    Request result = requestController.createRequest(requestDTO);
 
-    assertEquals(200, response.getStatusCodeValue());
-    assertEquals(request, response.getBody());
+    assertEquals(request, result);
     verify(requestService, times(1)).createRequest(requestDTO);
   }
 
@@ -66,13 +64,11 @@ class RequestControllerTest {
   void fetchRequests_ShouldReturnListOfRequests() {
     when(requestService.fetchRequests(Role.STUDENT, "student123")).thenReturn(List.of(request));
 
-    ResponseEntity<List<Request>> response =
-        requestController.fetchRequests("student123", Role.STUDENT);
+    List<Request> response = requestController.fetchRequests("student123", Role.STUDENT);
 
-    assertEquals(200, response.getStatusCodeValue());
-    assertNotNull(response.getBody());
-    assertEquals(1, response.getBody().size());
-    assertEquals("student123", response.getBody().get(0).getStudentId());
+    assertNotNull(response);
+    assertEquals(1, response.size());
+    assertEquals("student123", response.get(0).getStudentId());
   }
 
   @Test
@@ -80,11 +76,9 @@ class RequestControllerTest {
     request.setStatus(Status.ACCEPTED);
     when(requestService.updateRequestStatus("123", Status.ACCEPTED)).thenReturn(request);
 
-    ResponseEntity<Request> response =
-        requestController.updateRequestStatus("123", Status.ACCEPTED);
+    Request result = requestController.updateRequestStatus("123", Status.ACCEPTED);
 
-    assertEquals(200, response.getStatusCodeValue());
-    assertEquals(Status.ACCEPTED, response.getBody().getStatus());
+    assertEquals(Status.ACCEPTED, result.getStatus());
     verify(requestService, times(1)).updateRequestStatus("123", Status.ACCEPTED);
   }
 
@@ -93,17 +87,15 @@ class RequestControllerTest {
     RequestStats stats = new RequestStats(5, 0, 2, 3);
     when(requestService.getRequestStats()).thenReturn(stats);
 
-    ResponseEntity<RequestStats> response = requestController.getRequestStats();
+    RequestStats result = requestController.getRequestStats();
 
-    assertEquals(200, response.getStatusCodeValue());
-    assertEquals(stats, response.getBody());
+    assertEquals(stats, result);
   }
 
   @Test
   void deleteRequest_ShouldCallServiceAndReturnNoContent() {
-    ResponseEntity<Void> response = requestController.deleteRequest("123");
+    requestController.deleteRequest("123");
 
-    assertEquals(204, response.getStatusCodeValue());
     verify(requestService, times(1)).updateRequestStatus("123", Status.CANCELLED);
   }
 
@@ -113,18 +105,17 @@ class RequestControllerTest {
     when(requestService.respondToRequest(eq("123"), any(Request.class)))
         .thenReturn(responseRequest);
 
-    ResponseEntity<Request> response = requestController.respondToRequest("123", responseRequest);
+    Request result = requestController.respondToRequest("123", responseRequest);
 
-    assertEquals(200, response.getStatusCodeValue());
-    assertEquals("student123", response.getBody().getStudentId());
+    assertEquals("student123", result.getStudentId());
   }
 
   @Test
   void respondToRequest_ShouldReturnNullWhenNotFound() {
     when(requestService.respondToRequest(eq("123"), any(Request.class))).thenReturn(null);
 
-    ResponseEntity<Request> response = requestController.respondToRequest("123", request);
+    Request result = requestController.respondToRequest("123", request);
 
-    assertNull(response);
+    assertNull(result);
   }
 }

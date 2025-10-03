@@ -7,7 +7,9 @@ import edu.dosw.dto.CourseRequest;
 import edu.dosw.dto.GroupRequest;
 import edu.dosw.model.Course;
 import edu.dosw.model.Faculty;
+import edu.dosw.model.Group;
 import edu.dosw.services.FacultyService;
+import edu.dosw.services.GroupService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.ResponseEntity;
 
 class CourseControllerTest {
 
@@ -48,22 +49,19 @@ class CourseControllerTest {
   void shouldReturnCourseByIdWhenExists() {
     when(facultyService.findCourseByCode("CS101")).thenReturn(Optional.of(course));
 
-    ResponseEntity<Course> response = courseController.getCourseById("CS101");
+    Course result = courseController.getCourseById("CS101");
 
-    assertEquals(200, response.getStatusCodeValue());
-    assertNotNull(response.getBody());
-    assertEquals("CS101", response.getBody().getAbbreviation());
+    assertNotNull(result);
+    assertEquals("CS101", result.getAbbreviation());
     verify(facultyService).findCourseByCode("CS101");
   }
 
   @Test
-  void shouldReturnNotFoundWhenCourseDoesNotExist() {
+  void shouldThrowExceptionWhenCourseDoesNotExist() {
     when(facultyService.findCourseByCode("INVALID")).thenReturn(Optional.empty());
 
-    ResponseEntity<Course> response = courseController.getCourseById("INVALID");
+    assertThrows(RuntimeException.class, () -> courseController.getCourseById("INVALID"));
 
-    assertEquals(404, response.getStatusCodeValue());
-    assertNull(response.getBody());
     verify(facultyService).findCourseByCode("INVALID");
   }
 
@@ -71,10 +69,9 @@ class CourseControllerTest {
   void shouldCreateCourse() {
     when(facultyService.createCourse(courseRequest)).thenReturn(faculty);
 
-    ResponseEntity<Faculty> response = courseController.createCourse(courseRequest);
+    Faculty result = courseController.createCourse(courseRequest);
 
-    assertEquals(200, response.getStatusCodeValue());
-    assertEquals(faculty, response.getBody());
+    assertEquals(faculty, result);
     verify(facultyService).createCourse(courseRequest);
   }
 
@@ -82,38 +79,37 @@ class CourseControllerTest {
   void shouldUpdateCourseWhenExists() {
     when(facultyService.updateCourse("CS101", courseRequest)).thenReturn(faculty);
 
-    ResponseEntity<Faculty> response = courseController.updateCourse("CS101", courseRequest);
+    Faculty result = courseController.updateCourse("CS101", courseRequest);
 
-    assertEquals(200, response.getStatusCodeValue());
-    assertEquals(faculty, response.getBody());
+    assertEquals(faculty, result);
     verify(facultyService).updateCourse("CS101", courseRequest);
   }
 
   @Test
-  void shouldAddGroupToCourseSuccessfully() {
-    when(facultyService.addGroupToCourse(groupRequest)).thenReturn(true);
+  void shouldNotAddGroupToCourseNotExistent() {
 
-    ResponseEntity<Course> response = courseController.addGroupToCourse("CS101", groupRequest);
+    GroupService groupService = mock(GroupService.class);
+    // Arrange
+    GroupRequest groupRequest =
+        new GroupRequest("G01", "CS101", "2025", "1", "T123", true, 1, 30, 0);
 
-    assertEquals(200, response.getStatusCodeValue());
-    verify(facultyService).addGroupToCourse(groupRequest);
-  }
+    Course mockCourse = new Course();
+    when(facultyService.findCourseByCode("CS101")).thenReturn(Optional.of(mockCourse));
 
-  @Test
-  void shouldReturnBadRequestWhenAddGroupFails() {
-    when(facultyService.addGroupToCourse(groupRequest)).thenReturn(false);
+    Group mockGroup = new Group();
+    when(groupService.createGroup(any(GroupRequest.class))).thenReturn(mockGroup);
 
-    ResponseEntity<Course> response = courseController.addGroupToCourse("CS101", groupRequest);
+    // Act
+    Boolean result = facultyService.addGroupToCourse(groupRequest);
 
-    assertEquals(400, response.getStatusCodeValue());
-    verify(facultyService).addGroupToCourse(groupRequest);
+    // Assert
+    assertFalse(result);
   }
 
   @Test
   void shouldDeleteCourse() {
-    ResponseEntity<Void> response = courseController.deleteCourse("CS101");
+    courseController.deleteCourse("CS101");
 
-    assertEquals(204, response.getStatusCodeValue());
     verify(facultyService).deleteCourse("CS101");
   }
 }

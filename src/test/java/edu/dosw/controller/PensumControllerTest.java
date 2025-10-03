@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.ResponseEntity;
 
 class PensumControllerTest {
 
@@ -36,18 +35,17 @@ class PensumControllerTest {
   }
 
   @Test
-  void shouldReturnPemsumSuccessfully() {
+  void shouldReturnPensumSuccessfully() {
     // Arrange
     String studentId = "student123";
     when(pemsumService.getPemsum(studentId)).thenReturn(mockPemsum);
 
     // Act
-    ResponseEntity<Pemsum> response = pemsumController.getPemsum(studentId);
+    Pemsum result = pemsumController.getPemsum(studentId);
 
     // Assert
-    assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
-    assertEquals(mockPemsum, response.getBody());
+    assertNotNull(result);
+    assertEquals(mockPemsum, result);
     verify(pemsumService).getPemsum(studentId);
   }
 }

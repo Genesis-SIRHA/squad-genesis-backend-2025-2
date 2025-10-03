@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.ResponseEntity;
 
 class SchedulerControllerTest {
 
@@ -38,13 +37,12 @@ class SchedulerControllerTest {
   void getScheduleById_ShouldReturnSchedule_WhenStudentExists() {
     when(schedulerService.getScheduleById("student123")).thenReturn(schedule);
 
-    ResponseEntity<Schedule> response = schedulerController.getScheduleById("student123");
+    Schedule result = schedulerController.getScheduleById("student123");
 
-    assertEquals(200, response.getStatusCodeValue());
-    assertNotNull(response.getBody());
-    assertEquals("student123", response.getBody().getStudentId());
-    assertEquals(1, response.getBody().getSessions().size());
-    assertEquals("G1", response.getBody().getSessions().get(0).getGroupCode());
+    assertNotNull(result);
+    assertEquals("student123", result.getStudentId());
+    assertEquals(1, result.getSessions().size());
+    assertEquals("G1", result.getSessions().get(0).getGroupCode());
 
     verify(schedulerService, times(1)).getScheduleById("student123");
   }
@@ -54,12 +52,11 @@ class SchedulerControllerTest {
     Schedule emptySchedule = new Schedule("student456", new ArrayList<>());
     when(schedulerService.getScheduleById("student456")).thenReturn(emptySchedule);
 
-    ResponseEntity<Schedule> response = schedulerController.getScheduleById("student456");
+    Schedule result = schedulerController.getScheduleById("student456");
 
-    assertEquals(200, response.getStatusCodeValue());
-    assertNotNull(response.getBody());
-    assertEquals("student456", response.getBody().getStudentId());
-    assertTrue(response.getBody().getSessions().isEmpty());
+    assertNotNull(result);
+    assertEquals("student456", result.getStudentId());
+    assertTrue(result.getSessions().isEmpty());
 
     verify(schedulerService, times(1)).getScheduleById("student456");
   }
