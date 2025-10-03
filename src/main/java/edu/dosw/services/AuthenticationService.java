@@ -50,6 +50,6 @@ public class AuthenticationService {
     }
 
     public boolean verifyPassword(String rawPassword, String encodedPassword) {
-        return rawPassword.equals(encodedPassword);
+        return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 }
