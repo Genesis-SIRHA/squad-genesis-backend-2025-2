@@ -9,6 +9,9 @@ import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +25,7 @@ public class PemsumService {
   private final MembersService membersService;
   private final HistorialService historialService;
   private final PeriodService periodService;
+  private static final Logger logger = LoggerFactory.getLogger(PemsumService.class);
 
   /**
    * Constructs a new PemsumService with required dependencies.
@@ -66,6 +70,7 @@ public class PemsumService {
 
     List<Course> courses = facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan);
     if (courses.isEmpty()) {
+      logger.error("Invalid faculty name or plan: " + facultyName + " - " + plan);
       throw new BusinessException("Invalid faculty name or plan: " + facultyName + " - " + plan);
     }
 
