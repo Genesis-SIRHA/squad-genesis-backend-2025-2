@@ -1,40 +1,33 @@
 package edu.dosw.model;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
+@NoArgsConstructor
+@Document(collection = "faculties")
 public class Faculty {
+  @Id
+  @Field("facultyName")
   private String facultyName;
+  @Id
+  @Field("plan")
   private String plan;
-  private List<Course> courses;
+  
+  @Field("courses")
+  private List<Course> courses = new ArrayList<>();
 
   public Faculty(String facultyName, String plan, List<Course> courses) {
     this.facultyName = facultyName;
     this.plan = plan;
-    this.courses = new ArrayList<>(courses);
-  }
-
-  public String getFacultyName() {
-    return facultyName;
-  }
-
-  public void setFacultyName(String facultyName) {
-    this.facultyName = facultyName;
-  }
-
-  public String getPlan() {
-    return plan;
-  }
-
-  public void setPlan(String plan) {
-    this.plan = plan;
-  }
-
-  public List<Course> getCourses() {
-    return courses;
-  }
-
-  public void setCourses(List<Course> courses) {
-    this.courses = new ArrayList<>(courses);
+    if (courses != null) {
+      this.courses = new ArrayList<>(courses);
+    }
   }
 }

@@ -3,7 +3,7 @@ package edu.dosw.services.strategy;
 import edu.dosw.model.Request;
 import edu.dosw.repositories.RequestRepository;
 import edu.dosw.services.AdministrativeService;
-import edu.dosw.services.MembersService;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;

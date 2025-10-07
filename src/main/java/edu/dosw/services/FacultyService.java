@@ -32,6 +32,7 @@ public class FacultyService {
     Map<String, String> facultyInfo = new HashMap<>();
     List<Faculty> faculties = facultyRepository.findAll();
     for (Faculty faculty : faculties) {
+        logger.info("Faculty processed: " + faculty.getFacultyName());
       facultyInfo.put(faculty.getFacultyName(), faculty.getPlan());
     }
     return facultyInfo;
@@ -75,27 +76,25 @@ public class FacultyService {
   /**
    * Updates an existing course with new details.
    *
-   * @param id The ID of the course to update
+   * @param abbreviation The ID of the course to update
    * @param request The updated course details
    * @return An Optional containing the updated Course if found, or empty if not found
    */
-  public Faculty updateCourse(String id, CourseRequest request) {
-    Faculty faculty =
-        facultyRepository
-            .findByNameAndPlan(request.facultyName(), request.plan())
-            .orElseThrow(
-                () -> new BusinessException("Faculty not found: " + request.facultyName()));
+  public Course updateCourse(String abbreviation, CourseRequest request) {
+      Faculty faculty = facultyRepository
+              .findByNameAndPlan(request.facultyName(), request.plan())
+              .orElseThrow(() -> new BusinessException("Faculty not found: " + request.facultyName()));
 
-    if (faculty.getCourses().stream()
-        .anyMatch(c -> c.getAbbreviation().equals(request.abbreviation()))) {
-      logger.error("Course already exists: " + request.abbreviation());
-      throw new BusinessException("Course already exists: " + request.abbreviation());
-    }
+      Course existingCourse = faculty.getCourses().stream()
+              .filter(c -> c.getAbbreviation().equals(abbreviation))
+              .findFirst()
+              .orElseThrow(() -> new BusinessException("Course not found: " + abbreviation));
 
-    Course course = request.toEntity();
-    faculty.getCourses().add(course);
+      existingCourse.setCourseName(request.courseName());
+      existingCourse.setCredits(request.credits());
 
-    return facultyRepository.save(faculty);
+      facultyRepository.save(faculty);
+      return existingCourse;
   }
 
   /**
@@ -128,13 +127,23 @@ public class FacultyService {
    * Finds a course by its abbreviation.
    *
    * @param code The course abbreviation to search for
-   * @return An Optional containing the Course if found, or empty if not found
+   * @return An Optional containing the Course if found, or throws BusinessException if not found
+   * @throws BusinessException if the course is not found or no faculties exist
    */
   public Optional<Course> findCourseByCode(String code) {
-    List<Faculty> faculties = facultyRepository.findAll();
-    return faculties.stream()
-        .flatMap(faculty -> faculty.getCourses().stream())
-        .filter(course -> course.getAbbreviation().equals(code))
-        .findFirst();
+    Optional<Faculty> facultyOpt = facultyRepository.findFacultyByCourseAbbreviation(code);
+    
+    if (facultyOpt.isEmpty()) {
+      logger.error("Course not found: " + code);
+      throw new BusinessException("Course not found: " + code);
+    }
+
+    List<Course> courses = facultyOpt.get().getCourses();
+    if (courses == null || courses.isEmpty()) {
+      logger.error("No courses found for code: " + code);
+      throw new BusinessException("Course data is corrupted for: " + code);
+    }
+    
+    return Optional.of(courses.get(0));
   }
 }

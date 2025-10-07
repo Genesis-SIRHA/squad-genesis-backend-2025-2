@@ -102,10 +102,10 @@ class FacultyServiceTest {
         .thenReturn(Optional.of(faculty));
     when(facultyRepository.save(any(Faculty.class))).thenAnswer(i -> i.getArgument(0));
 
-    Faculty result = facultyService.updateCourse("CS101", request);
+    Course result = facultyService.updateCourse("CS101", request);
 
     assertNotNull(result);
-    assertTrue(result.getCourses().stream().anyMatch(c -> c.getAbbreviation().equals("CS103")));
+    assertTrue(result.getCourseName().equals("New Course"));
   }
 
   @Test

@@ -14,7 +14,7 @@ import java.util.Optional;
 public class AdministrativeService {
 
     private final AdministrativeRepository administrativeRepository;
-    private static final Logger logger = LoggerFactory.getLogger(MembersService.class);
+    private static final Logger logger = LoggerFactory.getLogger(AdministrativeService.class);
 
     @Autowired
     public AdministrativeService(AdministrativeRepository administrativeRepository) {
