@@ -32,7 +32,7 @@ public class FacultyService {
     Map<String, String> facultyInfo = new HashMap<>();
     List<Faculty> faculties = facultyRepository.findAll();
     for (Faculty faculty : faculties) {
-        logger.info("Faculty processed: " + faculty.getFacultyName());
+      logger.info("Faculty processed: " + faculty.getFacultyName());
       facultyInfo.put(faculty.getFacultyName(), faculty.getPlan());
     }
     return facultyInfo;
@@ -81,20 +81,23 @@ public class FacultyService {
    * @return An Optional containing the updated Course if found, or empty if not found
    */
   public Course updateCourse(String abbreviation, CourseRequest request) {
-      Faculty faculty = facultyRepository
-              .findByNameAndPlan(request.facultyName(), request.plan())
-              .orElseThrow(() -> new BusinessException("Faculty not found: " + request.facultyName()));
+    Faculty faculty =
+        facultyRepository
+            .findByNameAndPlan(request.facultyName(), request.plan())
+            .orElseThrow(
+                () -> new BusinessException("Faculty not found: " + request.facultyName()));
 
-      Course existingCourse = faculty.getCourses().stream()
-              .filter(c -> c.getAbbreviation().equals(abbreviation))
-              .findFirst()
-              .orElseThrow(() -> new BusinessException("Course not found: " + abbreviation));
+    Course existingCourse =
+        faculty.getCourses().stream()
+            .filter(c -> c.getAbbreviation().equals(abbreviation))
+            .findFirst()
+            .orElseThrow(() -> new BusinessException("Course not found: " + abbreviation));
 
-      existingCourse.setCourseName(request.courseName());
-      existingCourse.setCredits(request.credits());
+    existingCourse.setCourseName(request.courseName());
+    existingCourse.setCredits(request.credits());
 
-      facultyRepository.save(faculty);
-      return existingCourse;
+    facultyRepository.save(faculty);
+    return existingCourse;
   }
 
   /**
@@ -132,7 +135,7 @@ public class FacultyService {
    */
   public Optional<Course> findCourseByCode(String code) {
     Optional<Faculty> facultyOpt = facultyRepository.findFacultyByCourseAbbreviation(code);
-    
+
     if (facultyOpt.isEmpty()) {
       logger.error("Course not found: " + code);
       throw new BusinessException("Course not found: " + code);
@@ -143,7 +146,7 @@ public class FacultyService {
       logger.error("No courses found for code: " + code);
       throw new BusinessException("Course data is corrupted for: " + code);
     }
-    
+
     return Optional.of(courses.get(0));
   }
 }

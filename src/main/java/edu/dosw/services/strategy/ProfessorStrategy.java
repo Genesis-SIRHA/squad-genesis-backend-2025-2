@@ -3,16 +3,15 @@ package edu.dosw.services.strategy;
 import edu.dosw.model.Request;
 import edu.dosw.repositories.RequestRepository;
 import edu.dosw.services.ProfessorService;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Implementation of QueryStrategy for professor users. This strategy allows professors to
- * see all exception requests that require administrative review or approval.
+ * Implementation of QueryStrategy for professor users. This strategy allows professors to see all
+ * exception requests that require administrative review or approval.
  */
 @AllArgsConstructor
 public class ProfessorStrategy implements QueryStrategy {

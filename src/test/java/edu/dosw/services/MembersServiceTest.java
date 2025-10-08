@@ -1,17 +1,17 @@
 package edu.dosw.services;
 //
-//import static org.junit.jupiter.api.Assertions.*;
-//import static org.mockito.Mockito.*;
+// import static org.junit.jupiter.api.Assertions.*;
+// import static org.mockito.Mockito.*;
 //
-//import edu.dosw.exception.BusinessException;
-//import edu.dosw.model.User;
-//import edu.dosw.repositories.UserCredentialsRepository;
-//import java.util.Optional;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
+// import edu.dosw.exception.BusinessException;
+// import edu.dosw.model.User;
+// import edu.dosw.repositories.UserCredentialsRepository;
+// import java.util.Optional;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
 //
-///** Unit tests for {@link MembersService}. */
-//class MembersServiceTest {
+/// ** Unit tests for {@link MembersService}. */
+// class MembersServiceTest {
 //
 //  private UserCredentialsRepository userRepository;
 //  private MembersService membersService;
@@ -68,4 +68,4 @@ package edu.dosw.services;
 //
 //    verify(userRepository).findById("U1");
 //  }
-//}
+// }

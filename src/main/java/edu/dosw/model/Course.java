@@ -19,5 +19,4 @@ public class Course {
     this.abbreviation = abbreviation;
     this.courseName = courseName;
   }
-
 }

@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Authentication", description = "Authentication endpoints")
 public class AuthenticationController {
 
-    private final AuthenticationService authenticationService;
+  private final AuthenticationService authenticationService;
 
-    @PostMapping("/login")
-    @Operation(summary = "Log in")
-    public ResponseEntity<String> login(@RequestBody UserCredentialsDto userCredentialsDto) {
-        String isAuthenticated = String.valueOf(authenticationService.logIn(userCredentialsDto));
-        return ResponseEntity.ok(isAuthenticated);
-    }
+  @PostMapping("/login")
+  @Operation(summary = "Log in")
+  public ResponseEntity<String> login(@RequestBody UserCredentialsDto userCredentialsDto) {
+    String isAuthenticated = String.valueOf(authenticationService.logIn(userCredentialsDto));
+    return ResponseEntity.ok(isAuthenticated);
+  }
 }

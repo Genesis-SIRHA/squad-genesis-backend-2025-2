@@ -3,16 +3,14 @@ package edu.dosw.services.strategy;
 import edu.dosw.model.Request;
 import edu.dosw.repositories.RequestRepository;
 import edu.dosw.services.DeanService;
-
-import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Implementation of QueryStrategy for dean users. This strategy allows dean
- * users to see all available requests as well as any requests they have created themselves.
+ * Implementation of QueryStrategy for dean users. This strategy allows dean users to see all
+ * available requests as well as any requests they have created themselves.
  */
 public class DeanStrategy implements QueryStrategy {
 
@@ -27,8 +25,7 @@ public class DeanStrategy implements QueryStrategy {
    * @param deanService the service that manages persons in the university
    */
   @Autowired
-  public DeanStrategy(
-      RequestRepository requestRepository, DeanService deanService) {
+  public DeanStrategy(RequestRepository requestRepository, DeanService deanService) {
     this.requestRepository = requestRepository;
     this.deanService = deanService;
   }

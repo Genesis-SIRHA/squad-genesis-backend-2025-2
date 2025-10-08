@@ -37,7 +37,8 @@ class RequestServiceTest {
     deanService = mock(DeanService.class);
     professorSevice = mock(ProfessorService.class);
     requestService =
-        new RequestService(requestRepository, facultyRepository, groupRepository, deanService, professorSevice);
+        new RequestService(
+            requestRepository, facultyRepository, groupRepository, deanService, professorSevice);
   }
 
   @Test

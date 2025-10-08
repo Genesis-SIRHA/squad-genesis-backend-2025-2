@@ -2,7 +2,6 @@ package edu.dosw.services;
 
 import edu.dosw.exception.BusinessException;
 import edu.dosw.model.*;
-
 import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +67,8 @@ public class PemsumService {
     List<Course> courses = facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan);
     if (courses.isEmpty()) {
       logger.error("Invalid faculty fullName or plan: " + facultyName + " - " + plan);
-      throw new BusinessException("Invalid faculty fullName or plan: " + facultyName + " - " + plan);
+      throw new BusinessException(
+          "Invalid faculty fullName or plan: " + facultyName + " - " + plan);
     }
 
     String year = periodService.getYear();
