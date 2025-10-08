@@ -26,16 +26,19 @@ class RequestServiceTest {
   private FacultyRepository facultyRepository;
   private GroupRepository groupRepository;
   private RequestService requestService;
-  private MembersService membersService;
+  private DeanService deanService;
+  private ProfessorService professorSevice;
 
   @BeforeEach
   void setUp() {
     requestRepository = mock(RequestRepository.class);
     facultyRepository = mock(FacultyRepository.class);
     groupRepository = mock(GroupRepository.class);
-    membersService = mock(MembersService.class);
+    deanService = mock(DeanService.class);
+    professorSevice = mock(ProfessorService.class);
     requestService =
-        new RequestService(requestRepository, facultyRepository, groupRepository, membersService);
+        new RequestService(
+            requestRepository, facultyRepository, groupRepository, deanService, professorSevice);
   }
 
   @Test

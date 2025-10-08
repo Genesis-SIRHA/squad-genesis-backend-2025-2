@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * on courses and their groups.
  */
 @RestController
-@RequestMapping("/api/courses")
+@RequestMapping("/courses")
 @Tag(name = "Course Controller", description = "APIs for managing courses and groups")
 public class CourseController {
 
@@ -63,16 +63,16 @@ public class CourseController {
   /**
    * Updates an existing course.
    *
-   * @param id The ID of the course to update
+   * @param abbreviation The ID of the course to update
    * @param courseRequest The updated course details
    * @return The updated course if found, 404 otherwise
    */
-  @PutMapping("/{id}")
-  @Operation(summary = "Update course", description = "Updates course details including groups")
-  public ResponseEntity<Faculty> updateCourse(
-      @PathVariable String id, @Valid @RequestBody CourseRequest courseRequest) {
-    Faculty faculty = facultyService.updateCourse(id, courseRequest);
-    return ResponseEntity.ok((faculty));
+  @PatchMapping("/{abbreviation}")
+  @Operation(summary = "Update course", description = "Updates course")
+  public ResponseEntity<Course> updateCourse(
+      @PathVariable String abbreviation, @Valid @RequestBody CourseRequest courseRequest) {
+    Course course = facultyService.updateCourse(abbreviation, courseRequest);
+    return ResponseEntity.ok((course));
   }
 
   /**
