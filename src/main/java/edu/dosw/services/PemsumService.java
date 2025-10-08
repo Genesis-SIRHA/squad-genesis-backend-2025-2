@@ -61,7 +61,7 @@ public class PemsumService {
    * @throws BusinessException if faculty fullName or plan is invalid
    */
   private Pemsum buildPemsum(String studentId) {
-    Student student = studentService.listById(studentId);
+    Student student = studentService.getStudentById(studentId);
     String facultyName = student.getFacultyName();
     String plan = student.getPlan();
 

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
  * retrieving, updating, and deleting requests, as well as retrieving request statistics.
  */
 @RestController
-@RequestMapping("/api/requests")
+@RequestMapping("/requests")
 @Tag(name = "Request Controller", description = "APIs for managing requests")
 public class RequestController {
 

@@ -16,10 +16,8 @@ public class Faculty {
   @Id
   @Field("facultyName")
   private String facultyName;
-  @Id
   @Field("plan")
   private String plan;
-  
   @Field("courses")
   private List<Course> courses = new ArrayList<>();
 

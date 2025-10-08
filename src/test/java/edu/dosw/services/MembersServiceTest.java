@@ -5,7 +5,7 @@ package edu.dosw.services;
 //
 //import edu.dosw.exception.BusinessException;
 //import edu.dosw.model.User;
-//import edu.dosw.repositories.UserRepository;
+//import edu.dosw.repositories.UserCredentialsRepository;
 //import java.util.Optional;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Test;
@@ -13,12 +13,12 @@ package edu.dosw.services;
 ///** Unit tests for {@link MembersService}. */
 //class MembersServiceTest {
 //
-//  private UserRepository userRepository;
+//  private UserCredentialsRepository userRepository;
 //  private MembersService membersService;
 //
 //  @BeforeEach
 //  void setUp() {
-//    userRepository = mock(UserRepository.class);
+//    userRepository = mock(UserCredentialsRepository.class);
 //    membersService = new MembersService(userRepository);
 //  }
 //

@@ -10,8 +10,8 @@ import edu.dosw.model.enums.Status;
 import edu.dosw.repositories.FacultyRepository;
 import edu.dosw.repositories.GroupRepository;
 import edu.dosw.repositories.RequestRepository;
-import edu.dosw.services.strategy.AdministrativeStrategy;
-import edu.dosw.services.strategy.AdministratorStrategy;
+import edu.dosw.services.strategy.DeanStrategy;
+import edu.dosw.services.strategy.ProfessorStrategy;
 import edu.dosw.services.strategy.QueryStrategy;
 import edu.dosw.services.strategy.StudentStrategy;
 import java.time.LocalDate;
@@ -36,7 +36,7 @@ public class RequestService {
   private static final Logger logger = LoggerFactory.getLogger(RequestController.class);
   private final RequestRepository requestRepository;
   private final FacultyRepository facultyRepository;
-  private final AdministrativeService administrativeService;
+  private final DeanService deanService;
   private final GroupRepository groupRepository;
   private final Map<Role, QueryStrategy> strategyMap;
 
@@ -52,16 +52,17 @@ public class RequestService {
       RequestRepository requestRepository,
       FacultyRepository facultyRepository,
       GroupRepository groupRepository,
-      AdministrativeService administrativeService) {
+      DeanService deanService,
+      ProfessorService professorService) {
     this.requestRepository = requestRepository;
     this.facultyRepository = facultyRepository;
     this.groupRepository = groupRepository;
-    this.administrativeService = administrativeService;
+    this.deanService = deanService;
     this.strategyMap =
         Map.of(
             Role.STUDENT, new StudentStrategy(requestRepository),
-            Role.ADMINISTRATIVE, new AdministrativeStrategy(requestRepository,administrativeService ),
-            Role.ADMINISTRATOR, new AdministratorStrategy(requestRepository));
+            Role.DEAN, new DeanStrategy(requestRepository, deanService),
+            Role.PROFESSOR, new ProfessorStrategy(requestRepository, professorService));
   }
 
   /**

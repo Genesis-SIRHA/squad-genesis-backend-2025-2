@@ -52,4 +52,7 @@ public interface RequestRepository extends MongoRepository<Request, String> {
    * @return The count of requests with the specified status
    */
   long countByStatus(String status);
+
+  @Query("{ 'faculty': ?0, 'isExceptional': true }")
+  List<Request> findAvailableByFacultyAndIsExceptional();
 }

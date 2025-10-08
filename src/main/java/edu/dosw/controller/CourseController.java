@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * on courses and their groups.
  */
 @RestController
-@RequestMapping("/api/courses")
+@RequestMapping("/courses")
 @Tag(name = "Course Controller", description = "APIs for managing courses and groups")
 public class CourseController {
 

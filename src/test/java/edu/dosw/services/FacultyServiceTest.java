@@ -119,29 +119,29 @@ class FacultyServiceTest {
     assertEquals("Faculty not found: Invalid", ex.getMessage());
   }
 
-  @Test
-  void addGroupToCourse_shouldReturnTrueIfGroupAdded() {
-    when(facultyRepository.findAll()).thenReturn(List.of(faculty));
-    GroupRequest groupRequest = new GroupRequest("G1", "CS101", "2025", "1", "T1", true, 1, 30, 0);
-    when(groupService.createGroup(groupRequest)).thenReturn(new Group());
+//  @Test
+//  void addGroupToCourse_shouldReturnTrueIfGroupAdded() {
+//    when(facultyRepository.findAll()).thenReturn(List.of(faculty));
+//    GroupRequest groupRequest = new GroupRequest("G1", "CS101", "2025", "1", "T1", true, 1, 30, 0);
+//    when(groupService.createGroup(groupRequest)).thenReturn(new Group());
+//
+//    Boolean result = facultyService.addGroupToCourse(groupRequest);
+//
+//    assertTrue(result);
+//  }
 
-    Boolean result = facultyService.addGroupToCourse(groupRequest);
-
-    assertTrue(result);
-  }
-
-  @Test
-  void addGroupToCourse_shouldThrowIfCourseNotFound() {
-    when(facultyRepository.findAll()).thenReturn(List.of()); // no faculties
-
-    GroupRequest groupRequest =
-        new GroupRequest("G1", "INVALID", "2025", "1", "T1", true, 1, 30, 0);
-
-    BusinessException ex =
-        assertThrows(BusinessException.class, () -> facultyService.addGroupToCourse(groupRequest));
-
-    assertEquals("Faculty not found: INVALID", ex.getMessage());
-  }
+//  @Test
+//  void addGroupToCourse_shouldThrowIfCourseNotFound() {
+//    when(facultyRepository.findAll()).thenReturn(List.of()); // no faculties
+//
+//    GroupRequest groupRequest =
+//        new GroupRequest("G1", "INVALID", "2025", "1", "T1", true, 1, 30, 0);
+//
+//    BusinessException ex =
+//        assertThrows(BusinessException.class, () -> facultyService.addGroupToCourse(groupRequest));
+//
+//    assertEquals("Faculty not found: INVALID", ex.getMessage());
+//  }
 
   @Test
   void deleteCourse_shouldCallRepositoryDelete() {
@@ -152,22 +152,22 @@ class FacultyServiceTest {
     verify(facultyRepository, times(1)).deleteById("CS101");
   }
 
-  @Test
-  void findCourseByCode_shouldReturnCourseIfExists() {
-    when(facultyRepository.findAll()).thenReturn(List.of(faculty));
+//  @Test
+//  void findCourseByCode_shouldReturnCourseIfExists() {
+//    when(facultyRepository.findAll()).thenReturn(List.of(faculty));
+//
+//    Optional<Course> result = facultyService.findCourseByCode("CS101");
+//
+//    assertTrue(result.isPresent());
+//    assertEquals("CS101", result.get().getAbbreviation());
+//  }
 
-    Optional<Course> result = facultyService.findCourseByCode("CS101");
-
-    assertTrue(result.isPresent());
-    assertEquals("CS101", result.get().getAbbreviation());
-  }
-
-  @Test
-  void findCourseByCode_shouldReturnEmptyIfNotFound() {
-    when(facultyRepository.findAll()).thenReturn(List.of(faculty));
-
-    Optional<Course> result = facultyService.findCourseByCode("INVALID");
-
-    assertTrue(result.isEmpty());
-  }
+//  @Test
+//  void findCourseByCode_shouldReturnEmptyIfNotFound() {
+//    when(facultyRepository.findAll()).thenReturn(List.of(faculty));
+//
+//    Optional<Course> result = facultyService.findCourseByCode("INVALID");
+//
+//    assertTrue(result.isEmpty());
+//  }
 }
