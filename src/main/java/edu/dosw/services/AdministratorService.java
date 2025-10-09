@@ -34,7 +34,7 @@ public class AdministratorService {
     Administrator administrator =
         administratorRepository.findByUserId(administratorId).orElse(null);
     if (administrator == null) {
-      throw new BusinessException("Dean not found by id: " + administratorId);
+      throw new BusinessException("Administrator not found by id: " + administratorId);
     }
     return administrator;
   }

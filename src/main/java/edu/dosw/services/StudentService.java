@@ -6,6 +6,8 @@ import edu.dosw.model.Student;
 import edu.dosw.repositories.StudentRepository;
 import edu.dosw.utils.IdGenerator;
 import java.util.Arrays;
+
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +35,7 @@ public class StudentService {
   public Student getStudentById(String studentId) {
     Student student = studentRepository.findByUserId(studentId).orElse(null);
     if (student == null) {
-      throw new BusinessException("Dean not found by id: " + studentId);
+      throw new BusinessException("Student not found by id: " + studentId);
     }
     return student;
   }
@@ -151,5 +153,14 @@ public class StudentService {
       throw new BusinessException(
           "An inesperated error has occurred when deleting the student: " + e.getMessage());
     }
+  }
+
+  public String getFacultyByStudentId(String studentId) {
+    Student student = studentRepository.findByUserId(studentId).orElse(null);
+    if (student == null) {
+      logger.error("Student not found");
+      throw new BusinessException("Student not found");
+    }
+    return student.getFacultyName();
   }
 }

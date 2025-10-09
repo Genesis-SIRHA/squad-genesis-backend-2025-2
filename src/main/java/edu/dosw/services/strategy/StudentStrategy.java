@@ -1,7 +1,13 @@
 package edu.dosw.services.strategy;
 
+import edu.dosw.controller.RequestController;
 import edu.dosw.model.Request;
+import edu.dosw.model.Student;
 import edu.dosw.repositories.RequestRepository;
+import edu.dosw.services.StudentService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 /**
@@ -10,14 +16,17 @@ import java.util.List;
  */
 public class StudentStrategy implements QueryStrategy {
   private final RequestRepository requestRepository;
+  private final StudentService studentService;
+  private static final Logger logger = LoggerFactory.getLogger(StudentStrategy.class);
 
   /**
    * Constructs a new StudentStrategy with the given request repository.
    *
    * @param requestRepository The repository used to access request data
    */
-  public StudentStrategy(RequestRepository requestRepository) {
+  public StudentStrategy(RequestRepository requestRepository, StudentService studentService) {
     this.requestRepository = requestRepository;
+    this.studentService = studentService;
   }
 
   /**
@@ -28,6 +37,11 @@ public class StudentStrategy implements QueryStrategy {
    */
   @Override
   public List<Request> queryRequests(String userId) {
+    Student student = studentService.getStudentById(userId);
+    if (student == null) {
+        logger.error("Student not found with id: {}", userId);
+        throw new IllegalArgumentException("Student not found with id: " + userId);
+    }
     return requestRepository.findByStudentId(userId);
   }
 }

@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Document(collection = "faculties")
 public class Faculty {
   @Id
+  private String id;
   @Field("facultyName")
   private String facultyName;
 

@@ -2,11 +2,13 @@ package edu.dosw.model;
 
 import java.time.DayOfWeek;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @Document(collection = "sessions")
 public class Session {
+  @Id private String id;
   private String groupCode;
   private String classroomName;
   private int slot;
