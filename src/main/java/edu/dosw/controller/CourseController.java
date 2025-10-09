@@ -1,7 +1,7 @@
 package edu.dosw.controller;
 
 import edu.dosw.dto.CourseRequest;
-import edu.dosw.dto.GroupRequest;
+import edu.dosw.dto.UpdateCourseDTO;
 import edu.dosw.model.Course;
 import edu.dosw.model.Faculty;
 import edu.dosw.services.FacultyService;
