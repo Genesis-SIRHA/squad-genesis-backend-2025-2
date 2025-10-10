@@ -1,10 +1,10 @@
 package edu.dosw.model;
 
-import edu.dosw.model.enums.Status;
+import edu.dosw.model.enums.RequestStatus;
+import edu.dosw.model.enums.RequestType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -19,9 +19,9 @@ public class Request {
   @NotBlank(message = "Student ID is required")
   private String studentId;
   @NotNull(message = "Created at date is required")
-  private LocalDateTime createdAt;
-  private Status status;
-  private String type;
+  private LocalDate createdAt;
+  private RequestStatus status;
+  private RequestType type;
   private Boolean isExceptional;
   private String destinationGroupId;
   private String originGroupId;
@@ -32,10 +32,10 @@ public class Request {
 
   public Request() {
     this.requestId = UUID.randomUUID().toString();
-    this.createdAt = LocalDateTime.now();
+    this.createdAt = LocalDate.now();
     this.updatedAt = LocalDate.now();
     this.isExceptional = false;
-    this.status = Status.PENDING;
+    this.status = RequestStatus.PENDING;
     this.gestedBy = null;
     this.answer = null;
   }
@@ -52,7 +52,7 @@ public class Request {
   public static class RequestBuilder{
       private String studentId;
       private String description;
-      private String type;
+      private RequestType type;
       private String originGroupId;
       private String destinationGroupId;
 
@@ -66,7 +66,7 @@ public class Request {
         return this;
       }
 
-      public RequestBuilder type(String type) {
+      public RequestBuilder type(RequestType type) {
         this.type = type;
         return this;
       }

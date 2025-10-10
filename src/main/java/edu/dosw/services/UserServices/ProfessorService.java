@@ -1,9 +1,10 @@
-package edu.dosw.services;
+package edu.dosw.services.UserServices;
 
 import edu.dosw.dto.ProfessorDto;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Professor;
 import edu.dosw.repositories.ProfessorRepository;
+import edu.dosw.services.AuthenticationService;
 import edu.dosw.utils.IdGenerator;
 import java.util.Arrays;
 import java.util.Optional;

@@ -1,9 +1,10 @@
-package edu.dosw.services;
+package edu.dosw.services.UserServices;
 
 import edu.dosw.dto.AdministratorDto;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Administrator;
 import edu.dosw.repositories.AdministratorRepository;
+import edu.dosw.services.AuthenticationService;
 import edu.dosw.utils.IdGenerator;
 import java.util.Arrays;
 import lombok.AllArgsConstructor;

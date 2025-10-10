@@ -1,10 +1,9 @@
-package edu.dosw.services.strategy;
+package edu.dosw.services.strategy.queryStrategies;
 
-import edu.dosw.controller.RequestController;
 import edu.dosw.model.Request;
 import edu.dosw.model.Student;
 import edu.dosw.repositories.RequestRepository;
-import edu.dosw.services.StudentService;
+import edu.dosw.services.UserServices.StudentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

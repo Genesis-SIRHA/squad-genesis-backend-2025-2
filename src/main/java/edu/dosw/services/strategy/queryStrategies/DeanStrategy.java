@@ -1,8 +1,8 @@
-package edu.dosw.services.strategy;
+package edu.dosw.services.strategy.queryStrategies;
 
 import edu.dosw.model.Request;
 import edu.dosw.repositories.RequestRepository;
-import edu.dosw.services.DeanService;
+import edu.dosw.services.UserServices.DeanService;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

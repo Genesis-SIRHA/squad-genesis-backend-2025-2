@@ -6,6 +6,8 @@ import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import edu.dosw.services.UserServices.StudentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,7 +124,7 @@ public class PemsumService {
           .filter(h -> h.getGroupCode().equals(course.getAbbreviation()))
           .findFirst()
           .ifPresentOrElse(
-              h -> coursesMap.put(course, h.getStatus()), () -> coursesMap.put(course, "pending"));
+              h -> coursesMap.put(course, h.getStatus().toString()), () -> coursesMap.put(course, "pending"));
     }
     return coursesMap;
   }

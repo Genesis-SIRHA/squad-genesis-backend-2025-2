@@ -1,8 +1,8 @@
-package edu.dosw.services.strategy;
+package edu.dosw.services.strategy.queryStrategies;
 
 import edu.dosw.model.Request;
 import edu.dosw.repositories.RequestRepository;
-import edu.dosw.services.ProfessorService;
+import edu.dosw.services.UserServices.ProfessorService;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;

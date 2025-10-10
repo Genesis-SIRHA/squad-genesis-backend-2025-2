@@ -7,7 +7,6 @@ import edu.dosw.model.Course;
 import edu.dosw.model.Group;
 import edu.dosw.repositories.GroupRepository;
 import java.util.List;
-import java.util.Optional;
 
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -80,21 +79,22 @@ public class GroupService {
       return groupRepository.save(group);
     }
 
-    public Group findByGroupCode(String code) {
-      try {
-        return groupRepository.findByGroupCode(code).orElse(null);
-      } catch(Exception e){
-        throw new RuntimeException("Failed to find group by group code: " + e.getMessage());
-      }
+    public Group findByGroupCode(String groupCode) {
+        Group group  = groupRepository.findByGroupCode(groupCode).orElse(null);
+        if (group == null){
+            logger.error("Group not found by id {}", groupCode);
+            throw new IllegalArgumentException("Group not found: " + groupCode);
+        }
+        return group;
     }
 
     public Group updateGroup(String groupCode, UpdateGroupRequest groupRequest) {
         Group group = groupRepository.findByGroupCode(groupCode).orElse(null);
         if (group == null) {
-            logger.error("Group not found");
-            throw new BusinessException("Group not found");
+            logger.error("Group not found: {}", groupCode);
+            throw new BusinessException("Group not found: "+ groupCode);
         }
-        if (groupRequest.teacherId() != null) group.setProfessorId(groupRequest.teacherId());
+        if (groupRequest.professorId() != null) group.setProfessorId(groupRequest.professorId());
         if(groupRequest.isLab() != null) group.setLab(groupRequest.isLab());
         if (groupRequest.groupNum() != null) group.setGroupNum(groupRequest.groupNum());
         if(groupRequest.maxCapacity() != null) group.setMaxCapacity(groupRequest.maxCapacity());

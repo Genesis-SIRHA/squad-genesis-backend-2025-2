@@ -1,5 +1,6 @@
 package edu.dosw.dto;
 
+import edu.dosw.model.enums.RequestType;
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -14,7 +15,7 @@ import jakarta.validation.constraints.NotNull;
  */
 public record CreateRequestDto(
     @NotNull String studentId,
-    String type,
+    @NotNull RequestType type,
     String description,
     String originGroupId,
     String destinationGroupId

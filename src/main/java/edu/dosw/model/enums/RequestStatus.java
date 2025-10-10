@@ -1,10 +1,10 @@
 package edu.dosw.model.enums;
 
-public enum Status {
+public enum RequestStatus {
   PENDING,
   ACCEPTED,
-  IN_PROGRESS,
+  WAITING,
+  IN_REVIEW,
   REJECTED,
-  CANCELLED,
-  INVALID
+  CANCELLED
 }

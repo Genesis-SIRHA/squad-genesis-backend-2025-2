@@ -1,23 +1,5 @@
 package edu.dosw.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import edu.dosw.dto.CourseRequest;
-import edu.dosw.dto.CreationGroupRequest;
-import edu.dosw.model.Course;
-import edu.dosw.model.Faculty;
-import edu.dosw.services.FacultyService;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.ResponseEntity;
-
 //class CourseControllerTest {
 //
 //  @Mock private FacultyService facultyService;

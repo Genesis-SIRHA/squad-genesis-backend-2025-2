@@ -26,12 +26,6 @@ import org.springframework.web.bind.annotation.*;
 public class RequestController {
   private final RequestService requestService;
 
-  /**
-   * Creates a new request with the provided details.
-   *
-   * @param request The request data to create
-   * @return The created request with its generated userId and status
-   */
   @PostMapping
   @Operation(
           summary = "Create a new request",
@@ -41,13 +35,6 @@ public class RequestController {
     return ResponseEntity.ok(createdRequest);
   }
 
-  /**
-   * Retrieves requests based on user role and userId.
-   *
-   * @param userId The userId of the user making the request
-   * @param role The role of the user (e.g., STUDENT, PROFESSOR)
-   * @return List of requests filtered by user role and userId
-   */
   @GetMapping("/{role}/{userId}")
   @Operation(
       summary = "Get requests by role",
@@ -58,11 +45,6 @@ public class RequestController {
     return ResponseEntity.ok(requests);
   }
 
-  /**
-   * Retrieves requests based on user role and userId.
-   *
-   * @return List of all requests
-   */
   @GetMapping("/global")
   @Operation(
           summary = "Get all requests",
@@ -100,11 +82,6 @@ public class RequestController {
     return ResponseEntity.ok(requests);
   }
 
-  /**
-   * Retrieves statistics about requests.
-   *
-   * @return Request statistics including counts by status
-   */
   @GetMapping("/stats")
   @Operation(
           summary = "Get request statistics",
@@ -113,13 +90,6 @@ public class RequestController {
     return ResponseEntity.ok(requestService.getRequestStats());
   }
 
-  /**
-   * Updates the status of an existing request.
-   *
-   * @param userId The userId of the request to update
-   * @param updateRequestDto The update request dto containing the new state
-   * @return The updated request
-   */
   @PatchMapping("/status/{userId}")
   @Operation(
       summary = "Update request status",
@@ -129,12 +99,8 @@ public class RequestController {
     return ResponseEntity.ok(requestService.updateRequest(userId, updateRequestDto));
   }
 
-  /**
-   * Cancels a request by its userId.
-   *
-   * @param requestId The requestId of the request to cancel
-   * @return 204 No Content if successful
-   */
+
+
   @DeleteMapping("/{requestId}")
   @Operation(summary = "Cancel a request", description = "Cancels a request by its requestId")
   public ResponseEntity<Request> deleteRequest(@PathVariable String requestId) {

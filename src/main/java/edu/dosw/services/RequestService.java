@@ -4,12 +4,18 @@ import edu.dosw.dto.CreateRequestDto;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.dto.UpdateRequestDto;
 import edu.dosw.model.Request;
+import edu.dosw.model.enums.RequestStatus;
 import edu.dosw.model.enums.Role;
 import edu.dosw.repositories.RequestRepository;
-import edu.dosw.services.strategy.DeanStrategy;
-import edu.dosw.services.strategy.ProfessorStrategy;
-import edu.dosw.services.strategy.QueryStrategy;
-import edu.dosw.services.strategy.StudentStrategy;
+import edu.dosw.services.UserServices.DeanService;
+import edu.dosw.services.UserServices.ProfessorService;
+import edu.dosw.services.UserServices.StudentService;
+import edu.dosw.services.strategy.AnswerStrategies.AnswerStrategy;
+import edu.dosw.services.strategy.AnswerStrategies.AnswerStrategyFactory;
+import edu.dosw.services.strategy.queryStrategies.DeanStrategy;
+import edu.dosw.services.strategy.queryStrategies.ProfessorStrategy;
+import edu.dosw.services.strategy.queryStrategies.QueryStrategy;
+import edu.dosw.services.strategy.queryStrategies.StudentStrategy;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -18,14 +24,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-/**
- * Service class that handles business logic related to requests. Manages request creation,
- * retrieval, status updates, and statistics. Uses a strategy pattern to handle different request
- * querying behaviors based on user roles.
- */
 @Service
 public class RequestService {
 
@@ -35,6 +35,7 @@ public class RequestService {
   private final AuthenticationService authenticationService;
   private final StudentService studentService;
   private final Map<Role, QueryStrategy> strategyMap;
+  private final AnswerStrategyFactory answerStrategyFactory;
 
   @Autowired
   public RequestService(
@@ -43,12 +44,14 @@ public class RequestService {
       DeanService deanService,
       ProfessorService professorService,
       StudentService studentService,
-      AuthenticationService authenticationService
+      AuthenticationService authenticationService,
+      AnswerStrategyFactory answerStrategyFactory
       ) {
     this.requestRepository = requestRepository;
     this.validatorService = validatorService;
     this.authenticationService = authenticationService;
     this.studentService = studentService;
+    this.answerStrategyFactory = answerStrategyFactory;
     this.strategyMap =
         Map.of(
             Role.STUDENT, new StudentStrategy(requestRepository, studentService),
@@ -56,15 +59,6 @@ public class RequestService {
             Role.PROFESSOR, new ProfessorStrategy(requestRepository, professorService));
   }
 
-  /**
-   * Fetches requests based on the user's role and ID. Uses the strategy pattern to determine which
-   * requests are visible to the user.
-   *
-   * @param role The role of the user (STUDENT, ADMINISTRATIVE, or ADMINISTRATOR)
-   * @param userId The ID of the user making the request
-   * @return A list of requests visible to the user, sorted by creation date (newest first)
-   * @throws IllegalArgumentException if the provided role is not supported
-   */
   public List<Request> fetchRequests(Role role, String userId) {
       logger.info("Fetching requests for user: {} with role: {}", userId, role);
 
@@ -90,16 +84,8 @@ public class RequestService {
     }
   }
 
-  /**
-   * Creates a new request with the provided details. Validates that both origin and destination
-   * groups exist before creating the request.
-   *
-   * @param requestDTO The request data transfer object containing request details
-   * @return A RequestResponse containing the created request
-   * @throws IllegalArgumentException if either origin or destination group is not found
-   */
   public Request createRequest(CreateRequestDto requestDTO) {
-      validatorService.validateRequest(requestDTO);
+      validatorService.validateCreateRequest(requestDTO);
 
       Request request = new Request.RequestBuilder()
               .studentId(requestDTO.studentId())
@@ -116,14 +102,6 @@ public class RequestService {
       }
   }
 
-  /**
-   * Updates the status of an existing request.
-   *
-   * @param userId The ID of the request to update
-   * @param updateRequestDto The update request dto containing the new state
-   * @return The updated Request
-   * @throws RuntimeException if no request is found with the given ID
-   */
   public Request updateRequest(String userId, UpdateRequestDto updateRequestDto) {
     Request request = requestRepository.findByRequestId(updateRequestDto.requestId()).orElse(null);
     validatorService.validateUpdateRequest(userId, request, updateRequestDto);
@@ -134,6 +112,7 @@ public class RequestService {
     request.setUpdatedAt(LocalDate.now());
 
     try{
+        requestAnswerReplicator(request);
         return requestRepository.save(request);
     } catch (Exception e){
         logger.error("Failed to update request status: {}", e.getMessage());
@@ -141,11 +120,21 @@ public class RequestService {
     }
   }
 
-  /**
-   * Retrieves statistics about requests, including total count and counts by status.
-   *
-   * @return A RequestStats object containing the statistics
-   */
+    private void requestAnswerReplicator(Request request) {
+      if(request.getStatus() == RequestStatus.ACCEPTED){
+        AnswerStrategy answerStrategy = answerStrategyFactory.getStrategy(request.getType());
+        answerStrategy.answerRequest(request);
+      }
+      if(request.getStatus() == RequestStatus.WAITING){
+          //TODO: Crear la logica para que se mande la notification al estudiante de que debe dar mas informacion sobre una solicitud
+          //ideal si se maneja un servicio de notification y que se modifique el get, para que cuando el estado sea waiting front espere una respuesta
+      }
+
+      //Para los otros estados no tienen que poner nada, si se cancela o se rechaza no se hace cambios en el resto del sistema :3
+      //pd: Sofi, borren esto cuando lo implementen gracias.
+
+    }
+
   public RequestStats getRequestStats() {
     long total = requestRepository.count();
     long pending = requestRepository.countByStatus("PENDING");
