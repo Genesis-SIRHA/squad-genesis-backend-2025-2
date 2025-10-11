@@ -5,9 +5,13 @@ import edu.dosw.dto.UpdateGroupRequest;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Group;
+import edu.dosw.model.Session;
 import edu.dosw.repositories.GroupRepository;
+
+import java.util.ArrayList;
 import java.util.List;
 
+import edu.dosw.repositories.SessionRepository;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +28,7 @@ public class GroupService {
     private final FacultyService facultyService;
     private final GroupRepository groupRepository;
     private final PeriodService periodService;
+    private final SessionRepository sessionRepository;
 
 
     /**
@@ -104,13 +109,13 @@ public class GroupService {
     }
 
     public Group deleteGroup(String groupCode) {
-        Group group = groupRepository.findByGroupCode(groupCode).orElse(null);
-        if (group == null) {
-            logger.error("Group not found");
-            throw new BusinessException("Group not found");
-        }
+        Group group = findByGroupCode(groupCode);
         try {
             groupRepository.delete(group);
+            List<Session> sessions = sessionRepository.findByGroupCode(groupCode);
+            for (Session session : sessions) {
+                sessionRepository.delete(session);
+            }
             return group;
         }catch (Exception e){
             logger.error("Failed to delete group: " + e.getMessage());

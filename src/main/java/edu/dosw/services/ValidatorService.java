@@ -1,12 +1,10 @@
 package edu.dosw.services;
 
-import edu.dosw.dto.CreateRequestDto;
-import edu.dosw.dto.HistorialDTO;
-import edu.dosw.dto.UpdateRequestDto;
-import edu.dosw.dto.UserCredentialsDto;
+import edu.dosw.dto.*;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
+import edu.dosw.model.Session;
 import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.model.enums.RequestType;
 import edu.dosw.model.enums.RequestStatus;
@@ -94,6 +92,41 @@ public class ValidatorService {
         Map<String, String> faculties = facultyService.getAllFacultyNames();
         if (!faculties.containsKey(facultyName)){
             throw new BusinessException("Faculty "+facultyName +" does not exist in "+ faculties.keySet().toString());
+        }
+    }
+
+    public void validateCreateSession(SessionDTO sessiondto) {
+        groupService.getGroupByGroupCode(sessiondto.groupCode());
+        if(sessiondto.slot() == null){
+            logger.error("The slot cannot be null");
+            throw new IllegalArgumentException("The slot cannot be null");
+        }
+        if(sessiondto.slot() <= 0 || sessiondto.slot() >= 9){
+            logger.error("The slot is invalid");
+            throw new IllegalArgumentException("The slot is invalid");
+        }
+    }
+
+    public void validateUpdateSession(SessionDTO sessiondto, String year, String period) {
+        groupService.getGroupByGroupCode(sessiondto.groupCode());
+        if (!year.equals(periodService.getYear())  || !period.equals(periodService.getPeriod())){
+            logger.error("The year or period are invalid");
+            throw  new RuntimeException("The year or period are invalid");
+        }
+        if(sessiondto.slot() != null){
+            if(sessiondto.slot() <= 0 || sessiondto.slot() >= 9){
+                logger.error("The slot is invalid");
+                throw new IllegalArgumentException("The slot is invalid");
+            }
+        }
+        groupService.getGroupByGroupCode(sessiondto.groupCode());
+
+    }
+
+    public void validateDeleteSession(Session session) {
+        if (!session.getYear().equals(periodService.getYear())  || !session.getPeriod().equals(periodService.getPeriod())){
+            logger.error("The year or period are invalid");
+            throw  new RuntimeException("The year or period are invalid");
         }
     }
 }
