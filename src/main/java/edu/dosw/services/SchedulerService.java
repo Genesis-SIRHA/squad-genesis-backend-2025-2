@@ -2,11 +2,10 @@ package edu.dosw.services;
 
 import edu.dosw.model.Schedule;
 import edu.dosw.model.Session;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Service class responsible for managing and building student schedules. Coordinates between

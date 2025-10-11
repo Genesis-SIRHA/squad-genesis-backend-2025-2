@@ -4,13 +4,12 @@ import edu.dosw.dto.SessionDTO;
 import edu.dosw.model.Session;
 import edu.dosw.model.enums.DayOfWeek;
 import edu.dosw.repositories.SessionRepository;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Service class that handles business logic related to academic sessions. Provides methods for
@@ -49,11 +48,11 @@ public class SessionService {
     String year = periodService.getYear();
     String period = periodService.getPeriod();
     Session session =
-            sessionRepository.getSessionByScheduleAndClassroom(classroom, slot, day, year, period);
+        sessionRepository.getSessionByScheduleAndClassroom(classroom, slot, day, year, period);
     if (session == null) {
       logger.error("Session not found by scheduled and classroom: {} , {}", day, classroom);
       throw new IllegalArgumentException(
-              "Session not found by sessionId: " + day + ", " + classroom);
+          "Session not found by sessionId: " + day + ", " + classroom);
     }
     return session;
   }
@@ -66,12 +65,12 @@ public class SessionService {
     String period = periodService.getPeriod();
 
     Session session =
-            sessionRepository.getSessionByScheduleAndGroupCode(groupCode, slot, day, year, period);
+        sessionRepository.getSessionByScheduleAndGroupCode(groupCode, slot, day, year, period);
 
     if (session == null) {
       logger.error("Session not found by scheduled and classroom: {} en la franja {}", day, slot);
       throw new IllegalArgumentException(
-              "Session not found by sessionId: " + day + " en la franja " + slot);
+          "Session not found by sessionId: " + day + " en la franja " + slot);
     }
     return session;
   }
@@ -80,14 +79,14 @@ public class SessionService {
     sessionValidator.validateCreateSession(sessiondto);
 
     Session session =
-            new Session.SessionBuilder()
-                    .groupCode(sessiondto.groupCode())
-                    .classroomName(sessiondto.classroomName())
-                    .slot(sessiondto.slot())
-                    .day(sessiondto.day())
-                    .year(periodService.getYear())
-                    .period(periodService.getPeriod())
-                    .build();
+        new Session.SessionBuilder()
+            .groupCode(sessiondto.groupCode())
+            .classroomName(sessiondto.classroomName())
+            .slot(sessiondto.slot())
+            .day(sessiondto.day())
+            .year(periodService.getYear())
+            .period(periodService.getPeriod())
+            .build();
     try {
       return sessionRepository.save(session);
     } catch (Exception e) {
@@ -110,7 +109,7 @@ public class SessionService {
     } catch (Exception e) {
       logger.error("An unexpected error has occurred updating a session: {}", e.getMessage());
       throw new RuntimeException(
-              "An unexpected error has occurred updating a session:" + e.getMessage());
+          "An unexpected error has occurred updating a session:" + e.getMessage());
     }
   }
 
@@ -123,7 +122,7 @@ public class SessionService {
     } catch (Exception e) {
       logger.error("An unexpected error has occurred deleting a session : {}", e.getMessage());
       throw new RuntimeException(
-              "An unexpected error has occurred updating a session: " + e.getMessage());
+          "An unexpected error has occurred updating a session: " + e.getMessage());
     }
   }
 

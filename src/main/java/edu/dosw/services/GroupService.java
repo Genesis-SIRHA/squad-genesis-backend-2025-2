@@ -10,12 +10,11 @@ import edu.dosw.model.Group;
 import edu.dosw.model.Session;
 import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.repositories.GroupRepository;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * Service class that handles business logic related to groups. Provides methods for retrieving and
@@ -65,24 +64,24 @@ public class GroupService {
    */
   public Group createGroup(CreationGroupRequest groupRequest, String facultyName, String plan) {
     Course course =
-            facultyService.findCourseByAbbreviation(groupRequest.abbreviation(), facultyName, plan);
+        facultyService.findCourseByAbbreviation(groupRequest.abbreviation(), facultyName, plan);
     if (course == null) {
       logger.error("Faculty not found: " + groupRequest.abbreviation());
       throw new BusinessException("Faculty not found: " + groupRequest.abbreviation());
     }
 
     Group group =
-            new Group.GroupBuilder()
-                    .groupCode(groupRequest.groupCode())
-                    .abbreviation(groupRequest.abbreviation())
-                    .year(periodService.getYear())
-                    .period(periodService.getPeriod())
-                    .professorId(groupRequest.teacherId())
-                    .isLab(groupRequest.isLab())
-                    .groupNum(groupRequest.groupNum())
-                    .enrolled(groupRequest.enrolled())
-                    .maxCapacity(groupRequest.maxCapacity())
-                    .build();
+        new Group.GroupBuilder()
+            .groupCode(groupRequest.groupCode())
+            .abbreviation(groupRequest.abbreviation())
+            .year(periodService.getYear())
+            .period(periodService.getPeriod())
+            .professorId(groupRequest.teacherId())
+            .isLab(groupRequest.isLab())
+            .groupNum(groupRequest.groupNum())
+            .enrolled(groupRequest.enrolled())
+            .maxCapacity(groupRequest.maxCapacity())
+            .build();
 
     return groupRepository.save(group);
   }
@@ -161,16 +160,16 @@ public class GroupService {
     Group group = getGroupByGroupCode(groupCode);
 
     if (!group.getYear().equals(periodService.getYear())
-            || !group.getPeriod().equals(periodService.getPeriod())) {
+        || !group.getPeriod().equals(periodService.getPeriod())) {
       logger.error(
-              "The historial period and year does not match the one from the group: {} != {}",
-              group.getPeriod(),
-              periodService.getPeriod());
+          "The historial period and year does not match the one from the group: {} != {}",
+          group.getPeriod(),
+          periodService.getPeriod());
       throw new IllegalArgumentException(
-              "The historial period and year does not match the one from the group"
-                      + group.getPeriod()
-                      + " != "
-                      + periodService.getPeriod());
+          "The historial period and year does not match the one from the group"
+              + group.getPeriod()
+              + " != "
+              + periodService.getPeriod());
     }
 
     group.setEnrolled(group.getEnrolled() - 1);

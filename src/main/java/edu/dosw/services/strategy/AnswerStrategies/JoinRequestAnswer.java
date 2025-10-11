@@ -28,23 +28,23 @@ public class JoinRequestAnswer implements AnswerStrategy {
 
     try {
       UpdateGroupRequest groupRequest =
-              new UpdateGroupRequest(
-                      group.getProfessorId(),
-                      group.isLab(),
-                      group.getGroupNum(),
-                      group.getMaxCapacity(),
-                      group.getEnrolled() + 1);
+          new UpdateGroupRequest(
+              group.getProfessorId(),
+              group.isLab(),
+              group.getGroupNum(),
+              group.getMaxCapacity(),
+              group.getEnrolled() + 1);
       groupService.updateGroup(group.getGroupCode(), groupRequest);
 
       HistorialDTO historialDTO =
-              new HistorialDTO(
-                      request.getStudentId(), request.getDestinationGroupId(), HistorialStatus.ON_GOING);
+          new HistorialDTO(
+              request.getStudentId(), request.getDestinationGroupId(), HistorialStatus.ON_GOING);
 
       try {
         historialService.addHistorial(historialDTO);
       } catch (Exception e) {
         historialService.updateHistorial(
-                request.getStudentId(), request.getDestinationGroupId(), HistorialStatus.ON_GOING);
+            request.getStudentId(), request.getDestinationGroupId(), HistorialStatus.ON_GOING);
       }
 
     } catch (Exception e) {

@@ -1,13 +1,12 @@
 package edu.dosw.model;
 
 import edu.dosw.model.enums.DayOfWeek;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor

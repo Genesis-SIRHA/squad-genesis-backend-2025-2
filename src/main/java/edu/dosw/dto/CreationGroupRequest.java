@@ -15,5 +15,4 @@ public record CreationGroupRequest(
     @NotNull Boolean isLab,
     String groupNum,
     @Min(value = 1) int maxCapacity,
-    @Min(value = 0) int enrolled) {
-}
+    @Min(value = 0) int enrolled) {}

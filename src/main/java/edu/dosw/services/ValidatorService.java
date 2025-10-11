@@ -11,12 +11,11 @@ import edu.dosw.model.Student;
 import edu.dosw.model.enums.RequestStatus;
 import edu.dosw.model.enums.RequestType;
 import edu.dosw.services.UserServices.StudentService;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 @AllArgsConstructor
 @Service
@@ -44,13 +43,13 @@ public class ValidatorService {
     if (!request.type().equals(RequestType.CANCELLATION)) {
       Group destinationGroup = groupService.getGroupByGroupCode(request.destinationGroupId());
       Faculty faculty =
-              facultyService.getFacultyByNameAndPlan(student.getFacultyName(), student.getPlan());
+          facultyService.getFacultyByNameAndPlan(student.getFacultyName(), student.getPlan());
       if (faculty.getCourses().stream()
               .filter(c -> c.getAbbreviation().equals(destinationGroup.getAbbreviation()))
               .findFirst()
               .get()
               .getAbbreviation()
-              == null) {
+          == null) {
         logger.error("The destination group is not in your plan");
         throw new IllegalArgumentException("The origin group is not in your plan");
       }
@@ -65,7 +64,7 @@ public class ValidatorService {
   }
 
   public void validateUpdateRequest(
-          String userId, Request request, UpdateRequestDto updateRequestDto) {
+      String userId, Request request, UpdateRequestDto updateRequestDto) {
     UserCredentialsDto user = authenticationService.findByUserId(userId).orElse(null);
     if (user == null) {
       throw new RuntimeException("User not found with id: " + userId);
@@ -80,7 +79,7 @@ public class ValidatorService {
     }
 
     if (request.getStatus() != RequestStatus.PENDING
-            && updateRequestDto.status() == RequestStatus.PENDING) {
+        && updateRequestDto.status() == RequestStatus.PENDING) {
       throw new RuntimeException("Request cannot be changed to PENDING");
     }
   }
@@ -89,7 +88,7 @@ public class ValidatorService {
     Map<String, String> faculties = facultyService.getAllFacultyNames();
     if (!faculties.containsKey(facultyName)) {
       throw new BusinessException(
-              "Faculty " + facultyName + " does not exist in " + faculties.keySet());
+          "Faculty " + facultyName + " does not exist in " + faculties.keySet());
     }
   }
 }

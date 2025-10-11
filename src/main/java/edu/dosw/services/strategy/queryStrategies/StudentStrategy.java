@@ -4,10 +4,9 @@ import edu.dosw.model.Request;
 import edu.dosw.model.Student;
 import edu.dosw.repositories.RequestRepository;
 import edu.dosw.services.UserServices.StudentService;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 /**
  * Implementation of QueryStrategy for student users. This strategy allows students to see only

@@ -18,5 +18,4 @@ public record CreateRequestDto(
     @NotNull RequestType type,
     String description,
     String originGroupId,
-    String destinationGroupId) {
-}
+    String destinationGroupId) {}

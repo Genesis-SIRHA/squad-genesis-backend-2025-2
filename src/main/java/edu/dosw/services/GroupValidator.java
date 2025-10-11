@@ -24,27 +24,27 @@ public class GroupValidator {
       throw new BusinessException("Failed to delete group");
     }
     if (!group.getYear().equals(periodService.getYear())
-            || !group.getPeriod().equals(periodService.getPeriod())) {
+        || !group.getPeriod().equals(periodService.getPeriod())) {
       logger.error(
-              "The historial period and year does not match the one from the group: {} != {}",
-              group.getPeriod(),
-              periodService.getPeriod());
+          "The historial period and year does not match the one from the group: {} != {}",
+          group.getPeriod(),
+          periodService.getPeriod());
       throw new IllegalArgumentException(
-              "The historial period and year does not match the one from the group"
-                      + group.getPeriod()
-                      + " != "
-                      + periodService.getPeriod());
+          "The historial period and year does not match the one from the group"
+              + group.getPeriod()
+              + " != "
+              + periodService.getPeriod());
     }
 
     Student student = studentService.getStudentById(studentId);
     Faculty faculty =
-            facultyService.getFacultyByNameAndPlan(student.getFacultyName(), student.getPlan());
+        facultyService.getFacultyByNameAndPlan(student.getFacultyName(), student.getPlan());
     if (faculty.getCourses().stream()
             .filter(c -> c.getAbbreviation().equals(group.getAbbreviation()))
             .findFirst()
             .get()
             .getAbbreviation()
-            == null) {
+        == null) {
       logger.error("The destination group is not in your plan");
       throw new IllegalArgumentException("The origin group is not in your plan");
     }

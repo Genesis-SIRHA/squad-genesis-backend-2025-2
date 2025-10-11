@@ -16,16 +16,15 @@ import edu.dosw.services.strategy.queryStrategies.DeanStrategy;
 import edu.dosw.services.strategy.queryStrategies.ProfessorStrategy;
 import edu.dosw.services.strategy.queryStrategies.QueryStrategy;
 import edu.dosw.services.strategy.queryStrategies.StudentStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class RequestService {
@@ -76,8 +75,8 @@ public class RequestService {
   public List<Request> fetchAllRequests() {
     try {
       return requestRepository.findAll().stream()
-              .sorted(Comparator.comparing(Request::getCreatedAt))
-              .toList();
+          .sorted(Comparator.comparing(Request::getCreatedAt))
+          .toList();
     } catch (Exception e) {
       logger.error("Failed to fetch all requests: {}", e.getMessage());
       throw new RuntimeException("Failed to fetch all requests: " + e.getMessage());
@@ -88,13 +87,13 @@ public class RequestService {
     validatorService.validateCreateRequest(requestDTO);
 
     Request request =
-            new Request.RequestBuilder()
-                    .studentId(requestDTO.studentId())
-                    .type(requestDTO.type())
-                    .description(requestDTO.description())
-                    .destinationGroupId(requestDTO.destinationGroupId())
-                    .originGroupId(requestDTO.originGroupId())
-                    .build();
+        new Request.RequestBuilder()
+            .studentId(requestDTO.studentId())
+            .type(requestDTO.type())
+            .description(requestDTO.description())
+            .destinationGroupId(requestDTO.destinationGroupId())
+            .originGroupId(requestDTO.originGroupId())
+            .build();
     try {
       return requestRepository.save(request);
     } catch (Exception e) {
@@ -184,8 +183,8 @@ public class RequestService {
     }
     try {
       return facultyRequest.stream()
-              .sorted(Comparator.comparing(Request::getCreatedAt).reversed())
-              .toList();
+          .sorted(Comparator.comparing(Request::getCreatedAt).reversed())
+          .toList();
     } catch (Exception e) {
       logger.error("Failed to fetch requests by faculty name: {}", e.getMessage());
       throw new RuntimeException("Failed to fetch requests by faculty name: " + e.getMessage());

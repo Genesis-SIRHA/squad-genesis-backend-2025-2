@@ -7,15 +7,14 @@ import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Faculty;
 import edu.dosw.repositories.FacultyRepository;
-import lombok.AllArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 /**
  * Service class that handles business logic related to courses and groups. Provides methods for
@@ -50,9 +49,9 @@ public class FacultyService {
       return facultyRepository.findAll();
     } catch (Exception e) {
       logger.error(
-              "An inesperated error has occurred when getting all faculties: {}", e.getMessage());
+          "An inesperated error has occurred when getting all faculties: {}", e.getMessage());
       throw new BusinessException(
-              "An inesperated error has occurred when getting all faculties: " + e.getMessage());
+          "An inesperated error has occurred when getting all faculties: " + e.getMessage());
     }
   }
 
@@ -67,9 +66,9 @@ public class FacultyService {
 
   public Faculty updateFacultyByNameAndPlan(FacultyDto facultyDto) {
     Faculty faculty =
-            facultyRepository
-                    .findByNameAndPlan(facultyDto.facultyName(), facultyDto.plan())
-                    .orElse(null);
+        facultyRepository
+            .findByNameAndPlan(facultyDto.facultyName(), facultyDto.plan())
+            .orElse(null);
     if (faculty == null) {
       logger.error("Faculty not found: {}", facultyDto.facultyName());
       throw new BusinessException("Faculty not found: " + facultyDto.facultyName());
@@ -81,9 +80,9 @@ public class FacultyService {
       return facultyRepository.save(faculty);
     } catch (Exception e) {
       logger.error(
-              "An inesperated error has occurred when updating the faculty: {}", e.getMessage());
+          "An inesperated error has occurred when updating the faculty: {}", e.getMessage());
       throw new BusinessException(
-              "An inesperated error has occurred when updating the faculty: " + e.getMessage());
+          "An inesperated error has occurred when updating the faculty: " + e.getMessage());
     }
   }
 
@@ -105,13 +104,13 @@ public class FacultyService {
    */
   public Faculty addCourse(CourseRequest request) {
     Faculty faculty =
-            facultyRepository
-                    .findByNameAndPlan(request.facultyName().toLowerCase(), request.plan())
-                    .orElseThrow(
-                            () -> new BusinessException("Faculty not found: " + request.facultyName()));
+        facultyRepository
+            .findByNameAndPlan(request.facultyName().toLowerCase(), request.plan())
+            .orElseThrow(
+                () -> new BusinessException("Faculty not found: " + request.facultyName()));
 
     if (faculty.getCourses().stream()
-            .anyMatch(c -> c.getAbbreviation().equals(request.abbreviation().toUpperCase()))) {
+        .anyMatch(c -> c.getAbbreviation().equals(request.abbreviation().toUpperCase()))) {
       logger.error("Course already exists: " + request.abbreviation());
       throw new BusinessException("Course already exists: " + request.abbreviation());
     }
@@ -132,17 +131,17 @@ public class FacultyService {
    * @return An Optional containing the updated Course if found, or empty if not found
    */
   public Course updateCourse(
-          String courseAbbreviation, String facultyName, String plan, UpdateCourseDTO updateCourseDTO) {
+      String courseAbbreviation, String facultyName, String plan, UpdateCourseDTO updateCourseDTO) {
     Faculty faculty =
-            facultyRepository
-                    .findByNameAndPlan(facultyName.toLowerCase(), plan)
-                    .orElseThrow(() -> new BusinessException("Faculty not found: " + facultyName));
+        facultyRepository
+            .findByNameAndPlan(facultyName.toLowerCase(), plan)
+            .orElseThrow(() -> new BusinessException("Faculty not found: " + facultyName));
 
     Course existingCourse =
-            faculty.getCourses().stream()
-                    .filter(c -> c.getAbbreviation().equals(courseAbbreviation.toUpperCase()))
-                    .findFirst()
-                    .orElseThrow(() -> new BusinessException("Course not found: " + courseAbbreviation));
+        faculty.getCourses().stream()
+            .filter(c -> c.getAbbreviation().equals(courseAbbreviation.toUpperCase()))
+            .findFirst()
+            .orElseThrow(() -> new BusinessException("Course not found: " + courseAbbreviation));
 
     if (updateCourseDTO.courseName() != null)
       existingCourse.setCourseName(updateCourseDTO.courseName().toLowerCase());
@@ -162,9 +161,9 @@ public class FacultyService {
    * @throws BusinessException if the course is not found or no faculties exist
    */
   public Course findCourseByAbbreviation(
-          String courseAbbreviation, String facultyName, String plan) {
+      String courseAbbreviation, String facultyName, String plan) {
     Faculty faculty =
-            facultyRepository.findByNameAndPlan(facultyName.toLowerCase(), plan).orElse(null);
+        facultyRepository.findByNameAndPlan(facultyName.toLowerCase(), plan).orElse(null);
 
     if (faculty == null) {
       logger.error("Course not found: {} ", courseAbbreviation);
@@ -178,9 +177,9 @@ public class FacultyService {
     }
 
     return courses.stream()
-            .filter(c -> c.getAbbreviation().equals(courseAbbreviation.toUpperCase()))
-            .findFirst()
-            .orElse(null);
+        .filter(c -> c.getAbbreviation().equals(courseAbbreviation.toUpperCase()))
+        .findFirst()
+        .orElse(null);
   }
 
   /**
@@ -192,14 +191,14 @@ public class FacultyService {
    */
   public void deleteCourse(String courseAbbreviation, String facultyName, String plan) {
     Faculty faculty =
-            facultyRepository.findByNameAndPlan(facultyName.toLowerCase(), plan).orElse(null);
+        facultyRepository.findByNameAndPlan(facultyName.toLowerCase(), plan).orElse(null);
     if (faculty == null) {
       logger.error("Faculty not found: " + facultyName);
       throw new BusinessException("Faculty not found: " + facultyName);
     }
     faculty
-            .getCourses()
-            .removeIf(c -> c.getAbbreviation().equals(courseAbbreviation.toUpperCase()));
+        .getCourses()
+        .removeIf(c -> c.getAbbreviation().equals(courseAbbreviation.toUpperCase()));
     facultyRepository.save(faculty);
   }
 }

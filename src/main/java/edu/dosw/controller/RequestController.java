@@ -8,11 +8,10 @@ import edu.dosw.model.enums.Role;
 import edu.dosw.services.RequestService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * Controller that handles all request-related HTTP operations. Provides endpoints for creating,
@@ -27,8 +26,8 @@ public class RequestController {
 
   @PostMapping
   @Operation(
-          summary = "Create a new request",
-          description = "Creates a new request with the provided details")
+      summary = "Create a new request",
+      description = "Creates a new request with the provided details")
   public ResponseEntity<Request> createRequest(@RequestBody CreateRequestDto request) {
     Request createdRequest = requestService.createRequest(request);
     return ResponseEntity.ok(createdRequest);
@@ -60,8 +59,8 @@ public class RequestController {
 
   @GetMapping("/student/{studentId}")
   @Operation(
-          summary = "Get historical requests by studentId",
-          description = "Retrieves requests based on user role and userId")
+      summary = "Get historical requests by studentId",
+      description = "Retrieves requests based on user role and userId")
   public ResponseEntity<List<Request>> getStudentHistorialRequests(@PathVariable String studentId) {
     List<Request> requests = requestService.fetchRequests(Role.STUDENT, studentId);
     return ResponseEntity.ok(requests);
@@ -69,8 +68,8 @@ public class RequestController {
 
   @GetMapping("/faculty/{facultyName}")
   @Operation(
-          summary = "Get faculty requests",
-          description = "Retrieves requests based on faculty name")
+      summary = "Get faculty requests",
+      description = "Retrieves requests based on faculty name")
   public ResponseEntity<List<Request>> getRequestByFacultyName(@PathVariable String facultyName) {
     List<Request> requests = requestService.fetchRequestsByFacultyName(facultyName.toLowerCase());
     return ResponseEntity.ok(requests);
@@ -78,8 +77,8 @@ public class RequestController {
 
   @GetMapping("/stats")
   @Operation(
-          summary = "Get request statistics",
-          description = "Retrieves statistics about requests")
+      summary = "Get request statistics",
+      description = "Retrieves statistics about requests")
   public ResponseEntity<RequestStats> getRequestStats() {
     return ResponseEntity.ok(requestService.getRequestStats());
   }

@@ -5,13 +5,12 @@ import edu.dosw.model.Course;
 import edu.dosw.model.Historial;
 import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.repositories.HistorialRepository;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @AllArgsConstructor
 @Service
@@ -37,7 +36,7 @@ public class HistorialService {
     if (historial == null) {
       logger.error("historial does not exist");
       throw new IllegalArgumentException(
-              "historial not found with studentId " + studentId + " and groupCode " + groupCode);
+          "historial not found with studentId " + studentId + " and groupCode " + groupCode);
     }
     return historial;
   }
@@ -67,13 +66,13 @@ public class HistorialService {
     historialValidator.validateHistorialCreation(historialDTO);
 
     Historial historial =
-            new Historial.HistorialBuilder()
-                    .studentId(historialDTO.studentId())
-                    .groupCode(historialDTO.groupCode())
-                    .status(historialDTO.status())
-                    .year(periodService.getYear())
-                    .period(periodService.getPeriod())
-                    .build();
+        new Historial.HistorialBuilder()
+            .studentId(historialDTO.studentId())
+            .groupCode(historialDTO.groupCode())
+            .status(historialDTO.status())
+            .year(periodService.getYear())
+            .period(periodService.getPeriod())
+            .build();
     historialRepository.save(historial);
     return historial;
   }

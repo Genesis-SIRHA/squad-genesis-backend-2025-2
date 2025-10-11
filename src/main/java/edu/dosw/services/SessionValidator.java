@@ -39,7 +39,7 @@ public class SessionValidator {
 
   public void validateDeleteSession(Session session) {
     if (!session.getYear().equals(periodService.getYear())
-            || !session.getPeriod().equals(periodService.getPeriod())) {
+        || !session.getPeriod().equals(periodService.getPeriod())) {
       logger.error("The year or period are invalid");
       throw new RuntimeException("The year or period are invalid");
     }

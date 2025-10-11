@@ -23,17 +23,17 @@ public class CancellationRequestAnswer implements AnswerStrategy {
 
     try {
       UpdateGroupRequest groupRequest =
-              new UpdateGroupRequest(
-                      group.getProfessorId(),
-                      group.isLab(),
-                      group.getGroupNum(),
-                      group.getMaxCapacity(),
-                      group.getEnrolled() - 1);
+          new UpdateGroupRequest(
+              group.getProfessorId(),
+              group.isLab(),
+              group.getGroupNum(),
+              group.getMaxCapacity(),
+              group.getEnrolled() - 1);
 
       groupService.updateGroup(group.getGroupCode(), groupRequest);
 
       historialService.updateHistorial(
-              request.getStudentId(), request.getOriginGroupId(), HistorialStatus.CANCELLED);
+          request.getStudentId(), request.getOriginGroupId(), HistorialStatus.CANCELLED);
 
     } catch (Exception e) {
       logger.error("Failed to answer request: {}", e.getMessage());

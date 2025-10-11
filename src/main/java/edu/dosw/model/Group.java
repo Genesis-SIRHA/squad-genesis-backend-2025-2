@@ -11,8 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 @Document(collection = "groups")
 public class Group {
-  @Id
-  private String id;
+  @Id private String id;
   private String groupCode;
   private String abbreviation;
   private String year;

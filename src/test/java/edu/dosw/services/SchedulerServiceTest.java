@@ -1,13 +1,12 @@
 package edu.dosw.services;
 
-import edu.dosw.model.Schedule;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+
+import edu.dosw.model.Schedule;
+import java.util.ArrayList;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class SchedulerServiceTest {
 

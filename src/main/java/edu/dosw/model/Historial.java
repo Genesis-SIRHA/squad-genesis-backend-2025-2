@@ -12,8 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @Document(collection = "historial")
 public class Historial {
-  @Id
-  private String id;
+  @Id private String id;
   private String studentId;
   private String groupCode;
   private HistorialStatus status;
