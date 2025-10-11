@@ -11,17 +11,17 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 @Service
 public class HistorialValidator {
-    private final Logger logger = LoggerFactory.getLogger(HistorialValidator.class);
-    private StudentService studentService;
+  private final Logger logger = LoggerFactory.getLogger(HistorialValidator.class);
+  private StudentService studentService;
 
-    public void validateHistorialCreation(HistorialDTO historialDTO) {
-        studentService.getStudentById(historialDTO.studentId());
-    }
+  public void validateHistorialCreation(HistorialDTO historialDTO) {
+    studentService.getStudentById(historialDTO.studentId());
+  }
 
-    public void historialUpdateValidator(HistorialStatus oldStatus, HistorialStatus newStatus) {
-        if (oldStatus == newStatus) {
-            logger.error("Trying to change to the same status");
-            throw new IllegalArgumentException("there are no changes in STATUS");
-        }
+  public void historialUpdateValidator(HistorialStatus oldStatus, HistorialStatus newStatus) {
+    if (oldStatus == newStatus) {
+      logger.error("Trying to change to the same status");
+      throw new IllegalArgumentException("there are no changes in STATUS");
     }
+  }
 }

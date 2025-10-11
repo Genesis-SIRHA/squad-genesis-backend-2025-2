@@ -11,8 +11,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 @Document(collection = "groups")
 public class Group {
-    @Id
-    private String id;
+  @Id
+  private String id;
   private String groupCode;
   private String abbreviation;
   private String year;
@@ -36,63 +36,63 @@ public class Group {
   }
 
   public static class GroupBuilder {
-      private String groupCode;
-      private String abbreviation;
-      private String year;
-      private String period;
-      private String professorId;
-      private boolean isLab;
-      private String groupNum;
-      private int enrolled;
-      private int maxCapacity;
+    private String groupCode;
+    private String abbreviation;
+    private String year;
+    private String period;
+    private String professorId;
+    private boolean isLab;
+    private String groupNum;
+    private int enrolled;
+    private int maxCapacity;
 
-      public GroupBuilder groupCode(String groupCode) {
-          this.groupCode = groupCode.toUpperCase();
-          return this;
-      }
+    public GroupBuilder groupCode(String groupCode) {
+      this.groupCode = groupCode.toUpperCase();
+      return this;
+    }
 
-      public GroupBuilder abbreviation(String abbreviation) {
-          this.abbreviation = abbreviation.toUpperCase();
-          return this;
-      }
+    public GroupBuilder abbreviation(String abbreviation) {
+      this.abbreviation = abbreviation.toUpperCase();
+      return this;
+    }
 
-      public GroupBuilder year(String year) {
-          this.year = year;
-          return this;
-      }
+    public GroupBuilder year(String year) {
+      this.year = year;
+      return this;
+    }
 
-      public GroupBuilder period(String period) {
-          this.period = period;
-          return this;
-      }
+    public GroupBuilder period(String period) {
+      this.period = period;
+      return this;
+    }
 
-      public GroupBuilder professorId(String professorId) {
-          this.professorId = professorId;
-          return this;
-      }
+    public GroupBuilder professorId(String professorId) {
+      this.professorId = professorId;
+      return this;
+    }
 
-      public GroupBuilder isLab(boolean isLab) {
-          this.isLab = isLab;
-          return this;
-      }
+    public GroupBuilder isLab(boolean isLab) {
+      this.isLab = isLab;
+      return this;
+    }
 
-      public GroupBuilder groupNum(String groupNum) {
-          this.groupNum = groupNum;
-          return this;
-      }
+    public GroupBuilder groupNum(String groupNum) {
+      this.groupNum = groupNum;
+      return this;
+    }
 
-      public GroupBuilder enrolled(int enrolled) {
-          this.enrolled = enrolled;
-          return this;
-      }
+    public GroupBuilder enrolled(int enrolled) {
+      this.enrolled = enrolled;
+      return this;
+    }
 
-      public GroupBuilder maxCapacity(int maxCapacity) {
-          this.maxCapacity = maxCapacity;
-          return this;
-      }
+    public GroupBuilder maxCapacity(int maxCapacity) {
+      this.maxCapacity = maxCapacity;
+      return this;
+    }
 
-      public Group build() {
-          return new Group(this);
-      }
+    public Group build() {
+      return new Group(this);
+    }
   }
 }

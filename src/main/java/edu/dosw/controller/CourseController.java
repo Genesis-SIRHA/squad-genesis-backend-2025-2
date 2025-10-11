@@ -47,7 +47,7 @@ public class CourseController {
           @PathVariable String courseAbbreviation,
           @RequestParam String facultyName,
           @RequestParam String plan) {
-      Course course = facultyService.findCourseByAbbreviation(courseAbbreviation, facultyName, plan);
+    Course course = facultyService.findCourseByAbbreviation(courseAbbreviation, facultyName, plan);
     return ResponseEntity.ok(course);
   }
 
@@ -80,8 +80,8 @@ public class CourseController {
           @RequestParam String facultyName,
           @RequestParam String plan,
           @RequestBody UpdateCourseDTO updateCourseDTO) {
-      Course course =
-              facultyService.updateCourse(courseAbbreviation, facultyName, plan, updateCourseDTO);
+    Course course =
+            facultyService.updateCourse(courseAbbreviation, facultyName, plan, updateCourseDTO);
     return ResponseEntity.ok((course));
   }
 
@@ -101,7 +101,7 @@ public class CourseController {
           @PathVariable String courseAbbreviation,
           @RequestParam String facultyName,
           @RequestParam String plan) {
-      facultyService.deleteCourse(courseAbbreviation, facultyName, plan);
+    facultyService.deleteCourse(courseAbbreviation, facultyName, plan);
     return ResponseEntity.noContent().build();
   }
 }

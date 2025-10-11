@@ -38,8 +38,8 @@ public class StudentStrategy implements QueryStrategy {
   public List<Request> queryRequests(String userId) {
     Student student = studentService.getStudentById(userId);
     if (student == null) {
-        logger.error("Student not found with id: {}", userId);
-        throw new IllegalArgumentException("Student not found with id: " + userId);
+      logger.error("Student not found with id: {}", userId);
+      throw new IllegalArgumentException("Student not found with id: " + userId);
     }
     return requestRepository.findByStudentId(userId);
   }

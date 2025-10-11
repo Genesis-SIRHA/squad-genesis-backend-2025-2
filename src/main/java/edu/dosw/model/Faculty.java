@@ -13,8 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 @Document(collection = "faculties")
 public class Faculty {
-    @Id
-    private String id;
+  @Id
+  private String id;
 
   @Field("facultyName")
   private String facultyName;
