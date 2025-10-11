@@ -5,18 +5,18 @@ import edu.dosw.model.Course;
 import edu.dosw.model.Historial;
 import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.repositories.HistorialRepository;
-import java.util.ArrayList;
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @AllArgsConstructor
 @Service
 public class HistorialService {
-  private final ValidatorService validatorService;
+  private final HistorialValidator historialValidator;
   private final HistorialRepository historialRepository;
   private final PeriodService periodService;
   private final Logger logger = LoggerFactory.getLogger(HistorialService.class);
@@ -32,11 +32,12 @@ public class HistorialService {
     return groupCodes;
   }
 
-  public Historial getByStudentIdAndGroupCode(String studentId,String groupCode){
-    Historial historial =historialRepository.findByStudentIdAndGroupCode(studentId, groupCode);
-    if(historial == null){
+  public Historial getByStudentIdAndGroupCode(String studentId, String groupCode) {
+    Historial historial = historialRepository.findByStudentIdAndGroupCode(studentId, groupCode);
+    if (historial == null) {
       logger.error("historial does not exist");
-      throw new IllegalArgumentException("historial not found with studentId "+studentId+" and groupCode "+ groupCode );
+      throw new IllegalArgumentException(
+              "historial not found with studentId " + studentId + " and groupCode " + groupCode);
     }
     return historial;
   }
@@ -63,25 +64,30 @@ public class HistorialService {
 
   public Historial addHistorial(HistorialDTO historialDTO) {
     getByStudentIdAndGroupCode(historialDTO.studentId(), historialDTO.groupCode());
-    validatorService.historialCreationValidator(historialDTO);
+    historialValidator.validateHistorialCreation(historialDTO);
 
-    Historial historial = new Historial.HistorialBuilder()
-    .studentId(historialDTO.studentId())
-    .groupCode(historialDTO.groupCode())
-    .status(historialDTO.status())
-    .year(periodService.getYear())
-    .period(periodService.getPeriod())
-    .build();
+    Historial historial =
+            new Historial.HistorialBuilder()
+                    .studentId(historialDTO.studentId())
+                    .groupCode(historialDTO.groupCode())
+                    .status(historialDTO.status())
+                    .year(periodService.getYear())
+                    .period(periodService.getPeriod())
+                    .build();
     historialRepository.save(historial);
     return historial;
   }
 
-  public Historial updateHistorial (String studentId, String groupCode, HistorialStatus newStatus){
+  public Historial updateHistorial(String studentId, String groupCode, HistorialStatus newStatus) {
     Historial historial = getByStudentIdAndGroupCode(studentId, groupCode);
-    validatorService.historialUpdateValidator(historial.getStatus(), newStatus);
+    historialValidator.historialUpdateValidator(historial.getStatus(), newStatus);
 
     historial.setStatus(newStatus);
     historialRepository.save(historial);
     return historial;
+  }
+
+  public List<Historial> getAllHistorial() {
+    return historialRepository.findAll();
   }
 }

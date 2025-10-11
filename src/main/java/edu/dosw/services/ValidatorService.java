@@ -1,13 +1,15 @@
 package edu.dosw.services;
 
-import edu.dosw.dto.*;
+import edu.dosw.dto.CreateRequestDto;
+import edu.dosw.dto.UpdateRequestDto;
+import edu.dosw.dto.UserCredentialsDto;
 import edu.dosw.exception.BusinessException;
+import edu.dosw.model.Faculty;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
-import edu.dosw.model.Session;
-import edu.dosw.model.enums.HistorialStatus;
-import edu.dosw.model.enums.RequestType;
+import edu.dosw.model.Student;
 import edu.dosw.model.enums.RequestStatus;
+import edu.dosw.model.enums.RequestType;
 import edu.dosw.services.UserServices.StudentService;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -19,114 +21,75 @@ import java.util.Map;
 @AllArgsConstructor
 @Service
 public class ValidatorService {
-    private GroupService groupService;
-    private StudentService studentService;
-    private AuthenticationService authenticationService;
-    private FacultyService facultyService;
-    private PeriodService periodService;
-    private static final Logger logger = LoggerFactory.getLogger(ValidatorService.class);
+  private static final Logger logger = LoggerFactory.getLogger(ValidatorService.class);
+  private GroupService groupService;
+  private StudentService studentService;
+  private AuthenticationService authenticationService;
+  private FacultyService facultyService;
 
+  public void validateCreateRequest(CreateRequestDto request) {
 
-    public void historialCreationValidator(HistorialDTO historialDTO) {
-        studentService.getStudentById(historialDTO.studentId());
-
-        Group group = groupService.findByGroupCode(historialDTO.groupCode());
-
-        if (!group.getYear().equals(periodService.getYear()) || !group.getPeriod().equals(periodService.getPeriod())){
-            logger.error("The historial period and year does not match the one from the group: {} != {}", group.getPeriod(),periodService.getPeriod());
-            throw new IllegalArgumentException("The historial period and year does not match the one from the group"+ group.getPeriod()+" != "+periodService.getPeriod());
-        }
+    if (!request.type().equals(RequestType.JOIN) && request.originGroupId() == null) {
+      throw new IllegalArgumentException("Invalid Request: There is not an originGroupId");
+    }
+    if (!request.type().equals(RequestType.CANCELLATION) && request.destinationGroupId() == null) {
+      throw new IllegalArgumentException("Invalid Request: There is not a destinationGroupId");
     }
 
-    public void historialUpdateValidator(HistorialStatus oldStatus, HistorialStatus newStatus) {
-
-        if (oldStatus == newStatus){
-            logger.error("Trying to change to the same status");
-            throw new IllegalArgumentException("there are no changes in STATUS");
-        }
+    Student student = studentService.getStudentById(request.studentId());
+    if (!request.type().equals(RequestType.JOIN)) {
+      groupService.getGroupByGroupCode(request.originGroupId());
     }
 
-    public void validateCreateRequest(CreateRequestDto request) {
-        studentService.getStudentById(request.studentId());
-
-        if (!request.type().equals(RequestType.JOIN) && request.originGroupId() == null) {
-            throw new IllegalArgumentException("Invalid Request: There is not an originGroupId");
-        }
-
-        if (!request.type().equals(RequestType.CANCELLATION) && request.destinationGroupId() == null) {
-            throw new IllegalArgumentException("Invalid Request: There is not a destinationGroupId");
-        }
-
-        if(!request.type().equals(RequestType.JOIN)){
-            groupService.findByGroupCode(request.originGroupId());
-        }
-        if(!request.type().equals(RequestType.CANCELLATION)){
-            groupService.findByGroupCode(request.destinationGroupId());
-        }
-
-        // TODO: realizar validacion de que el estudiante si quiere cancelar o hacer swap el este en el grupo de origen
-        // TODO: realizar validacion de que no exista una solicitud con el mismo estudiante, grupo origen y grupo destino
-        // TODO: realizar validacion de que el grupo destino en caso de ser SWAP O JOIN el destinationGroup no sea de una clase ya vista y terminada
+    if (!request.type().equals(RequestType.CANCELLATION)) {
+      Group destinationGroup = groupService.getGroupByGroupCode(request.destinationGroupId());
+      Faculty faculty =
+              facultyService.getFacultyByNameAndPlan(student.getFacultyName(), student.getPlan());
+      if (faculty.getCourses().stream()
+              .filter(c -> c.getAbbreviation().equals(destinationGroup.getAbbreviation()))
+              .findFirst()
+              .get()
+              .getAbbreviation()
+              == null) {
+        logger.error("The destination group is not in your plan");
+        throw new IllegalArgumentException("The origin group is not in your plan");
+      }
     }
 
-    public void validateUpdateRequest(String userId, Request request, UpdateRequestDto updateRequestDto) {
-        UserCredentialsDto user = authenticationService.findByUserId(userId).orElse(null);
-        if (user == null) {
-            throw new RuntimeException("User not found with id: " + userId);
-        }
+    // TODO: realizar validacion de que el estudiante si quiere cancelar o hacer swap el este en el
+    // grupo de origen
+    // TODO: realizar validacion de que no exista una solicitud con el mismo estudiante, grupo
+    // origen y grupo destino
+    // TODO: realizar validacion de que el grupo destino en caso de ser SWAP O JOIN el
+    // destinationGroup no sea de una clase ya vista y terminada
+  }
 
-        if (request == null) {
-            throw new RuntimeException("Request not found with id: " + updateRequestDto.requestId());
-        }
-
-        if(updateRequestDto.status() == null || updateRequestDto.status() == request.getStatus()) {
-            throw new RuntimeException("Request status cannot be the same as the current status");
-        }
-
-        if(request.getStatus() != RequestStatus.PENDING && updateRequestDto.status() == RequestStatus.PENDING) {
-            throw new RuntimeException("Request cannot be changed to PENDING");
-        }
+  public void validateUpdateRequest(
+          String userId, Request request, UpdateRequestDto updateRequestDto) {
+    UserCredentialsDto user = authenticationService.findByUserId(userId).orElse(null);
+    if (user == null) {
+      throw new RuntimeException("User not found with id: " + userId);
     }
 
-    public void validateFacultyName(String facultyName) {
-        Map<String, String> faculties = facultyService.getAllFacultyNames();
-        if (!faculties.containsKey(facultyName)){
-            throw new BusinessException("Faculty "+facultyName +" does not exist in "+ faculties.keySet().toString());
-        }
+    if (request == null) {
+      throw new RuntimeException("Request not found with id: " + updateRequestDto.requestId());
     }
 
-    public void validateCreateSession(SessionDTO sessiondto) {
-        groupService.getGroupByGroupCode(sessiondto.groupCode());
-        if(sessiondto.slot() == null){
-            logger.error("The slot cannot be null");
-            throw new IllegalArgumentException("The slot cannot be null");
-        }
-        if(sessiondto.slot() <= 0 || sessiondto.slot() >= 9){
-            logger.error("The slot is invalid");
-            throw new IllegalArgumentException("The slot is invalid");
-        }
+    if (updateRequestDto.status() == null || updateRequestDto.status() == request.getStatus()) {
+      throw new RuntimeException("Request status cannot be the same as the current status");
     }
 
-    public void validateUpdateSession(SessionDTO sessiondto, String year, String period) {
-        groupService.getGroupByGroupCode(sessiondto.groupCode());
-        if (!year.equals(periodService.getYear())  || !period.equals(periodService.getPeriod())){
-            logger.error("The year or period are invalid");
-            throw  new RuntimeException("The year or period are invalid");
-        }
-        if(sessiondto.slot() != null){
-            if(sessiondto.slot() <= 0 || sessiondto.slot() >= 9){
-                logger.error("The slot is invalid");
-                throw new IllegalArgumentException("The slot is invalid");
-            }
-        }
-        groupService.getGroupByGroupCode(sessiondto.groupCode());
-
+    if (request.getStatus() != RequestStatus.PENDING
+            && updateRequestDto.status() == RequestStatus.PENDING) {
+      throw new RuntimeException("Request cannot be changed to PENDING");
     }
+  }
 
-    public void validateDeleteSession(Session session) {
-        if (!session.getYear().equals(periodService.getYear())  || !session.getPeriod().equals(periodService.getPeriod())){
-            logger.error("The year or period are invalid");
-            throw  new RuntimeException("The year or period are invalid");
-        }
+  public void validateFacultyName(String facultyName) {
+    Map<String, String> faculties = facultyService.getAllFacultyNames();
+    if (!faculties.containsKey(facultyName)) {
+      throw new BusinessException(
+              "Faculty " + facultyName + " does not exist in " + faculties.keySet());
     }
+  }
 }

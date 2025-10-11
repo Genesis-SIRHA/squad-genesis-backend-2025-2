@@ -12,8 +12,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @Document(collection = "historial")
 public class Historial {
-  @Id
-  private String id;
+    @Id
+    private String id;
   private String studentId;
   private String groupCode;
   private HistorialStatus status;
@@ -28,7 +28,7 @@ public class Historial {
     this.period = builder.period;
   }
 
-  public static class HistorialBuilder{
+    public static class HistorialBuilder {
     private String studentId;
     private String groupCode;
     private HistorialStatus status;
@@ -64,5 +64,4 @@ public class Historial {
       return new Historial(this);
     }
   }
-
 }

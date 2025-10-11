@@ -6,12 +6,12 @@ import edu.dosw.model.Student;
 import edu.dosw.repositories.StudentRepository;
 import edu.dosw.services.AuthenticationService;
 import edu.dosw.utils.IdGenerator;
-import java.util.Arrays;
-
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
 
 /**
  * Service class that provides business logic for managing Student entities. This service handles

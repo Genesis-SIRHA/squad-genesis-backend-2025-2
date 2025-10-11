@@ -7,5 +7,5 @@ public record UpdateGroupRequest(
         Boolean isLab,
         String groupNum,
         @Min(value = 1) Integer maxCapacity,
-        @Min(value = 0) Integer enrolled
-) { }
+        @Min(value = 0) Integer enrolled) {
+}

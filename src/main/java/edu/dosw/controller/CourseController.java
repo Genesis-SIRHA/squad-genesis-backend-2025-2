@@ -40,9 +40,14 @@ public class CourseController {
    * @return The course details if found, 404 otherwise
    */
   @GetMapping("/{courseAbbreviation}")
-  @Operation(summary = "Get course by courseAbbreviation", description = "Retrieve course details by its courseAbbreviation")
-  public ResponseEntity<Course> getCourseById(@PathVariable String courseAbbreviation, @RequestParam String facultyName, @RequestParam String plan) {
-    Course course= facultyService.findCourseByAbbreviation(courseAbbreviation, facultyName, plan);
+  @Operation(
+          summary = "Get course by courseAbbreviation",
+          description = "Retrieve course details by its courseAbbreviation")
+  public ResponseEntity<Course> getCourseById(
+          @PathVariable String courseAbbreviation,
+          @RequestParam String facultyName,
+          @RequestParam String plan) {
+      Course course = facultyService.findCourseByAbbreviation(courseAbbreviation, facultyName, plan);
     return ResponseEntity.ok(course);
   }
 
@@ -71,8 +76,12 @@ public class CourseController {
   @PatchMapping("/{courseAbbreviation}")
   @Operation(summary = "Update course", description = "Updates course")
   public ResponseEntity<Course> updateCourse(
-      @PathVariable String courseAbbreviation, @RequestParam String facultyName, @RequestParam String plan,@RequestBody UpdateCourseDTO updateCourseDTO) {
-    Course course = facultyService.updateCourse(courseAbbreviation, facultyName, plan, updateCourseDTO);
+          @PathVariable String courseAbbreviation,
+          @RequestParam String facultyName,
+          @RequestParam String plan,
+          @RequestBody UpdateCourseDTO updateCourseDTO) {
+      Course course =
+              facultyService.updateCourse(courseAbbreviation, facultyName, plan, updateCourseDTO);
     return ResponseEntity.ok((course));
   }
 
@@ -85,9 +94,14 @@ public class CourseController {
    * @return 204 No Content if successful
    */
   @DeleteMapping("/{courseAbbreviation}")
-  @Operation(summary = "Delete course by it's courseAbbreviation", description = "Deletes a course by its courseAbbreviation")
-  public ResponseEntity<Void> deleteCourseByCourseAbbreviation(@PathVariable String courseAbbreviation, @RequestParam String facultyName, @RequestParam String plan) {
-    facultyService.deleteCourse(courseAbbreviation ,facultyName, plan);
+  @Operation(
+          summary = "Delete course by it's courseAbbreviation",
+          description = "Deletes a course by its courseAbbreviation")
+  public ResponseEntity<Void> deleteCourseByCourseAbbreviation(
+          @PathVariable String courseAbbreviation,
+          @RequestParam String facultyName,
+          @RequestParam String plan) {
+      facultyService.deleteCourse(courseAbbreviation, facultyName, plan);
     return ResponseEntity.noContent().build();
   }
 }

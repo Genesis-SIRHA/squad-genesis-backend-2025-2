@@ -1,21 +1,22 @@
 package edu.dosw.services;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import edu.dosw.dto.CourseRequest;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Faculty;
 import edu.dosw.repositories.FacultyRepository;
-import java.util.List;
-import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 /** Unit tests for {@link FacultyService}. */
 class FacultyServiceTest {
@@ -94,29 +95,30 @@ class FacultyServiceTest {
     assertEquals("Course already exists: CS101", ex.getMessage());
   }
 
-//  @Test
-//  void updateCourse_shouldSaveUpdatedFaculty() {
-//    CourseRequest request = new CourseRequest("CS103", "New Course", 5, "Engineering", "2025");
-//    when(facultyRepository.findByNameAndPlan("Engineering", "2025"))
-//        .thenReturn(Optional.of(faculty));
-//    when(facultyRepository.save(any(Faculty.class))).thenAnswer(i -> i.getArgument(0));
-//
-//    Course result = facultyService.updateCourse("CS101", request);
-//
-//    assertNotNull(result);
-//    assertTrue(result.getCourseName().equals("New Course"));
-//  }
-//
-//  @Test
-//  void updateCourse_shouldThrowIfFacultyNotFound() {
-//    CourseRequest request = new CourseRequest("CS103", "New Course", 5, "Invalid", "2025");
-//    when(facultyRepository.findByNameAndPlan("Invalid", "2025")).thenReturn(Optional.empty());
-//
-//    BusinessException ex =
-//        assertThrows(BusinessException.class, () -> facultyService.updateCourse("CS101", request));
-//
-//    assertEquals("Faculty not found: Invalid", ex.getMessage());
-//  }
+    //  @Test
+    //  void updateCourse_shouldSaveUpdatedFaculty() {
+    //    CourseRequest request = new CourseRequest("CS103", "New Course", 5, "Engineering", "2025");
+    //    when(facultyRepository.findByNameAndPlan("Engineering", "2025"))
+    //        .thenReturn(Optional.of(faculty));
+    //    when(facultyRepository.save(any(Faculty.class))).thenAnswer(i -> i.getArgument(0));
+    //
+    //    Course result = facultyService.updateCourse("CS101", request);
+    //
+    //    assertNotNull(result);
+    //    assertTrue(result.getCourseName().equals("New Course"));
+    //  }
+    //
+    //  @Test
+    //  void updateCourse_shouldThrowIfFacultyNotFound() {
+    //    CourseRequest request = new CourseRequest("CS103", "New Course", 5, "Invalid", "2025");
+    //    when(facultyRepository.findByNameAndPlan("Invalid", "2025")).thenReturn(Optional.empty());
+    //
+    //    BusinessException ex =
+    //        assertThrows(BusinessException.class, () -> facultyService.updateCourse("CS101",
+    // request));
+    //
+    //    assertEquals("Faculty not found: Invalid", ex.getMessage());
+    //  }
 
   //  @Test
   //  void addGroupToCourse_shouldReturnTrueIfGroupAdded() {
@@ -144,14 +146,14 @@ class FacultyServiceTest {
   //    assertEquals("Faculty not found: INVALID", ex.getMessage());
   //  }
 
-//  @Test
-//  void deleteCourse_shouldCallRepositoryDelete() {
-//    doNothing().when(facultyRepository).deleteById("CS101");
-//
-//    facultyService.deleteCourse("CS101");
-//
-//    verify(facultyRepository, times(1)).deleteById("CS101");
-//  }
+    //  @Test
+    //  void deleteCourse_shouldCallRepositoryDelete() {
+    //    doNothing().when(facultyRepository).deleteById("CS101");
+    //
+    //    facultyService.deleteCourse("CS101");
+    //
+    //    verify(facultyRepository, times(1)).deleteById("CS101");
+    //  }
 
   //  @Test
   //  void findCourseByCode_shouldReturnCourseIfExists() {

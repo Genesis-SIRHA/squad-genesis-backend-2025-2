@@ -34,45 +34,45 @@ public class Session {
   }
 
   public static class SessionBuilder {
-      private String groupCode;
-      private String classroomName;
-      private int slot;
-      private DayOfWeek day;
-      private String year;
-      private String period;
+    private String groupCode;
+    private String classroomName;
+    private int slot;
+    private DayOfWeek day;
+    private String year;
+    private String period;
 
-      public SessionBuilder groupCode(String groupCode) {
-        this.groupCode = groupCode;
-        return this;
-      }
+    public SessionBuilder groupCode(String groupCode) {
+      this.groupCode = groupCode;
+      return this;
+    }
 
-      public SessionBuilder classroomName(String classroomName) {
-        this.classroomName = classroomName;
-        return this;
-      }
+    public SessionBuilder classroomName(String classroomName) {
+      this.classroomName = classroomName;
+      return this;
+    }
 
-      public SessionBuilder slot(int slot) {
-        this.slot = slot;
-        return this;
-      }
+    public SessionBuilder slot(int slot) {
+      this.slot = slot;
+      return this;
+    }
 
-      public SessionBuilder day(DayOfWeek day) {
-        this.day = day;
-        return this;
-      }
+    public SessionBuilder day(DayOfWeek day) {
+      this.day = day;
+      return this;
+    }
 
-      public SessionBuilder year(String year) {
-        this.year = year;
-        return this;
-      }
+    public SessionBuilder year(String year) {
+      this.year = year;
+      return this;
+    }
 
-      public SessionBuilder period(String period) {
-        this.period = period;
-        return this;
-      }
+    public SessionBuilder period(String period) {
+      this.period = period;
+      return this;
+    }
 
-      public Session build() {
-        return new Session(this);
-      }
+    public Session build() {
+      return new Session(this);
+    }
   }
 }

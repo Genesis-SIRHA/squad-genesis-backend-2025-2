@@ -1,18 +1,8 @@
 package edu.dosw.services;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import edu.dosw.dto.CreationGroupRequest;
-import edu.dosw.model.Group;
-import edu.dosw.repositories.GroupRepository;
-import java.util.List;
-import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 //
-///** Unit tests for {@link GroupService}. */
-//class GroupServiceTest {
+/// ** Unit tests for {@link GroupService}. */
+// class GroupServiceTest {
 //
 //  private GroupRepository groupRepository;
 //  private GroupService groupService;
@@ -65,7 +55,8 @@ import org.junit.jupiter.api.Test;
 
 //  @Test
 //  void createGroup_shouldConvertRequestAndSave() {
-//    CreationGroupRequest request = new CreationGroupRequest("G1", "CS101", "2025", "1", "T123", true, 1, 30, 0);
+//    CreationGroupRequest request = new CreationGroupRequest("G1", "CS101", "2025", "1", "T123",
+// true, 1, 30, 0);
 //
 //    Group entity = request.toEntity();
 //    entity.setGroupCode("G1");
@@ -80,4 +71,4 @@ import org.junit.jupiter.api.Test;
 //    assertTrue(result.isLab());
 //    verify(groupRepository).save(any(Group.class));
 //  }
-//}
+// }

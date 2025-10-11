@@ -3,17 +3,16 @@ package edu.dosw.controller;
 import edu.dosw.dto.CreateRequestDto;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.dto.UpdateRequestDto;
-import edu.dosw.model.Professor;
 import edu.dosw.model.Request;
 import edu.dosw.model.enums.Role;
 import edu.dosw.services.RequestService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * Controller that handles all request-related HTTP operations. Provides endpoints for creating,
@@ -46,18 +45,14 @@ public class RequestController {
   }
 
   @GetMapping("/global")
-  @Operation(
-          summary = "Get all requests",
-          description = "Retrieves all requests ")
+  @Operation(summary = "Get all requests", description = "Retrieves all requests ")
   public ResponseEntity<List<Request>> fetchAllRequests() {
     List<Request> requests = requestService.fetchAllRequests();
     return ResponseEntity.ok(requests);
   }
 
   @GetMapping("/{requestId}")
-  @Operation(
-          summary = "Get requests by id",
-          description = "Retrieves request by id ")
+  @Operation(summary = "Get requests by id", description = "Retrieves request by id ")
   public ResponseEntity<Request> getRequest(@PathVariable String requestId) {
     Request request = requestService.getRequest(requestId);
     return ResponseEntity.ok(request);
@@ -71,7 +66,6 @@ public class RequestController {
     List<Request> requests = requestService.fetchRequests(Role.STUDENT, studentId);
     return ResponseEntity.ok(requests);
   }
-
 
   @GetMapping("/faculty/{facultyName}")
   @Operation(
@@ -99,12 +93,9 @@ public class RequestController {
     return ResponseEntity.ok(requestService.updateRequest(userId, updateRequestDto));
   }
 
-
-
   @DeleteMapping("/{requestId}")
   @Operation(summary = "Cancel a request", description = "Cancels a request by its requestId")
   public ResponseEntity<Request> deleteRequest(@PathVariable String requestId) {
     return ResponseEntity.ok(requestService.deleteRequestStatus(requestId));
   }
-
 }

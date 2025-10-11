@@ -12,53 +12,44 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-
 @AllArgsConstructor
 @Component
-public class JoinRequestAnswer implements AnswerStrategy{
-    private final GroupService groupService;
-    private final HistorialService historialService;
-    private final Logger logger = LoggerFactory.getLogger(JoinRequestAnswer.class);
+public class JoinRequestAnswer implements AnswerStrategy {
+  private final GroupService groupService;
+  private final HistorialService historialService;
+  private final Logger logger = LoggerFactory.getLogger(JoinRequestAnswer.class);
 
-    public void answerRequest(Request request){
-        Group group = groupService.findByGroupCode(request.getDestinationGroupId());
-        if (group.getEnrolled() >= group.getMaxCapacity()){
-            logger.error("Destination group {} is full", group.getGroupCode());
-            throw new IllegalArgumentException("Destination" + group.getGroupCode()+ "group is full");
-        }
-
-        try {
-            UpdateGroupRequest groupRequest = new UpdateGroupRequest(
-                    group.getProfessorId(),
-                    group.isLab(),
-                    group.getGroupNum(),
-                    group.getMaxCapacity(),
-                    group.getEnrolled()+1);
-            groupService.updateGroup(group.getGroupCode(), groupRequest);
-
-
-            HistorialDTO historialDTO = new HistorialDTO(
-                    request.getStudentId(),
-                    request.getDestinationGroupId(),
-                    HistorialStatus.ON_GOING
-            );
-
-            try{
-                historialService.addHistorial(historialDTO);
-            }catch (Exception e){
-                historialService.updateHistorial(
-                        request.getStudentId(),
-                        request.getDestinationGroupId(),
-                        HistorialStatus.ON_GOING
-                );
-            }
-
-
-        }catch (Exception e){
-            logger.error("Failed to answer request: {}", e.getMessage());
-            throw new RuntimeException("Failed to answer request: " + e.getMessage());
-        }
-
+  public void answerRequest(Request request) {
+    Group group = groupService.getGroupByGroupCode(request.getDestinationGroupId());
+    if (group.getEnrolled() >= group.getMaxCapacity()) {
+      logger.error("Destination group {} is full", group.getGroupCode());
+      throw new IllegalArgumentException("Destination" + group.getGroupCode() + "group is full");
     }
 
+    try {
+      UpdateGroupRequest groupRequest =
+              new UpdateGroupRequest(
+                      group.getProfessorId(),
+                      group.isLab(),
+                      group.getGroupNum(),
+                      group.getMaxCapacity(),
+                      group.getEnrolled() + 1);
+      groupService.updateGroup(group.getGroupCode(), groupRequest);
+
+      HistorialDTO historialDTO =
+              new HistorialDTO(
+                      request.getStudentId(), request.getDestinationGroupId(), HistorialStatus.ON_GOING);
+
+      try {
+        historialService.addHistorial(historialDTO);
+      } catch (Exception e) {
+        historialService.updateHistorial(
+                request.getStudentId(), request.getDestinationGroupId(), HistorialStatus.ON_GOING);
+      }
+
+    } catch (Exception e) {
+      logger.error("Failed to answer request: {}", e.getMessage());
+      throw new RuntimeException("Failed to answer request: " + e.getMessage());
+    }
+  }
 }

@@ -1,12 +1,12 @@
 package edu.dosw.services.strategy.AnswerStrategies;
 
 import edu.dosw.dto.HistorialDTO;
+import edu.dosw.dto.UpdateGroupRequest;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
+import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.services.GroupService;
 import edu.dosw.services.HistorialService;
-import edu.dosw.dto.UpdateGroupRequest;
-import edu.dosw.model.enums.HistorialStatus;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,54 +14,49 @@ import org.springframework.stereotype.Component;
 
 @AllArgsConstructor
 @Component
-public class SwapRequestAnswer implements AnswerStrategy{
+public class SwapRequestAnswer implements AnswerStrategy {
     private final GroupService groupService;
     private final HistorialService historialService;
     private final Logger logger = LoggerFactory.getLogger(SwapRequestAnswer.class);
 
     public void answerRequest(Request request) {
-        Group originGroup = groupService.findByGroupCode(request.getOriginGroupId());
-        UpdateGroupRequest originGroupRequest = new UpdateGroupRequest(
-                originGroup.getProfessorId(),
-                originGroup.isLab(),
-                originGroup.getGroupNum(),
-                originGroup.getMaxCapacity(),
-                originGroup.getEnrolled()-1
-        );
+        Group originGroup = groupService.getGroupByGroupCode(request.getOriginGroupId());
+        UpdateGroupRequest originGroupRequest =
+                new UpdateGroupRequest(
+                        originGroup.getProfessorId(),
+                        originGroup.isLab(),
+                        originGroup.getGroupNum(),
+                        originGroup.getMaxCapacity(),
+                        originGroup.getEnrolled() - 1);
 
-        Group destinationGroup = groupService.findByGroupCode(request.getDestinationGroupId());
-        UpdateGroupRequest destinationGroupRequest = new UpdateGroupRequest(
-                destinationGroup.getProfessorId(),
-                destinationGroup.isLab(),
-                destinationGroup.getGroupNum(),
-                destinationGroup.getMaxCapacity(),
-                destinationGroup.getEnrolled()+1
-        );
+        Group destinationGroup = groupService.getGroupByGroupCode(request.getDestinationGroupId());
+        UpdateGroupRequest destinationGroupRequest =
+                new UpdateGroupRequest(
+                        destinationGroup.getProfessorId(),
+                        destinationGroup.isLab(),
+                        destinationGroup.getGroupNum(),
+                        destinationGroup.getMaxCapacity(),
+                        destinationGroup.getEnrolled() + 1);
 
-        try{
-            if (destinationGroup.getEnrolled() >= destinationGroup.getMaxCapacity()){
+        try {
+            if (destinationGroup.getEnrolled() >= destinationGroup.getMaxCapacity()) {
                 logger.error("Destination group {} is full", destinationGroup.getGroupCode());
-                throw new IllegalArgumentException("Destination" + destinationGroup.getGroupCode()+ "group is full");
+                throw new IllegalArgumentException(
+                        "Destination" + destinationGroup.getGroupCode() + "group is full");
             }
             groupService.updateGroup(originGroup.getGroupCode(), originGroupRequest);
             groupService.updateGroup(destinationGroup.getGroupCode(), destinationGroupRequest);
 
-            HistorialDTO historialDTO = new HistorialDTO(
-                    request.getStudentId(),
-                    request.getDestinationGroupId(),
-                    HistorialStatus.ON_GOING
-            );
+            HistorialDTO historialDTO =
+                    new HistorialDTO(
+                            request.getStudentId(), request.getDestinationGroupId(), HistorialStatus.ON_GOING);
 
             historialService.addHistorial(historialDTO);
             historialService.updateHistorial(
-                    request.getStudentId(),
-                    request.getOriginGroupId(),
-                    HistorialStatus.SWAPPED
-            );
-        }catch (Exception e){
+                    request.getStudentId(), request.getOriginGroupId(), HistorialStatus.SWAPPED);
+        } catch (Exception e) {
             logger.error("Failed to answer request: {}", e.getMessage());
             throw new RuntimeException("Failed to answer request: " + e.getMessage());
         }
-
     }
 }

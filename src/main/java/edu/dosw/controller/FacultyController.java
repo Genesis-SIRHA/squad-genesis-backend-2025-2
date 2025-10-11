@@ -26,7 +26,8 @@ public class FacultyController {
 
     @GetMapping("/{facultyName}/{plan}")
     @Operation(summary = "Get faculty by name and plan")
-    public ResponseEntity<Faculty> getFacultyByNameAndPlan(@PathVariable String facultyName, @PathVariable String plan) {
+    public ResponseEntity<Faculty> getFacultyByNameAndPlan(
+            @PathVariable String facultyName, @PathVariable String plan) {
         return ResponseEntity.ok(facultyService.getFacultyByNameAndPlan(facultyName, plan));
     }
 
@@ -41,5 +42,4 @@ public class FacultyController {
     public ResponseEntity<Faculty> updateFacultyByNameAndPlan(@RequestBody FacultyDto facultyDto) {
         return ResponseEntity.ok(facultyService.updateFacultyByNameAndPlan(facultyDto));
     }
-
 }
