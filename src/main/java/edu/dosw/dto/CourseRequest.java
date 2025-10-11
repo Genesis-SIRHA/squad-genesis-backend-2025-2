@@ -4,14 +4,14 @@ import edu.dosw.model.Course;
 import jakarta.validation.constraints.NotBlank;
 
 /**
- * Represents a request to create or update a course. Contains the course abbreviation, name, and
- * list of groups.
+ * Represents a request to create or update a course. Contains the course abbreviation, fullName,
+ * and list of groups.
  */
 public record CourseRequest(
     /** The unique abbreviation that identifies the course. Cannot be blank. */
     @NotBlank(message = "El código del curso es obligatorio") String abbreviation,
 
-    /** The name of the course. Cannot be blank. */
+    /** The fullName of the course. Cannot be blank. */
     @NotBlank(message = "El nombre del curso es obligatorio") String courseName,
     int credits,
     String facultyName,

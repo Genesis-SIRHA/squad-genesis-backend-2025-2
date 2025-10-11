@@ -38,14 +38,14 @@ public class Pemsum {
   }
 
   /**
-   * @return The full name of the student.
+   * @return The full fullName of the student.
    */
   public String getStudentName() {
     return studentName;
   }
 
   /**
-   * @return The name of the faculty the student belongs to.
+   * @return The fullName of the faculty the student belongs to.
    */
   public String getFacultyName() {
     return facultyName;
@@ -104,9 +104,9 @@ public class Pemsum {
     }
 
     /**
-     * Sets the student's full name.
+     * Sets the student's full fullName.
      *
-     * @param studentName The student's full name.
+     * @param studentName The student's full fullName.
      * @return This builder instance for method chaining.
      */
     public Builder studentName(String studentName) {
@@ -115,9 +115,9 @@ public class Pemsum {
     }
 
     /**
-     * Sets the name of the faculty.
+     * Sets the fullName of the faculty.
      *
-     * @param facultyName The faculty name.
+     * @param facultyName The faculty fullName.
      * @return This builder instance for method chaining.
      */
     public Builder facultyName(String facultyName) {
@@ -128,7 +128,7 @@ public class Pemsum {
     /**
      * Sets the academic plan or program.
      *
-     * @param facultyPlan The academic plan or program name.
+     * @param facultyPlan The academic plan or program fullName.
      * @return This builder instance for method chaining.
      */
     public Builder facultyPlan(String facultyPlan) {
