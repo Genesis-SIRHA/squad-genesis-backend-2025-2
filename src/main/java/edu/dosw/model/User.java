@@ -1,23 +1,29 @@
 package edu.dosw.model;
 
+import java.util.UUID;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
+@AllArgsConstructor
 @Document(collection = "universityMembers")
 public class User {
-  @Id private final String userId;
-  private String type;
-  private String name;
-  private String plan;
-  private String facultyName;
+  @Id protected String id;
+  protected String userId;
+  protected String identityDocument;
+  protected String email;
+  protected String fullName;
 
-  public User(String userId, String type, String name, String plan, String facultyName) {
+  public User() {
+    this.userId = UUID.randomUUID().toString();
+  }
+
+  public User(String userId, String identityDocument, String email, String fullName) {
     this.userId = userId;
-    this.type = type;
-    this.name = name;
-    this.plan = plan;
-    this.facultyName = facultyName;
+    this.identityDocument = identityDocument;
+    this.email = email;
+    this.fullName = fullName;
   }
 }

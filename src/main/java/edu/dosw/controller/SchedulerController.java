@@ -4,7 +4,7 @@ import edu.dosw.model.Schedule;
 import edu.dosw.services.SchedulerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,20 +13,11 @@ import org.springframework.web.bind.annotation.*;
  * student schedules.
  */
 @RestController
-@RequestMapping("/api/schedules")
+@RequestMapping("/schedules")
+@AllArgsConstructor
 @Tag(name = "Scheduler Controller", description = "APIs for managing class schedules")
 public class SchedulerController {
   private final SchedulerService schedulerService;
-
-  /**
-   * Constructs a new SchedulerController with the specified SchedulerService.
-   *
-   * @param schedulerService The service for handling schedule-related operations
-   */
-  @Autowired
-  public SchedulerController(SchedulerService schedulerService) {
-    this.schedulerService = schedulerService;
-  }
 
   /**
    * Retrieves a student's schedule by their ID.

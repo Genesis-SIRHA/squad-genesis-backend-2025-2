@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
  * on courses and their groups.
  */
 @RestController
-@RequestMapping("/api/courses")
+@RequestMapping("/pemsum")
 @Tag(name = "Pemsum Controller", description = "APIs for managing courses and groups")
 public class PemsumController {
 
