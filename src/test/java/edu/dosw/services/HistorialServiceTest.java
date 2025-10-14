@@ -1,66 +1,234 @@
 package edu.dosw.services;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
-
+import edu.dosw.dto.HistorialDTO;
+import edu.dosw.exception.BusinessException;
+import edu.dosw.exception.ResourceNotFoundException;
+import edu.dosw.model.Course;
 import edu.dosw.model.Historial;
+import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.repositories.HistorialRepository;
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 class HistorialServiceTest {
 
-  @Mock private HistorialRepository historialRepository;
+    @Mock
+    private HistorialValidator historialValidator;
 
-  @InjectMocks private HistorialService historialService;
+    @Mock
+    private HistorialRepository historialRepository;
 
-  @BeforeEach
-  void setUp() {
-    MockitoAnnotations.openMocks(this);
-  }
+    @Mock
+    private PeriodService periodService;
 
-  @Test
-  void getCurrentSessionsByStudentIdAndPeriod_shouldReturnGroupCodes() {
-    // Arrange
-    Historial h1 = new Historial();
-    h1.setGroupCode("G1");
-    Historial h2 = new Historial();
-    h2.setGroupCode("G2");
+    @InjectMocks
+    private HistorialService historialService;
 
-    ArrayList<Historial> mockHistorial = new ArrayList<>();
-    mockHistorial.add(h1);
-    mockHistorial.add(h2);
+    @Test
+    void getCurrentSessionsByStudentIdAndPeriod_ShouldReturnGroupCodes() {
+        String studentId = "STUD123";
+        String year = "2024";
+        String period = "1";
 
-    when(historialRepository.findCurrentSessionsByStudentIdAndYearAndPeriod("S1", "2025", "1"))
-        .thenReturn(mockHistorial);
+        List<Historial> historials = Arrays.asList(
+                createHistorial("GROUP1", studentId, year, period),
+                createHistorial("GROUP2", studentId, year, period)
+        );
 
-    // Act
-    List<String> result =
-        historialService.getCurrentSessionsByStudentIdAndPeriod("S1", "2025", "1");
+        when(historialRepository.findCurrentSessionsByStudentIdAndYearAndPeriod(studentId, year, period))
+                .thenReturn(new java.util.ArrayList<>(historials));
 
-    // Assert
-    assertEquals(2, result.size());
-    assertTrue(result.contains("G1"));
-    assertTrue(result.contains("G2"));
-  }
+        List<String> result = historialService.getCurrentSessionsByStudentIdAndPeriod(studentId, year, period);
 
-  @Test
-  void getCurrentSessionsByStudentIdAndPeriod_shouldReturnEmptyListIfNoHistorial() {
-    // Arrange
-    when(historialRepository.findCurrentSessionsByStudentIdAndYearAndPeriod("S1", "2025", "1"))
-        .thenReturn(new ArrayList<>());
+        assertEquals(2, result.size());
+        assertTrue(result.contains("GROUP1"));
+        assertTrue(result.contains("GROUP2"));
+        verify(historialRepository).findCurrentSessionsByStudentIdAndYearAndPeriod(studentId, year, period);
+    }
 
-    // Act
-    List<String> result =
-        historialService.getCurrentSessionsByStudentIdAndPeriod("S1", "2025", "1");
+    @Test
+    void getCurrentSessionsByStudentIdAndPeriod_WithEmptyList_ShouldReturnEmptyList() {
+        String studentId = "STUD123";
+        String year = "2024";
+        String period = "1";
 
-    // Assert
-    assertNotNull(result);
-    assertTrue(result.isEmpty());
-  }
+        when(historialRepository.findCurrentSessionsByStudentIdAndYearAndPeriod(studentId, year, period))
+                .thenReturn(new java.util.ArrayList<>());
+
+        List<String> result = historialService.getCurrentSessionsByStudentIdAndPeriod(studentId, year, period);
+
+        assertTrue(result.isEmpty());
+        verify(historialRepository).findCurrentSessionsByStudentIdAndYearAndPeriod(studentId, year, period);
+    }
+
+    @Test
+    void getByStudentIdAndGroupCode_WithExistingHistorial_ShouldReturnHistorial() {
+        String studentId = "STUD123";
+        String groupCode = "GROUP1";
+        Historial expectedHistorial = createHistorial(groupCode, studentId, "2024", "1");
+
+        when(historialRepository.findByStudentIdAndGroupCode(studentId, groupCode))
+                .thenReturn(expectedHistorial);
+
+        Historial result = historialService.getByStudentIdAndGroupCode(studentId, groupCode);
+
+        assertNotNull(result);
+        assertEquals(studentId, result.getStudentId());
+        assertEquals(groupCode, result.getGroupCode());
+        verify(historialRepository).findByStudentIdAndGroupCode(studentId, groupCode);
+    }
+
+    @Test
+    void getByStudentIdAndGroupCode_WithNonExistingHistorial_ShouldThrowResourceNotFoundException() {
+        String studentId = "STUD123";
+        String groupCode = "GROUP1";
+
+        when(historialRepository.findByStudentIdAndGroupCode(studentId, groupCode))
+                .thenReturn(null);
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> historialService.getByStudentIdAndGroupCode(studentId, groupCode));
+
+        assertTrue(exception.getMessage().contains("historial not found"));
+        verify(historialRepository).findByStudentIdAndGroupCode(studentId, groupCode);
+    }
+
+    @Test
+    void getSessionsByStudentIdYearAndPeriod_ShouldReturnHistorials() {
+        String studentId = "STUD123";
+        String year = "2024";
+        String period = "1";
+
+        List<Historial> expectedHistorials = Arrays.asList(
+                createHistorial("GROUP1", studentId, year, period),
+                createHistorial("GROUP2", studentId, year, period)
+        );
+
+        when(historialRepository.findCurrentSessionsByStudentIdAndYearAndPeriod(studentId, year, period))
+                .thenReturn(new java.util.ArrayList<>(expectedHistorials));
+
+        List<Historial> result = historialService.getSessionsByStudentIdYearAndPeriod(studentId, year, period);
+
+        assertEquals(2, result.size());
+        verify(historialRepository).findCurrentSessionsByStudentIdAndYearAndPeriod(studentId, year, period);
+    }
+
+    @Test
+    void addHistorial_WithValidData_ShouldReturnSavedHistorial() {
+        HistorialDTO historialDTO = new HistorialDTO("STUD123", "GROUP1", HistorialStatus.ON_GOING);
+        Historial existingHistorial = createHistorial("GROUP1", "STUD123", "2023", "1");
+        Historial newHistorial = createHistorial("GROUP1", "STUD123", "2024", "1");
+
+        when(historialRepository.findByStudentIdAndGroupCode("STUD123", "GROUP1"))
+                .thenReturn(existingHistorial);
+        doNothing().when(historialValidator).validateHistorialCreation(historialDTO);
+        when(periodService.getYear()).thenReturn("2024");
+        when(periodService.getPeriod()).thenReturn("1");
+        when(historialRepository.save(any(Historial.class))).thenReturn(newHistorial);
+
+        Historial result = historialService.addHistorial(historialDTO);
+
+        assertNotNull(result);
+        verify(historialRepository).findByStudentIdAndGroupCode("STUD123", "GROUP1");
+        verify(historialValidator).validateHistorialCreation(historialDTO);
+        verify(periodService).getYear();
+        verify(periodService).getPeriod();
+        verify(historialRepository).save(any(Historial.class));
+    }
+
+    @Test
+    void addHistorial_WithNonExistingHistorial_ShouldThrowResourceNotFoundException() {
+        HistorialDTO historialDTO = new HistorialDTO("STUD123", "GROUP1", HistorialStatus.ON_GOING);
+
+        when(historialRepository.findByStudentIdAndGroupCode("STUD123", "GROUP1"))
+                .thenReturn(null);
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> historialService.addHistorial(historialDTO));
+
+        assertTrue(exception.getMessage().contains("historial not found"));
+        verify(historialRepository).findByStudentIdAndGroupCode("STUD123", "GROUP1");
+        verify(historialValidator, never()).validateHistorialCreation(any());
+        verify(historialRepository, never()).save(any());
+    }
+
+    @Test
+    void updateHistorial_WithValidData_ShouldReturnUpdatedHistorial() {
+        String studentId = "STUD123";
+        String groupCode = "GROUP1";
+        HistorialStatus newStatus = HistorialStatus.CANCELLED;
+        Historial existingHistorial = createHistorial(groupCode, studentId, "2024", "1");
+
+        when(historialRepository.findByStudentIdAndGroupCode(studentId, groupCode))
+                .thenReturn(existingHistorial);
+        doNothing().when(historialValidator).historialUpdateValidator(existingHistorial.getStatus(), newStatus);
+        when(historialRepository.save(existingHistorial)).thenReturn(existingHistorial);
+
+        Historial result = historialService.updateHistorial(studentId, groupCode, newStatus);
+
+        assertNotNull(result);
+        assertEquals(newStatus, result.getStatus());
+        verify(historialRepository).findByStudentIdAndGroupCode(studentId, groupCode);
+        verify(historialValidator).historialUpdateValidator(HistorialStatus.ON_GOING, newStatus);
+        verify(historialRepository).save(existingHistorial);
+    }
+
+    @Test
+    void updateHistorial_WithNonExistingHistorial_ShouldThrowResourceNotFoundException() {
+        String studentId = "STUD123";
+        String groupCode = "GROUP1";
+        HistorialStatus newStatus = HistorialStatus.CANCELLED;
+
+        when(historialRepository.findByStudentIdAndGroupCode(studentId, groupCode))
+                .thenReturn(null);
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> historialService.updateHistorial(studentId, groupCode, newStatus));
+
+        assertTrue(exception.getMessage().contains("historial not found"));
+        verify(historialRepository).findByStudentIdAndGroupCode(studentId, groupCode);
+        verify(historialValidator, never()).historialUpdateValidator(any(), any());
+        verify(historialRepository, never()).save(any());
+    }
+
+    @Test
+    void getAllHistorial_ShouldReturnAllHistorials() {
+        List<Historial> expectedHistorials = Arrays.asList(
+                createHistorial("GROUP1", "STUD123", "2024", "1"),
+                createHistorial("GROUP2", "STUD456", "2024", "1")
+        );
+
+        when(historialRepository.findAll()).thenReturn(expectedHistorials);
+
+        List<Historial> result = historialService.getAllHistorial();
+
+        assertEquals(2, result.size());
+        verify(historialRepository).findAll();
+    }
+
+    private Historial createHistorial(String groupCode, String studentId, String year, String period) {
+        return new Historial.HistorialBuilder()
+                .studentId(studentId)
+                .groupCode(groupCode)
+                .status(HistorialStatus.ON_GOING)
+                .year(year)
+                .period(period)
+                .build();
+    }
+
+    private Course createCourse(String abbreviation) {
+        Course course = new Course();
+        course.setAbbreviation(abbreviation);
+        return course;
+    }
 }
