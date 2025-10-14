@@ -1,15 +1,14 @@
 package edu.dosw.model;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Document(collection = "courses")
 public class Course {
-  @NotBlank private String abbreviation;
+  @Id @NotBlank private String abbreviation;
 
   @NotBlank private String courseName;
 
@@ -18,5 +17,13 @@ public class Course {
   public Course(String abbreviation, String courseName) {
     this.abbreviation = abbreviation;
     this.courseName = courseName;
+  }
+
+  public Course() {}
+
+  public Course(String abbreviation, String courseName, int credits) {
+    this.abbreviation = abbreviation;
+    this.courseName = courseName;
+    this.credits = credits;
   }
 }

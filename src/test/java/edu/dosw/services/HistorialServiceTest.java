@@ -1,7 +1,7 @@
 package edu.dosw.services;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import edu.dosw.model.Historial;
 import edu.dosw.repositories.HistorialRepository;

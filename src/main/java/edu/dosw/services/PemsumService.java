@@ -4,8 +4,7 @@ import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Historial;
 import edu.dosw.model.Pemsum;
-import edu.dosw.model.Student;
-import edu.dosw.services.UserServices.StudentService;
+import edu.dosw.model.User;
 import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +21,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class PemsumService {
   private final FacultyService facultyService;
-  private final StudentService studentService;
+  private final MembersService membersService;
   private final HistorialService historialService;
   private final PeriodService periodService;
   private static final Logger logger = LoggerFactory.getLogger(PemsumService.class);
@@ -31,17 +30,17 @@ public class PemsumService {
    * Constructs a new PemsumService with required dependencies.
    *
    * @param facultyService Service for faculty-related operations
-   * @param studentService Service for student-related operations
+   * @param membersService Service for member-related operations
    * @param historialService Service for academic history operations
    */
   @Autowired
   public PemsumService(
       FacultyService facultyService,
-      StudentService studentService,
+      MembersService membersService,
       HistorialService historialService) {
     this.facultyService = facultyService;
+    this.membersService = membersService;
     this.historialService = historialService;
-    this.studentService = studentService;
     Clock clock = Clock.systemDefaultZone();
     this.periodService = new PeriodService(clock);
   }
@@ -61,18 +60,17 @@ public class PemsumService {
    *
    * @param studentId The unique identifier of the student
    * @return A fully constructed Pemsum object
-   * @throws BusinessException if faculty fullName or plan is invalid
+   * @throws BusinessException if faculty name or plan is invalid
    */
   private Pemsum buildPemsum(String studentId) {
-    Student student = studentService.getStudentById(studentId);
+    User student = membersService.listById(studentId);
     String facultyName = student.getFacultyName();
     String plan = student.getPlan();
 
     List<Course> courses = facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan);
     if (courses.isEmpty()) {
-      logger.error("Invalid faculty fullName or plan: " + facultyName + " - " + plan);
-      throw new BusinessException(
-          "Invalid faculty fullName or plan: " + facultyName + " - " + plan);
+      logger.error("Invalid faculty name or plan: " + facultyName + " - " + plan);
+      throw new BusinessException("Invalid faculty name or plan: " + facultyName + " - " + plan);
     }
 
     String year = periodService.getYear();
@@ -82,12 +80,14 @@ public class PemsumService {
 
     Map<Course, String> coursesMap = getCoursesMap(courses, historials);
 
+    // Créditos totales y aprobados
     int totalCredits = courses.stream().mapToInt(Course::getCredits).sum();
     int approvedCredits = getApprovedCredits(coursesMap);
 
+    // Construcción del Pemsum
     return new Pemsum.Builder()
         .studentId(studentId)
-        .studentName(student.getFullName())
+        .studentName(student.getName())
         .facultyName(facultyName)
         .facultyPlan(plan)
         .totalCredits(totalCredits)
@@ -126,8 +126,7 @@ public class PemsumService {
           .filter(h -> h.getGroupCode().equals(course.getAbbreviation()))
           .findFirst()
           .ifPresentOrElse(
-              h -> coursesMap.put(course, h.getStatus().toString()),
-              () -> coursesMap.put(course, "pending"));
+              h -> coursesMap.put(course, h.getStatus()), () -> coursesMap.put(course, "pending"));
     }
     return coursesMap;
   }
