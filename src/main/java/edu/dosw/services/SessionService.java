@@ -1,6 +1,8 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.SessionDTO;
+import edu.dosw.exception.BusinessException;
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Session;
 import edu.dosw.model.enums.DayOfWeek;
 import edu.dosw.repositories.SessionRepository;
@@ -18,118 +20,118 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 @Service
 public class SessionService {
-  private final SessionRepository sessionRepository;
-  private final PeriodService periodService;
-  private final SessionValidator sessionValidator;
-  private final Logger logger = LoggerFactory.getLogger(SessionService.class);
+    private final SessionRepository sessionRepository;
+    private final PeriodService periodService;
+    private final SessionValidator sessionValidator;
+    private final Logger logger = LoggerFactory.getLogger(SessionService.class);
 
-  public List<Session> getSessionsByGroupCode(String groupCode) {
-    ArrayList<Session> groupSchedule = sessionRepository.findByGroupCode(groupCode);
-    if (groupSchedule == null) {
-      logger.error("Group schedule not found by GroupCode: {}", groupCode);
-      throw new IllegalArgumentException("Group schedule not found by GroupCode: " + groupCode);
+    public List<Session> getSessionsByGroupCode(String groupCode) {
+        ArrayList<Session> groupSchedule = sessionRepository.findByGroupCode(groupCode);
+        if (groupSchedule == null) {
+            logger.error("Group schedule not found by GroupCode: {}", groupCode);
+            throw new ResourceNotFoundException("Group schedule not found by GroupCode: " + groupCode);
+        }
+        return groupSchedule;
     }
-    return groupSchedule;
-  }
 
-  public Session getSessionBySessionId(String sessionId) {
-    Session session = sessionRepository.findBySessionId(sessionId);
-    if (session == null) {
-      logger.error("Session not found by sessionId: {}", sessionId);
-      throw new IllegalArgumentException("Session not found by sessionId: " + sessionId);
+    public Session getSessionBySessionId(String sessionId) {
+        Session session = sessionRepository.findBySessionId(sessionId);
+        if (session == null) {
+            logger.error("Session not found by sessionId: {}", sessionId);
+            throw new ResourceNotFoundException("Session not found by sessionId: " + sessionId);
+        }
+        return session;
     }
-    return session;
-  }
 
-  public Session getSessionsByScheduleAndClassroom(SessionDTO sessionDto) {
-    String classroom = sessionDto.classroomName();
-    Integer slot = sessionDto.slot();
-    DayOfWeek day = sessionDto.day();
-    String year = periodService.getYear();
-    String period = periodService.getPeriod();
-    Session session =
-        sessionRepository.getSessionByScheduleAndClassroom(classroom, slot, day, year, period);
-    if (session == null) {
-      logger.error("Session not found by scheduled and classroom: {} , {}", day, classroom);
-      throw new IllegalArgumentException(
-          "Session not found by sessionId: " + day + ", " + classroom);
+    public Session getSessionsByScheduleAndClassroom(SessionDTO sessionDto) {
+        String classroom = sessionDto.classroomName();
+        Integer slot = sessionDto.slot();
+        DayOfWeek day = sessionDto.day();
+        String year = periodService.getYear();
+        String period = periodService.getPeriod();
+        Session session =
+                sessionRepository.getSessionByScheduleAndClassroom(classroom, slot, day, year, period);
+        if (session == null) {
+            logger.error("Session not found by scheduled and classroom: {} , {}", day, classroom);
+            throw new ResourceNotFoundException(
+                    "Session not found by sessionId: " + day + ", " + classroom);
+        }
+        return session;
     }
-    return session;
-  }
 
-  public Session getSessionsByScheduleAndGroupCode(SessionDTO sessionDTO) {
-    String groupCode = sessionDTO.groupCode();
-    Integer slot = sessionDTO.slot();
-    DayOfWeek day = sessionDTO.day();
-    String year = periodService.getYear();
-    String period = periodService.getPeriod();
+    public Session getSessionsByScheduleAndGroupCode(SessionDTO sessionDTO) {
+        String groupCode = sessionDTO.groupCode();
+        Integer slot = sessionDTO.slot();
+        DayOfWeek day = sessionDTO.day();
+        String year = periodService.getYear();
+        String period = periodService.getPeriod();
 
-    Session session =
-        sessionRepository.getSessionByScheduleAndGroupCode(groupCode, slot, day, year, period);
+        Session session =
+                sessionRepository.getSessionByScheduleAndGroupCode(groupCode, slot, day, year, period);
 
-    if (session == null) {
-      logger.error("Session not found by scheduled and classroom: {} en la franja {}", day, slot);
-      throw new IllegalArgumentException(
-          "Session not found by sessionId: " + day + " en la franja " + slot);
+        if (session == null) {
+            logger.error("Session not found by scheduled and classroom: {} en la franja {}", day, slot);
+            throw new ResourceNotFoundException(
+                    "Session not found by sessionId: " + day + " en la franja " + slot);
+        }
+        return session;
     }
-    return session;
-  }
 
-  public Session createSession(SessionDTO sessiondto) {
-    sessionValidator.validateCreateSession(sessiondto);
+    public Session createSession(SessionDTO sessiondto) {
+        sessionValidator.validateCreateSession(sessiondto);
 
-    Session session =
-        new Session.SessionBuilder()
-            .groupCode(sessiondto.groupCode())
-            .classroomName(sessiondto.classroomName())
-            .slot(sessiondto.slot())
-            .day(sessiondto.day())
-            .year(periodService.getYear())
-            .period(periodService.getPeriod())
-            .build();
-    try {
-      return sessionRepository.save(session);
-    } catch (Exception e) {
-      logger.error("Failed to create session: {}", e.getMessage());
-      throw new RuntimeException("Failed to create session: " + e.getMessage());
+        Session session =
+                new Session.SessionBuilder()
+                        .groupCode(sessiondto.groupCode())
+                        .classroomName(sessiondto.classroomName())
+                        .slot(sessiondto.slot())
+                        .day(sessiondto.day())
+                        .year(periodService.getYear())
+                        .period(periodService.getPeriod())
+                        .build();
+        try {
+            return sessionRepository.save(session);
+        } catch (Exception e) {
+            logger.error("Failed to create session: {}", e.getMessage());
+            throw new BusinessException("Failed to create session: " + e.getMessage());
+        }
     }
-  }
 
-  public Session updateSession(String sessionId, SessionDTO sessiondto) {
-    Session session = getSessionBySessionId(sessionId);
-    sessionValidator.validateUpdateSession(sessiondto, session.getYear(), session.getPeriod());
+    public Session updateSession(String sessionId, SessionDTO sessiondto) {
+        Session session = getSessionBySessionId(sessionId);
+        sessionValidator.validateUpdateSession(sessiondto, session.getYear(), session.getPeriod());
 
-    if (sessiondto.groupCode() != null) session.setGroupCode(sessiondto.groupCode());
-    if (sessiondto.day() != null) session.setDay(sessiondto.day());
-    if (sessiondto.classroomName() != null) session.setClassroomName(sessiondto.classroomName());
-    if (sessiondto.slot() != null) session.setSlot(sessiondto.slot());
+        if (sessiondto.groupCode() != null) session.setGroupCode(sessiondto.groupCode());
+        if (sessiondto.day() != null) session.setDay(sessiondto.day());
+        if (sessiondto.classroomName() != null) session.setClassroomName(sessiondto.classroomName());
+        if (sessiondto.slot() != null) session.setSlot(sessiondto.slot());
 
-    try {
-      return sessionRepository.save(session);
-    } catch (Exception e) {
-      logger.error("An unexpected error has occurred updating a session: {}", e.getMessage());
-      throw new RuntimeException(
-          "An unexpected error has occurred updating a session:" + e.getMessage());
+        try {
+            return sessionRepository.save(session);
+        } catch (Exception e) {
+            logger.error("An unexpected error has occurred updating a session: {}", e.getMessage());
+            throw new BusinessException(
+                    "An unexpected error has occurred updating a session:" + e.getMessage());
+        }
     }
-  }
 
-  public Session deleteSession(String sessionId) {
-    Session session = getSessionBySessionId(sessionId);
-    sessionValidator.validateDeleteSession(session);
-    try {
-      sessionRepository.delete(session);
-      return session;
-    } catch (Exception e) {
-      logger.error("An unexpected error has occurred deleting a session : {}", e.getMessage());
-      throw new RuntimeException(
-          "An unexpected error has occurred updating a session: " + e.getMessage());
+    public Session deleteSession(String sessionId) {
+        Session session = getSessionBySessionId(sessionId);
+        sessionValidator.validateDeleteSession(session);
+        try {
+            sessionRepository.delete(session);
+            return session;
+        } catch (Exception e) {
+            logger.error("An unexpected error has occurred deleting a session : {}", e.getMessage());
+            throw new BusinessException(
+                    "An unexpected error has occurred updating a session: " + e.getMessage());
+        }
     }
-  }
 
-  public void deleteSessionsByGroupCode(String groupCode) {
-    List<Session> sessions = getSessionsByGroupCode(groupCode);
-    for (Session session : sessions) {
-      sessionRepository.delete(session);
+    public void deleteSessionsByGroupCode(String groupCode) {
+        List<Session> sessions = getSessionsByGroupCode(groupCode);
+        for (Session session : sessions) {
+            sessionRepository.delete(session);
+        }
     }
-  }
 }

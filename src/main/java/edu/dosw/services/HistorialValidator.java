@@ -2,6 +2,7 @@ package edu.dosw.services;
 
 import edu.dosw.dto.HistorialDTO;
 import edu.dosw.model.enums.HistorialStatus;
+import edu.dosw.exception.BusinessException;
 import edu.dosw.services.UserServices.StudentService;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -18,10 +19,10 @@ public class HistorialValidator {
     studentService.getStudentById(historialDTO.studentId());
   }
 
-  public void historialUpdateValidator(HistorialStatus oldStatus, HistorialStatus newStatus) {
-    if (oldStatus == newStatus) {
-      logger.error("Trying to change to the same status");
-      throw new IllegalArgumentException("there are no changes in STATUS");
+    public void historialUpdateValidator(HistorialStatus oldStatus, HistorialStatus newStatus) {
+        if (oldStatus == newStatus) {
+            logger.error("Trying to change to the same status");
+            throw new BusinessException("There are no changes in STATUS");
+        }
     }
-  }
 }
