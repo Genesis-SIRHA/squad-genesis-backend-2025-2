@@ -1,4 +1,4 @@
-package edu.dosw.services.strategy;
+package edu.dosw.services.strategy.queryStrategies;
 
 import edu.dosw.model.Request;
 import java.util.List;
