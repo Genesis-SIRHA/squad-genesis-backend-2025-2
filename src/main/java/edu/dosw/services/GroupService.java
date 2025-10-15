@@ -10,7 +10,9 @@ import edu.dosw.model.Group;
 import edu.dosw.model.Session;
 import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.repositories.GroupRepository;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +32,7 @@ public class GroupService {
   private final SessionService sessionService;
   private final HistorialService historialService;
   private final GroupValidator groupValidator;
+  private static final double UMBRAL_NOTIFICATION = 90.0;
 
   /**
    * Retrieves all groups associated with a specific course abbreviation.
@@ -53,6 +56,7 @@ public class GroupService {
       logger.error("Group not found by id {}", groupCode);
       throw new IllegalArgumentException("Group not found: " + groupCode);
     }
+    verificarGrupo(group);
     return group;
   }
 
@@ -83,7 +87,9 @@ public class GroupService {
             .maxCapacity(groupRequest.maxCapacity())
             .build();
 
-    return groupRepository.save(group);
+    Group savedGroup = groupRepository.save(group);
+    verificarGrupo(savedGroup);
+    return savedGroup;
   }
 
   public Group updateGroup(String groupCode, UpdateGroupRequest groupRequest) {
@@ -97,7 +103,7 @@ public class GroupService {
     if (groupRequest.groupNum() != null) group.setGroupNum(groupRequest.groupNum());
     if (groupRequest.maxCapacity() != null) group.setMaxCapacity(groupRequest.maxCapacity());
     if (groupRequest.enrolled() != null) group.setEnrolled(groupRequest.enrolled());
-
+    verificarGrupo(group);
     return groupRepository.save(group);
   }
 
@@ -147,12 +153,14 @@ public class GroupService {
     try {
       group.setEnrolled(group.getEnrolled() + 1);
       groupRepository.save(group);
+      verificarGrupo(group);
 
       HistorialDTO historialDTO = new HistorialDTO(studentId, groupCode, HistorialStatus.ON_GOING);
       historialService.addHistorial(historialDTO);
     } catch (Exception e) {
       historialService.updateHistorial(studentId, groupCode, HistorialStatus.ON_GOING);
     }
+
     return group;
   }
 
@@ -174,7 +182,7 @@ public class GroupService {
 
     group.setEnrolled(group.getEnrolled() - 1);
     groupRepository.save(group);
-
+    verificarGrupo(group);
     try {
       historialService.updateHistorial(studentId, groupCode, HistorialStatus.CANCELLED);
     } catch (Exception e) {
@@ -182,5 +190,59 @@ public class GroupService {
       throw new BusinessException("Failed to update historial" + e.getMessage());
     }
     return group;
+  }
+
+  /**
+   * Method that verifies the capacity of all the groups and makes a message in case it is more or
+   * equal to the umbral of the notification.
+   *
+   * @return List <String> : list of notifications with name of the respective groups
+   */
+  public List<String> verifyAllGroups() {
+    List<Group> grupos = groupRepository.findAll();
+    List<String> notificaciones = new ArrayList<>();
+
+    for (Group grupo : grupos) {
+      String notificacion = verificarGrupo(grupo);
+      if (notificacion != null) {
+        notificaciones.add(notificacion);
+      }
+    }
+
+    return notificaciones;
+  }
+
+  public String verifyGroupByGroupCode(String groupCode) {
+    Optional<Group> grupo = groupRepository.findByGroupCode(groupCode);
+    if (grupo.isPresent()) {
+      return verificarGrupo(grupo.get());
+    }
+    return "Grupo no encontrado con código: " + groupCode;
+  }
+
+  private String verificarGrupo(Group grupo) {
+    double porcentaje = calcularPorcentajeCapacidad(grupo);
+
+    if (porcentaje >= UMBRAL_NOTIFICATION) {
+      String mensaje =
+          String.format(
+              " Grupo %s - %s: Capacidad al %.1f%% (%d/%d estudiantes)",
+              grupo.getGroupCode(),
+              grupo.getAbbreviation(),
+              porcentaje,
+              grupo.getEnrolled(),
+              grupo.getMaxCapacity());
+
+      logger.warn("Notificación: " + mensaje);
+
+      return mensaje;
+    }
+
+    return null;
+  }
+
+  private double calcularPorcentajeCapacidad(Group grupo) {
+    if (grupo.getMaxCapacity() == 0) return 0;
+    return ((double) grupo.getEnrolled() / grupo.getMaxCapacity()) * 100;
   }
 }
