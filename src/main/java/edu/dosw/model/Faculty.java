@@ -12,7 +12,8 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @NoArgsConstructor
 @Document(collection = "faculties")
 public class Faculty {
-  @Id
+  @Id private String id;
+
   @Field("facultyName")
   private String facultyName;
 

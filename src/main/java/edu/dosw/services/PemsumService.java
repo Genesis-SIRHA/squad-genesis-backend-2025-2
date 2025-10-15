@@ -1,7 +1,11 @@
 package edu.dosw.services;
 
 import edu.dosw.exception.BusinessException;
-import edu.dosw.model.*;
+import edu.dosw.model.Course;
+import edu.dosw.model.Historial;
+import edu.dosw.model.Pemsum;
+import edu.dosw.model.Student;
+import edu.dosw.services.UserServices.StudentService;
 import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
@@ -122,7 +126,8 @@ public class PemsumService {
           .filter(h -> h.getGroupCode().equals(course.getAbbreviation()))
           .findFirst()
           .ifPresentOrElse(
-              h -> coursesMap.put(course, h.getStatus()), () -> coursesMap.put(course, "pending"));
+              h -> coursesMap.put(course, h.getStatus().toString()),
+              () -> coursesMap.put(course, "pending"));
     }
     return coursesMap;
   }

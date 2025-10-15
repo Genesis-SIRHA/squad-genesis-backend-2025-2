@@ -2,6 +2,7 @@ package edu.dosw.repositories;
 
 import edu.dosw.model.Request;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
@@ -55,4 +56,10 @@ public interface RequestRepository extends MongoRepository<Request, String> {
 
   @Query("{ 'faculty': ?0, 'isExceptional': true }")
   List<Request> findAvailableByFacultyAndIsExceptional();
+
+  @Query("{ 'faculty': ?0 }")
+  List<Request> findAvailableByFaculty(String faculty);
+
+  @Query("{ 'requestId': ?0 }")
+  Optional<Request> findByRequestId(String requestid);
 }

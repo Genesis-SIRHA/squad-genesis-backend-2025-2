@@ -2,7 +2,7 @@ package edu.dosw.controller;
 
 import edu.dosw.dto.DeanDto;
 import edu.dosw.model.Dean;
-import edu.dosw.services.DeanService;
+import edu.dosw.services.UserServices.DeanService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
