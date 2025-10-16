@@ -218,7 +218,6 @@ class GroupServiceNotificationTest {
 
     double porcentaje = (double) method.invoke(groupService, grupo);
 
-
     assertEquals(75.0, porcentaje, 0.01, "Debería calcular 75.0% para 15/20 estudiantes");
   }
 
@@ -275,8 +274,23 @@ class GroupServiceNotificationTest {
   }
 
   @Test
-  void testVerifyAllGroups_DeberiaRetornarNotificacionesParaGruposConAltaCapacidad() {
+  void testVerifyGroupByGroupCode_DeberiaRetornarMensajeCuandoCapacidadAlta() {
+    when(groupRepository.findByGroupCode("G01")).thenReturn(Optional.of(grupoConAltaCapacidad));
 
+    String resultado = groupService.verifyGroupByGroupCode("G01");
+
+    assertNotNull(resultado);
+    assertTrue(resultado.contains("G01"));
+
+    boolean tienePorcentajeCorrecto = resultado.contains("90,0%") || resultado.contains("90.0%");
+    assertTrue(
+        tienePorcentajeCorrecto,
+        "Debería contener el porcentaje 90% (formato: '90,0%' o '90.0%'). Mensaje actual: "
+            + resultado);
+  }
+
+  @Test
+  void testVerifyAllGroups_DeberiaRetornarNotificacionesParaGruposConAltaCapacidad() {
     List<Group> grupos = Arrays.asList(grupoConAltaCapacidad, grupoConBajaCapacidad);
     when(groupRepository.findAll()).thenReturn(grupos);
 
@@ -286,20 +300,11 @@ class GroupServiceNotificationTest {
     assertEquals(1, notificaciones.size());
     assertTrue(notificaciones.get(0).contains("G01"));
 
-    boolean tienePorcentajeCorrecto = notificaciones.get(0).contains("90,0%");
-    assertTrue(tienePorcentajeCorrecto, "Debería contener el porcentaje 90%");
-  }
-
-  @Test
-  void testVerifyGroupByGroupCode_DeberiaRetornarMensajeCuandoCapacidadAlta() {
-    when(groupRepository.findByGroupCode("G01")).thenReturn(Optional.of(grupoConAltaCapacidad));
-
-    String resultado = groupService.verifyGroupByGroupCode("G01");
-
-    assertNotNull(resultado);
-    assertTrue(resultado.contains("G01"));
-
-    boolean tienePorcentajeCorrecto = resultado.contains("90,0%");
-    assertTrue(tienePorcentajeCorrecto, "Debería contener el porcentaje 90%");
+    boolean tienePorcentajeCorrecto =
+        notificaciones.get(0).contains("90,0%") || notificaciones.get(0).contains("90.0%");
+    assertTrue(
+        tienePorcentajeCorrecto,
+        "Debería contener el porcentaje 90% (formato: '90,0%' o '90.0%'). Mensaje actual: "
+            + notificaciones.get(0));
   }
 }
