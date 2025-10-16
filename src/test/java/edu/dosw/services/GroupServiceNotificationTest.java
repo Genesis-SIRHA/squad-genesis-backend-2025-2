@@ -12,6 +12,7 @@ import edu.dosw.model.Course;
 import edu.dosw.model.Group;
 import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.repositories.GroupRepository;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -61,7 +62,7 @@ class GroupServiceNotificationTest {
             .professorId("PROF123")
             .isLab(false)
             .groupNum("1")
-            .enrolled(18)
+            .enrolled(18) // 90%
             .maxCapacity(20)
             .build();
 
@@ -202,22 +203,61 @@ class GroupServiceNotificationTest {
   }
 
   @Test
-  void testCalcularPorcentajeCapacidad_DeberiaCalcularCorrectamente() {
-    Group grupo = new Group.GroupBuilder().enrolled(15).maxCapacity(20).build();
+  void testCalcularPorcentajeCapacidad_DeberiaCalcularCorrectamente() throws Exception {
+    Group grupo =
+        new Group.GroupBuilder()
+            .groupCode("TEST")
+            .abbreviation("TEST")
+            .enrolled(15)
+            .maxCapacity(20)
+            .build();
 
-    GroupService service =
-        new GroupService(
-            facultyService,
-            groupRepository,
-            periodService,
-            sessionService,
-            historialService,
-            groupValidator);
+    Method method =
+        GroupService.class.getDeclaredMethod("calcularPorcentajeCapacidad", Group.class);
+    method.setAccessible(true);
 
-    // Usar reflection para probar el método privado o mover a público para testing
-    // En este caso, asumimos que el cálculo es correcto basado en la lógica observada
-    double porcentajeEsperado = (15.0 / 20.0) * 100;
-    assertEquals(75.0, porcentajeEsperado);
+    double porcentaje = (double) method.invoke(groupService, grupo);
+
+
+    assertEquals(75.0, porcentaje, 0.01, "Debería calcular 75.0% para 15/20 estudiantes");
+  }
+
+  @Test
+  void testCalcularPorcentajeCapacidad_DeberiaManejarCeroCapacidad() throws Exception {
+    Group grupo =
+        new Group.GroupBuilder()
+            .groupCode("TEST")
+            .abbreviation("TEST")
+            .enrolled(10)
+            .maxCapacity(0) // División por cero
+            .build();
+
+    Method method =
+        GroupService.class.getDeclaredMethod("calcularPorcentajeCapacidad", Group.class);
+    method.setAccessible(true);
+
+    double porcentaje = (double) method.invoke(groupService, grupo);
+
+    assertEquals(0.0, porcentaje, 0.01, "Debería retornar 0 cuando maxCapacity es 0");
+  }
+
+  @Test
+  void testCalcularPorcentajeCapacidad_DeberiaCalcular100Porciento() throws Exception {
+    Group grupo =
+        new Group.GroupBuilder()
+            .groupCode("TEST")
+            .abbreviation("TEST")
+            .enrolled(20)
+            .maxCapacity(20)
+            .build();
+
+    Method method =
+        GroupService.class.getDeclaredMethod("calcularPorcentajeCapacidad", Group.class);
+    method.setAccessible(true);
+
+    double porcentaje = (double) method.invoke(groupService, grupo);
+
+    assertEquals(100.0, porcentaje, 0.01, "Debería calcular 100.0% para 20/20 estudiantes");
   }
 
   @Test
@@ -234,83 +274,32 @@ class GroupServiceNotificationTest {
         });
   }
 
-  //    @Test
-  //    void testCreateGroup_DeberiaNotificarCuandoCapacidadAlta() {
-  //        // Arrange
-  //        CreationGroupRequest request = new CreationGroupRequest(
-  //                "G03", "MAT101", "PROF123", false, "1", 19, 20
-  //        );
-  //
-  //        when(facultyService.findCourseByAbbreviation("MAT101", "Ingenieria", "2024"))
-  //                .thenReturn(course);
-  //        when(periodService.getYear()).thenReturn("2024");
-  //        when(periodService.getPeriod()).thenReturn("1");
-  //
-  //        // Mock para preservar los valores del request
-  //        when(groupRepository.save(any(Group.class))).thenAnswer(invocation -> {
-  //            Group grupo = invocation.getArgument(0);
-  //            // El grupo ya viene con enrolled=19 y maxCapacity=20 del request
-  //            return grupo;
-  //        });
-  //
-  //        // Act
-  //        Group result = groupService.createGroup(request, "Ingenieria", "2024");
-  //
-  //        // Assert
-  //        assertNotNull(result);
-  //        assertEquals(19, result.getEnrolled(), "El grupo debería tener 19 estudiantes
-  // inscritos");
-  //        assertEquals(20, result.getMaxCapacity(), "El grupo debería tener capacidad para 20
-  // estudiantes");
-  //    }
+  @Test
+  void testVerifyAllGroups_DeberiaRetornarNotificacionesParaGruposConAltaCapacidad() {
 
-//  @Test
-//  void testVerifyAllGroups_DeberiaRetornarNotificacionesParaGruposConAltaCapacidad() {
-//
-//    Group grupo95Porciento =
-//        new Group.GroupBuilder()
-//            .groupCode("G01")
-//            .abbreviation("MAT101")
-//            .enrolled(19)
-//            .maxCapacity(20)
-//            .build();
-//
-//    Group grupo50Porciento =
-//        new Group.GroupBuilder()
-//            .groupCode("G02")
-//            .abbreviation("FIS201")
-//            .enrolled(10)
-//            .maxCapacity(20)
-//            .build();
-//
-//    List<Group> grupos = Arrays.asList(grupo95Porciento, grupo50Porciento);
-//    when(groupRepository.findAll()).thenReturn(grupos);
-//
-//    List<String> notificaciones = groupService.verifyAllGroups();
-//
-//    assertNotNull(notificaciones);
-//    assertEquals(1, notificaciones.size(), "Debería haber exactamente 1 notificación");
-//    assertTrue(
-//        notificaciones.get(0).contains("G01"), "La notificación debería ser para el grupo G01");
-//    assertTrue(notificaciones.get(0).contains("95.0%"), "La notificación debería mostrar 95.0%");
-//  }
+    List<Group> grupos = Arrays.asList(grupoConAltaCapacidad, grupoConBajaCapacidad);
+    when(groupRepository.findAll()).thenReturn(grupos);
 
-//  @Test
-//  void testVerifyGroupByGroupCode_DeberiaRetornarMensajeCuandoCapacidadAlta() {
-//    Group grupo95Porciento =
-//        new Group.GroupBuilder()
-//            .groupCode("G01")
-//            .abbreviation("MAT101")
-//            .enrolled(19)
-//            .maxCapacity(20)
-//            .build();
-//
-//    when(groupRepository.findByGroupCode("G01")).thenReturn(Optional.of(grupo95Porciento));
-//
-//    String resultado = groupService.verifyGroupByGroupCode("G01");
-//
-//    assertNotNull(resultado, "Debería retornar un mensaje de notificación");
-//    assertTrue(resultado.contains("G01"), "El mensaje debería contener el código del grupo");
-//    assertTrue(resultado.contains("95.0%"), "El mensaje debería mostrar el porcentaje correcto");
-//  }
+    List<String> notificaciones = groupService.verifyAllGroups();
+
+    assertNotNull(notificaciones);
+    assertEquals(1, notificaciones.size());
+    assertTrue(notificaciones.get(0).contains("G01"));
+
+    boolean tienePorcentajeCorrecto = notificaciones.get(0).contains("90,0%");
+    assertTrue(tienePorcentajeCorrecto, "Debería contener el porcentaje 90%");
+  }
+
+  @Test
+  void testVerifyGroupByGroupCode_DeberiaRetornarMensajeCuandoCapacidadAlta() {
+    when(groupRepository.findByGroupCode("G01")).thenReturn(Optional.of(grupoConAltaCapacidad));
+
+    String resultado = groupService.verifyGroupByGroupCode("G01");
+
+    assertNotNull(resultado);
+    assertTrue(resultado.contains("G01"));
+
+    boolean tienePorcentajeCorrecto = resultado.contains("90,0%");
+    assertTrue(tienePorcentajeCorrecto, "Debería contener el porcentaje 90%");
+  }
 }
