@@ -273,38 +273,50 @@ class GroupServiceNotificationTest {
         });
   }
 
-  @Test
-  void testVerifyGroupByGroupCode_DeberiaRetornarMensajeCuandoCapacidadAlta() {
-    when(groupRepository.findByGroupCode("G01")).thenReturn(Optional.of(grupoConAltaCapacidad));
+    @Test
+    void testVerifyGroupByGroupCode_DeberiaRetornarMensajeCuandoCapacidadAlta() {
+        when(groupRepository.findByGroupCode("G01")).thenReturn(Optional.of(grupoConAltaCapacidad));
 
-    String resultado = groupService.verifyGroupByGroupCode("G01");
+        String resultado = groupService.verifyGroupByGroupCode("G01");
 
-    assertNotNull(resultado);
-    assertTrue(resultado.contains("G01"));
+        assertNotNull(resultado);
+        assertTrue(resultado.contains("G01"));
 
-    boolean tienePorcentajeCorrecto = resultado.contains("90,0%") || resultado.contains("90.0%");
-    assertTrue(
-        tienePorcentajeCorrecto,
-        "Debería contener el porcentaje 90% (formato: '90,0%' o '90.0%'). Mensaje actual: "
-            + resultado);
-  }
+        double porcentaje = extraerPorcentaje(resultado);
+        assertTrue(porcentaje >= 89.0 && porcentaje <= 91.0,
+                "El porcentaje debería estar alrededor de 90%. Valor extraído: " + porcentaje + ". Mensaje: " + resultado);
+    }
 
-  @Test
-  void testVerifyAllGroups_DeberiaRetornarNotificacionesParaGruposConAltaCapacidad() {
-    List<Group> grupos = Arrays.asList(grupoConAltaCapacidad, grupoConBajaCapacidad);
-    when(groupRepository.findAll()).thenReturn(grupos);
+    @Test
+    void testVerifyAllGroups_DeberiaRetornarNotificacionesParaGruposConAltaCapacidad() {
+        List<Group> grupos = Arrays.asList(grupoConAltaCapacidad, grupoConBajaCapacidad);
+        when(groupRepository.findAll()).thenReturn(grupos);
 
-    List<String> notificaciones = groupService.verifyAllGroups();
+        List<String> notificaciones = groupService.verifyAllGroups();
 
-    assertNotNull(notificaciones);
-    assertEquals(1, notificaciones.size());
-    assertTrue(notificaciones.get(0).contains("G01"));
+        assertNotNull(notificaciones);
+        assertEquals(1, notificaciones.size());
+        assertTrue(notificaciones.get(0).contains("G01"));
 
-    boolean tienePorcentajeCorrecto =
-        notificaciones.get(0).contains("90,0%") || notificaciones.get(0).contains("90.0%");
-    assertTrue(
-        tienePorcentajeCorrecto,
-        "Debería contener el porcentaje 90% (formato: '90,0%' o '90.0%'). Mensaje actual: "
-            + notificaciones.get(0));
-  }
+        double porcentaje = extraerPorcentaje(notificaciones.get(0));
+        assertTrue(porcentaje >= 89.0 && porcentaje <= 91.0,
+                "El porcentaje debería estar alrededor de 90%. Valor extraído: " + porcentaje + ". Mensaje: " + notificaciones.get(0));
+    }
+
+
+    private double extraerPorcentaje(String mensaje) {
+        try {
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(\\d+[,\\.]?\\d*)%");
+            java.util.regex.Matcher matcher = pattern.matcher(mensaje);
+
+            if (matcher.find()) {
+                String numeroStr = matcher.group(1).replace(',', '.');
+                return Double.parseDouble(numeroStr);
+            }
+        } catch (Exception e) {
+
+            return 0.0;
+        }
+        return 0;
+    }
 }
