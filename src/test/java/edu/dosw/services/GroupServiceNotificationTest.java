@@ -1,55 +1,40 @@
 package edu.dosw.services;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import edu.dosw.dto.HistorialDTO;
-import edu.dosw.dto.UpdateGroupRequest;
 import edu.dosw.exception.BusinessException;
-import edu.dosw.model.Course;
 import edu.dosw.model.Group;
 import edu.dosw.model.enums.HistorialStatus;
+import edu.dosw.observer.GroupCapacityNotifier;
+import edu.dosw.observer.MessageGroupObserver;
 import edu.dosw.repositories.GroupRepository;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 
 @ExtendWith(MockitoExtension.class)
 class GroupServiceNotificationTest {
 
-  @Mock private FacultyService facultyService;
-
   @Mock private GroupRepository groupRepository;
-
   @Mock private PeriodService periodService;
-
-  @Mock private SessionService sessionService;
-
   @Mock private HistorialService historialService;
-
   @Mock private GroupValidator groupValidator;
-
-  @Mock private Logger logger;
+  @Mock private GroupCapacityNotifier groupCapacityNotifier;
+  @Mock private MessageGroupObserver messageGroupObserver;
 
   @InjectMocks private GroupService groupService;
 
-  @Captor private ArgumentCaptor<Group> groupCaptor;
-
   private Group grupoConAltaCapacidad;
   private Group grupoConBajaCapacidad;
-  private Course course;
 
   @BeforeEach
   void setUp() {
@@ -75,55 +60,9 @@ class GroupServiceNotificationTest {
             .professorId("PROF456")
             .isLab(false)
             .groupNum("1")
-            .enrolled(10)
+            .enrolled(10) // 50%
             .maxCapacity(20)
             .build();
-
-    course = new Course();
-    course.setAbbreviation("MAT101");
-  }
-
-  @Test
-  void testGetGroupByGroupCode_DeberiaNotificarCuandoCapacidadAlta() {
-    when(groupRepository.findByGroupCode("G01")).thenReturn(Optional.of(grupoConAltaCapacidad));
-
-    Group result = groupService.getGroupByGroupCode("G01");
-
-    assertNotNull(result);
-    assertEquals("G01", result.getGroupCode());
-  }
-
-  @Test
-  void testGetGroupByGroupCode_NoDeberiaNotificarCuandoCapacidadBaja() {
-    // Arrange
-    when(groupRepository.findByGroupCode("G02")).thenReturn(Optional.of(grupoConBajaCapacidad));
-
-    Group result = groupService.getGroupByGroupCode("G02");
-
-    assertNotNull(result);
-    assertEquals("G02", result.getGroupCode());
-  }
-
-  @Test
-  void testUpdateGroup_DeberiaNotificarCuandoCapacidadSuperaUmbral() {
-    Group grupoActual =
-        new Group.GroupBuilder()
-            .groupCode("G01")
-            .abbreviation("MAT101")
-            .enrolled(15)
-            .maxCapacity(20)
-            .build();
-
-    UpdateGroupRequest request = new UpdateGroupRequest(null, null, null, null, 19); // 95%
-
-    when(groupRepository.findByGroupCode("G01")).thenReturn(Optional.of(grupoActual));
-    when(groupRepository.save(any(Group.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
-
-    Group result = groupService.updateGroup("G01", request);
-
-    assertNotNull(result);
-    assertEquals(19, result.getEnrolled());
   }
 
   @Test
@@ -146,10 +85,12 @@ class GroupServiceNotificationTest {
             });
     doNothing().when(groupValidator).validateAddStudentToGroup(any(Group.class), anyString());
     when(historialService.addHistorial(any(HistorialDTO.class))).thenReturn(null);
+    doNothing().when(groupCapacityNotifier).checkAndNotify(any(Group.class));
 
     Group result = groupService.addStudent("G01", "STU123");
 
     assertNotNull(result);
+    verify(groupCapacityNotifier).checkAndNotify(any(Group.class));
   }
 
   @Test
@@ -176,20 +117,25 @@ class GroupServiceNotificationTest {
             });
     when(historialService.updateHistorial(anyString(), anyString(), any(HistorialStatus.class)))
         .thenReturn(null);
+    doNothing().when(groupCapacityNotifier).checkAndNotify(any(Group.class));
 
     Group result = groupService.deleteStudent("G01", "STU123");
 
     assertNotNull(result);
+    verify(groupCapacityNotifier).checkAndNotify(any(Group.class));
   }
 
   @Test
   void testVerifyGroupByGroupCode_DeberiaRetornarNullCuandoCapacidadBaja() {
-
     when(groupRepository.findByGroupCode("G02")).thenReturn(Optional.of(grupoConBajaCapacidad));
+    doNothing().when(groupCapacityNotifier).checkAndNotify(grupoConBajaCapacidad);
+    when(messageGroupObserver.getNotifications()).thenReturn(List.of());
 
     String resultado = groupService.verifyGroupByGroupCode("G02");
 
     assertNull(resultado);
+    verify(messageGroupObserver).clearNotifications();
+    verify(groupCapacityNotifier).checkAndNotify(grupoConBajaCapacidad);
   }
 
   @Test
@@ -200,63 +146,59 @@ class GroupServiceNotificationTest {
 
     assertNotNull(resultado);
     assertTrue(resultado.contains("Grupo no encontrado"));
+    verify(messageGroupObserver, never()).clearNotifications();
+    verify(groupCapacityNotifier, never()).checkAndNotify(any());
   }
 
   @Test
-  void testCalcularPorcentajeCapacidad_DeberiaCalcularCorrectamente() throws Exception {
-    Group grupo =
-        new Group.GroupBuilder()
-            .groupCode("TEST")
-            .abbreviation("TEST")
-            .enrolled(15)
-            .maxCapacity(20)
-            .build();
+  void testVerifyGroupByGroupCode_DeberiaRetornarMensajeCuandoCapacidadAlta() {
+    when(groupRepository.findByGroupCode("G01")).thenReturn(Optional.of(grupoConAltaCapacidad));
+    doNothing().when(groupCapacityNotifier).checkAndNotify(grupoConAltaCapacidad);
+    when(messageGroupObserver.getNotifications())
+        .thenReturn(List.of(" Grupo G01 - MAT101: Capacidad al 90.0% (18/20 estudiantes)"));
 
-    Method method =
-        GroupService.class.getDeclaredMethod("calcularPorcentajeCapacidad", Group.class);
-    method.setAccessible(true);
+    String resultado = groupService.verifyGroupByGroupCode("G01");
 
-    double porcentaje = (double) method.invoke(groupService, grupo);
+    assertNotNull(resultado);
+    assertTrue(resultado.contains("G01"));
+    assertTrue(resultado.contains("90.0%"));
 
-    assertEquals(75.0, porcentaje, 0.01, "Debería calcular 75.0% para 15/20 estudiantes");
+    verify(messageGroupObserver).clearNotifications();
+    verify(groupCapacityNotifier).checkAndNotify(grupoConAltaCapacidad);
   }
 
   @Test
-  void testCalcularPorcentajeCapacidad_DeberiaManejarCeroCapacidad() throws Exception {
-    Group grupo =
-        new Group.GroupBuilder()
-            .groupCode("TEST")
-            .abbreviation("TEST")
-            .enrolled(10)
-            .maxCapacity(0) // División por cero
-            .build();
+  void testVerifyAllGroups_DeberiaRetornarNotificacionesParaGruposConAltaCapacidad() {
+    List<Group> grupos = Arrays.asList(grupoConAltaCapacidad, grupoConBajaCapacidad);
+    when(groupRepository.findAll()).thenReturn(grupos);
+    doNothing().when(groupCapacityNotifier).checkAndNotify(any(Group.class));
+    when(messageGroupObserver.getNotifications())
+        .thenReturn(List.of(" Grupo G01 - MAT101: Capacidad al 90.0% (18/20 estudiantes)"));
 
-    Method method =
-        GroupService.class.getDeclaredMethod("calcularPorcentajeCapacidad", Group.class);
-    method.setAccessible(true);
+    List<String> notificaciones = groupService.verifyAllGroups();
 
-    double porcentaje = (double) method.invoke(groupService, grupo);
+    assertNotNull(notificaciones);
+    assertEquals(1, notificaciones.size());
+    assertTrue(notificaciones.get(0).contains("G01"));
 
-    assertEquals(0.0, porcentaje, 0.01, "Debería retornar 0 cuando maxCapacity es 0");
+    verify(messageGroupObserver).clearNotifications();
+    verify(groupCapacityNotifier, times(2)).checkAndNotify(any(Group.class));
   }
 
   @Test
-  void testCalcularPorcentajeCapacidad_DeberiaCalcular100Porciento() throws Exception {
-    Group grupo =
-        new Group.GroupBuilder()
-            .groupCode("TEST")
-            .abbreviation("TEST")
-            .enrolled(20)
-            .maxCapacity(20)
-            .build();
+  void testVerifyAllGroups_DeberiaRetornarListaVaciaCuandoNoHayNotificaciones() {
+    List<Group> grupos = Arrays.asList(grupoConBajaCapacidad);
+    when(groupRepository.findAll()).thenReturn(grupos);
+    doNothing().when(groupCapacityNotifier).checkAndNotify(any(Group.class));
+    when(messageGroupObserver.getNotifications()).thenReturn(List.of());
 
-    Method method =
-        GroupService.class.getDeclaredMethod("calcularPorcentajeCapacidad", Group.class);
-    method.setAccessible(true);
+    List<String> notificaciones = groupService.verifyAllGroups();
 
-    double porcentaje = (double) method.invoke(groupService, grupo);
+    assertNotNull(notificaciones);
+    assertTrue(notificaciones.isEmpty());
 
-    assertEquals(100.0, porcentaje, 0.01, "Debería calcular 100.0% para 20/20 estudiantes");
+    verify(messageGroupObserver).clearNotifications();
+    verify(groupCapacityNotifier).checkAndNotify(grupoConBajaCapacidad);
   }
 
   @Test
@@ -266,57 +208,44 @@ class GroupServiceNotificationTest {
         .when(groupValidator)
         .validateAddStudentToGroup(any(Group.class), anyString());
 
-    assertThrows(
-        BusinessException.class,
-        () -> {
-          groupService.addStudent("G01", "STU123");
-        });
+    assertThrows(BusinessException.class, () -> groupService.addStudent("G01", "STU123()"));
+
+    verify(groupRepository, never()).save(any());
+    verify(groupCapacityNotifier, never()).checkAndNotify(any());
   }
 
-    @Test
-    void testVerifyGroupByGroupCode_DeberiaRetornarMensajeCuandoCapacidadAlta() {
-        when(groupRepository.findByGroupCode("G01")).thenReturn(Optional.of(grupoConAltaCapacidad));
+  @Test
+  void testDeleteStudent_DeberiaLanzarExcepcionCuandoPeriodoNoCoincide() {
+    Group grupoPeriodoIncorrecto =
+        new Group.GroupBuilder()
+            .groupCode("G01")
+            .abbreviation("MAT101")
+            .enrolled(19)
+            .maxCapacity(20)
+            .year("2023") // Año diferente
+            .period("2") // Periodo diferente
+            .build();
 
-        String resultado = groupService.verifyGroupByGroupCode("G01");
+    when(groupRepository.findByGroupCode("G01")).thenReturn(Optional.of(grupoPeriodoIncorrecto));
+    when(periodService.getYear()).thenReturn("2024");
+    when(periodService.getPeriod()).thenReturn("1");
 
-        assertNotNull(resultado);
-        assertTrue(resultado.contains("G01"));
+    assertThrows(IllegalArgumentException.class, () -> groupService.deleteStudent("G01", "STU123"));
 
-        double porcentaje = extraerPorcentaje(resultado);
-        assertTrue(porcentaje >= 89.0 && porcentaje <= 91.0,
-                "El porcentaje debería estar alrededor de 90%. Valor extraído: " + porcentaje + ". Mensaje: " + resultado);
-    }
+    verify(groupRepository, never()).save(any());
+    verify(groupCapacityNotifier, never()).checkAndNotify(any());
+  }
 
-    @Test
-    void testVerifyAllGroups_DeberiaRetornarNotificacionesParaGruposConAltaCapacidad() {
-        List<Group> grupos = Arrays.asList(grupoConAltaCapacidad, grupoConBajaCapacidad);
-        when(groupRepository.findAll()).thenReturn(grupos);
+  @Test
+  void testMultipleObservers_DeberiaFuncionarCorrectamenteConVariosObservers() {
+    when(groupRepository.findByGroupCode("G01")).thenReturn(Optional.of(grupoConAltaCapacidad));
+    doNothing().when(groupCapacityNotifier).checkAndNotify(grupoConAltaCapacidad);
+    when(messageGroupObserver.getNotifications())
+        .thenReturn(List.of("Notificación 1", "Notificación 2"));
 
-        List<String> notificaciones = groupService.verifyAllGroups();
+    String resultado = groupService.verifyGroupByGroupCode("G01");
 
-        assertNotNull(notificaciones);
-        assertEquals(1, notificaciones.size());
-        assertTrue(notificaciones.get(0).contains("G01"));
-
-        double porcentaje = extraerPorcentaje(notificaciones.get(0));
-        assertTrue(porcentaje >= 89.0 && porcentaje <= 91.0,
-                "El porcentaje debería estar alrededor de 90%. Valor extraído: " + porcentaje + ". Mensaje: " + notificaciones.get(0));
-    }
-
-
-    private double extraerPorcentaje(String mensaje) {
-        try {
-            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(\\d+[,\\.]?\\d*)%");
-            java.util.regex.Matcher matcher = pattern.matcher(mensaje);
-
-            if (matcher.find()) {
-                String numeroStr = matcher.group(1).replace(',', '.');
-                return Double.parseDouble(numeroStr);
-            }
-        } catch (Exception e) {
-
-            return 0.0;
-        }
-        return 0;
-    }
+    assertNotNull(resultado);
+    assertEquals("Notificación 1", resultado);
+  }
 }

@@ -9,8 +9,9 @@ import edu.dosw.model.Course;
 import edu.dosw.model.Group;
 import edu.dosw.model.Session;
 import edu.dosw.model.enums.HistorialStatus;
+import edu.dosw.observer.GroupCapacityNotifier;
+import edu.dosw.observer.MessageGroupObserver;
 import edu.dosw.repositories.GroupRepository;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -32,7 +33,8 @@ public class GroupService {
   private final SessionService sessionService;
   private final HistorialService historialService;
   private final GroupValidator groupValidator;
-  private static final double UMBRAL_NOTIFICATION = 90.0;
+  private final GroupCapacityNotifier groupCapacityNotifier;
+  private final MessageGroupObserver messageGroupObserver;
 
   /**
    * Retrieves all groups associated with a specific course abbreviation.
@@ -56,7 +58,6 @@ public class GroupService {
       logger.error("Group not found by id {}", groupCode);
       throw new IllegalArgumentException("Group not found: " + groupCode);
     }
-    verificarGrupo(group);
     return group;
   }
 
@@ -86,10 +87,7 @@ public class GroupService {
             .enrolled(groupRequest.enrolled())
             .maxCapacity(groupRequest.maxCapacity())
             .build();
-
-    Group savedGroup = groupRepository.save(group);
-    verificarGrupo(savedGroup);
-    return savedGroup;
+    return group;
   }
 
   public Group updateGroup(String groupCode, UpdateGroupRequest groupRequest) {
@@ -103,7 +101,6 @@ public class GroupService {
     if (groupRequest.groupNum() != null) group.setGroupNum(groupRequest.groupNum());
     if (groupRequest.maxCapacity() != null) group.setMaxCapacity(groupRequest.maxCapacity());
     if (groupRequest.enrolled() != null) group.setEnrolled(groupRequest.enrolled());
-    verificarGrupo(group);
     return groupRepository.save(group);
   }
 
@@ -152,15 +149,14 @@ public class GroupService {
     groupValidator.validateAddStudentToGroup(group, studentId);
     try {
       group.setEnrolled(group.getEnrolled() + 1);
-      groupRepository.save(group);
-      verificarGrupo(group);
+      Group updatedGroup = groupRepository.save(group);
+      groupCapacityNotifier.checkAndNotify(updatedGroup);
 
       HistorialDTO historialDTO = new HistorialDTO(studentId, groupCode, HistorialStatus.ON_GOING);
       historialService.addHistorial(historialDTO);
     } catch (Exception e) {
       historialService.updateHistorial(studentId, groupCode, HistorialStatus.ON_GOING);
     }
-
     return group;
   }
 
@@ -181,8 +177,8 @@ public class GroupService {
     }
 
     group.setEnrolled(group.getEnrolled() - 1);
-    groupRepository.save(group);
-    verificarGrupo(group);
+    Group updatedGroup = groupRepository.save(group);
+    groupCapacityNotifier.checkAndNotify(updatedGroup);
     try {
       historialService.updateHistorial(studentId, groupCode, HistorialStatus.CANCELLED);
     } catch (Exception e) {
@@ -192,57 +188,33 @@ public class GroupService {
     return group;
   }
 
-  /**
-   * Method that verifies the capacity of all the groups and makes a message in case it is more or
-   * equal to the umbral of the notification.
-   *
-   * @return List <String> : list of notifications with name of the respective groups
-   */
+  /** Method that verifies the capacity of all the groups and returns notifications */
   public List<String> verifyAllGroups() {
-    List<Group> grupos = groupRepository.findAll();
-    List<String> notificaciones = new ArrayList<>();
+    messageGroupObserver.clearNotifications();
 
+    List<Group> grupos = groupRepository.findAll();
     for (Group grupo : grupos) {
-      String notificacion = verificarGrupo(grupo);
-      if (notificacion != null) {
-        notificaciones.add(notificacion);
-      }
+      groupCapacityNotifier.checkAndNotify(grupo);
     }
 
-    return notificaciones;
+    return messageGroupObserver.getNotifications();
   }
 
+  /**
+   * method that checks the capacity of the group, given it's groupCode
+   *
+   * @param groupCode
+   * @return message
+   */
   public String verifyGroupByGroupCode(String groupCode) {
     Optional<Group> grupo = groupRepository.findByGroupCode(groupCode);
     if (grupo.isPresent()) {
-      return verificarGrupo(grupo.get());
+      messageGroupObserver.clearNotifications();
+      groupCapacityNotifier.checkAndNotify(grupo.get());
+
+      List<String> notifications = messageGroupObserver.getNotifications();
+      return notifications.isEmpty() ? null : notifications.get(0);
     }
     return "Grupo no encontrado con código: " + groupCode;
-  }
-
-  private String verificarGrupo(Group grupo) {
-    double porcentaje = calcularPorcentajeCapacidad(grupo);
-
-    if (porcentaje >= UMBRAL_NOTIFICATION) {
-      String mensaje =
-          String.format(
-              " Grupo %s - %s: Capacidad al %.1f%% (%d/%d estudiantes)",
-              grupo.getGroupCode(),
-              grupo.getAbbreviation(),
-              porcentaje,
-              grupo.getEnrolled(),
-              grupo.getMaxCapacity());
-
-      logger.warn("Notificación: " + mensaje);
-
-      return mensaje;
-    }
-
-    return null;
-  }
-
-  private double calcularPorcentajeCapacidad(Group grupo) {
-    if (grupo.getMaxCapacity() == 0) return 0;
-    return ((double) grupo.getEnrolled() / grupo.getMaxCapacity()) * 100;
   }
 }
