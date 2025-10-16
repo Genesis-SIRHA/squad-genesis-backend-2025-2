@@ -144,7 +144,7 @@ public class GroupController {
         @ApiResponse(responseCode = "500", description = "We had an internal error. Try later ")
       })
   @PostMapping("/check-all-groups")
-  public ResponseEntity<List<String>> VerifyAllGroups() {
+  public ResponseEntity<List<String>> verifyAllGroups() {
     try {
       List<String> notificaciones = groupService.verifyAllGroups();
       return ResponseEntity.ok(notificaciones);
@@ -168,7 +168,7 @@ public class GroupController {
 
   @Operation(summary = "Get capacity of a group by it's group code")
   @GetMapping("/capacity/{groupCode}")
-  public ResponseEntity<Map<String, Object>> GetGroupCapacity(@PathVariable String groupCode) {
+  public ResponseEntity<Map<String, Object>> getGroupCapacity(@PathVariable String groupCode) {
     Group grupo = groupService.getGroupByGroupCode(groupCode);
 
     if (grupo != null) {
