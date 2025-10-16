@@ -122,14 +122,14 @@ class GroupControllerNotificationTest {
   }
 
   @Test
-  void testVerifyAllGroups_DeberiaRetornarListaDeNotificaciones() {
+  void testverifyAllGroups_DeberiaRetornarListaDeNotificaciones() {
     List<String> notificacionesMock =
         Arrays.asList(
             " Grupo G01 - MAT101: Capacidad al 90.0% (18/20 estudiantes)",
             " Grupo G03 - QUIM101: Capacidad al 95.0% (19/20 estudiantes)");
     when(groupService.verifyAllGroups()).thenReturn(notificacionesMock);
 
-    ResponseEntity<List<String>> response = groupController.VerifyAllGroups();
+    ResponseEntity<List<String>> response = groupController.verifyAllGroups();
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
@@ -138,11 +138,11 @@ class GroupControllerNotificationTest {
   }
 
   @Test
-  void testVerifyAllGroups_DeberiaManejarErrorInterno() {
+  void testverifyAllGroups_DeberiaManejarErrorInterno() {
 
     when(groupService.verifyAllGroups()).thenThrow(new RuntimeException("Error de base de datos"));
 
-    ResponseEntity<List<String>> response = groupController.VerifyAllGroups();
+    ResponseEntity<List<String>> response = groupController.verifyAllGroups();
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     assertNotNull(response.getBody());
@@ -176,11 +176,11 @@ class GroupControllerNotificationTest {
   }
 
   @Test
-  void testGetGroupCapacity_DeberiaRetornarMetricasConAlertaTrue() {
+  void testgetGroupCapacity_DeberiaRetornarMetricasConAlertaTrue() {
 
     when(groupService.getGroupByGroupCode("G01")).thenReturn(grupoConAltaCapacidad);
 
-    ResponseEntity<Map<String, Object>> response = groupController.GetGroupCapacity("G01");
+    ResponseEntity<Map<String, Object>> response = groupController.getGroupCapacity("G01");
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
@@ -195,11 +195,11 @@ class GroupControllerNotificationTest {
   }
 
   @Test
-  void testGetGroupCapacity_DeberiaRetornarMetricasConAlertaFalse() {
+  void testgetGroupCapacity_DeberiaRetornarMetricasConAlertaFalse() {
 
     when(groupService.getGroupByGroupCode("G02")).thenReturn(grupoConBajaCapacidad);
 
-    ResponseEntity<Map<String, Object>> response = groupController.GetGroupCapacity("G02");
+    ResponseEntity<Map<String, Object>> response = groupController.getGroupCapacity("G02");
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
@@ -211,11 +211,11 @@ class GroupControllerNotificationTest {
   }
 
   @Test
-  void testGetGroupCapacity_DeberiaRetornarNotFoundCuandoGrupoNoExiste() {
+  void testgetGroupCapacity_DeberiaRetornarNotFoundCuandoGrupoNoExiste() {
 
     when(groupService.getGroupByGroupCode("G99")).thenReturn(null);
 
-    ResponseEntity<Map<String, Object>> response = groupController.GetGroupCapacity("G99");
+    ResponseEntity<Map<String, Object>> response = groupController.getGroupCapacity("G99");
 
     assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
   }
