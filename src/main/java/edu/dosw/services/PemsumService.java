@@ -6,11 +6,15 @@ import edu.dosw.model.Course;
 import edu.dosw.model.Historial;
 import edu.dosw.model.Pemsum;
 import edu.dosw.model.Student;
+import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.services.UserServices.StudentService;
 import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,7 +110,7 @@ public class PemsumService {
     private int getApprovedCredits(Map<Course, String> coursesMap) {
         int approvedCredits = 0;
         for (Course course : coursesMap.keySet()) {
-            if ("approved".equalsIgnoreCase(coursesMap.get(course))) {
+            if ("FINISHED".equalsIgnoreCase(coursesMap.get(course))) {
                 approvedCredits += course.getCredits();
             }
         }
@@ -132,4 +136,50 @@ public class PemsumService {
         }
         return coursesMap;
     }
+
+    public double getCompletedCoursesPercentage(String studentId) {
+        Student student = studentService.getStudentById(studentId);
+        String facultyName = student.getFacultyName();
+        String plan = student.getPlan();
+
+        List<Course> facultyCourses = facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan);
+
+        if (facultyCourses.isEmpty()) {
+            logger.error("Invalid faculty fullName or plan: " + facultyName + " - " + plan);
+            throw new ResourceNotFoundException(
+                    "Invalid faculty fullName or plan: " + facultyName + " - " + plan);
+        }
+
+        List<Historial> studentHistorial = historialService.getAllHistorial().stream()
+                .filter(historial -> historial.getStudentId().equals(studentId))
+                .collect(Collectors.toList());
+
+        List<Historial> finishedHistorial = studentHistorial.stream()
+                .filter(historial -> historial.getStatus() == HistorialStatus.FINISHED)
+                .collect(Collectors.toList());
+
+
+        int approvedCredits = finishedHistorial.stream()
+                .mapToInt(historial -> {
+                    return facultyCourses.stream()
+                            .filter(course -> course.getAbbreviation().equals(historial.getGroupCode()))
+                            .findFirst()
+                            .map(Course::getCredits)
+                            .orElse(0);
+                })
+                .sum();
+
+        int totalCredits = facultyCourses.stream()
+                .mapToInt(Course::getCredits)
+                .sum();
+
+        if (totalCredits == 0) {
+            return 0.0;
+        }
+
+        return (double) approvedCredits / totalCredits * 100;
+    }
+
+
+
 }

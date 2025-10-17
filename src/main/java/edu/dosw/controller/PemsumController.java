@@ -1,11 +1,15 @@
 package edu.dosw.controller;
 
+import edu.dosw.model.Course;
 import edu.dosw.model.Pemsum;
 import edu.dosw.services.PemsumService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 
 /**
  * Controller that handles all course-related HTTP requests. Provides endpoints for CRUD operations
@@ -37,4 +41,13 @@ public class PemsumController {
   public ResponseEntity<Pemsum> getPemsum(@PathVariable String studentId) {
     return ResponseEntity.ok(pemsumService.getPemsum(studentId));
   }
+
+    @GetMapping("/{studentId}/completed-courses")
+    @Operation(
+            summary = "Get completed courses percentage",
+            description = "Retrieves the percentage of completed courses based on approved credits vs total credits in the study plan")
+    public ResponseEntity<Double> getCompletedCoursesPercentage(@PathVariable String studentId) {
+        return ResponseEntity.ok(pemsumService.getCompletedCoursesPercentage(studentId));
+    }
+
 }
