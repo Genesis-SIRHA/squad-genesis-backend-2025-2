@@ -14,33 +14,33 @@ import org.slf4j.LoggerFactory;
  * their own requests.
  */
 public class StudentStrategy implements QueryStrategy {
-    private final RequestRepository requestRepository;
-    private final StudentService studentService;
-    private static final Logger logger = LoggerFactory.getLogger(StudentStrategy.class);
+  private final RequestRepository requestRepository;
+  private final StudentService studentService;
+  private static final Logger logger = LoggerFactory.getLogger(StudentStrategy.class);
 
-    /**
-     * Constructs a new StudentStrategy with the given request repository.
-     *
-     * @param requestRepository The repository used to access request data
-     */
-    public StudentStrategy(RequestRepository requestRepository, StudentService studentService) {
-        this.requestRepository = requestRepository;
-        this.studentService = studentService;
-    }
+  /**
+   * Constructs a new StudentStrategy with the given request repository.
+   *
+   * @param requestRepository The repository used to access request data
+   */
+  public StudentStrategy(RequestRepository requestRepository, StudentService studentService) {
+    this.requestRepository = requestRepository;
+    this.studentService = studentService;
+  }
 
-    /**
-     * Queries requests that belong to the specified student.
-     *
-     * @param userId The ID of the student whose requests to retrieve
-     * @return A list of requests created by the specified student
-     */
-    @Override
-    public List<Request> queryRequests(String userId) {
-        Student student = studentService.getStudentById(userId);
-        if (student == null) {
-            logger.error("Student not found with id: {}", userId);
-            throw new ResourceNotFoundException("Student not found with id: " + userId);
-        }
-        return requestRepository.findByStudentId(userId);
+  /**
+   * Queries requests that belong to the specified student.
+   *
+   * @param userId The ID of the student whose requests to retrieve
+   * @return A list of requests created by the specified student
+   */
+  @Override
+  public List<Request> queryRequests(String userId) {
+    Student student = studentService.getStudentById(userId);
+    if (student == null) {
+      logger.error("Student not found with id: {}", userId);
+      throw new ResourceNotFoundException("Student not found with id: " + userId);
     }
+    return requestRepository.findByStudentId(userId);
+  }
 }

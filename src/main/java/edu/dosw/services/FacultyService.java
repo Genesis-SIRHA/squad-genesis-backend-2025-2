@@ -44,35 +44,35 @@ public class FacultyService {
     return facultyRepository.save(faculty);
   }
 
-    public Map<String, String> getAllFacultyNames() {
-        Map<String, String> facultyInfo = new HashMap<>();
-        List<Faculty> faculties = facultyRepository.findAll();
-        for (Faculty faculty : faculties) {
-            logger.info("Faculty processed: " + faculty.getFacultyName());
-            facultyInfo.put(faculty.getFacultyName().toLowerCase(), faculty.getPlan());
-        }
-        return facultyInfo;
+  public Map<String, String> getAllFacultyNames() {
+    Map<String, String> facultyInfo = new HashMap<>();
+    List<Faculty> faculties = facultyRepository.findAll();
+    for (Faculty faculty : faculties) {
+      logger.info("Faculty processed: " + faculty.getFacultyName());
+      facultyInfo.put(faculty.getFacultyName().toLowerCase(), faculty.getPlan());
     }
+    return facultyInfo;
+  }
 
-    public List<Faculty> getAllFaculties() {
-        try {
-            return facultyRepository.findAll();
-        } catch (Exception e) {
-            logger.error(
-                    "An inesperated error has occurred when getting all faculties: {}", e.getMessage());
-            throw new BusinessException(
-                    "An inesperated error has occurred when getting all faculties: " + e.getMessage());
-        }
+  public List<Faculty> getAllFaculties() {
+    try {
+      return facultyRepository.findAll();
+    } catch (Exception e) {
+      logger.error(
+          "An inesperated error has occurred when getting all faculties: {}", e.getMessage());
+      throw new BusinessException(
+          "An inesperated error has occurred when getting all faculties: " + e.getMessage());
     }
+  }
 
-    public Faculty getFacultyByNameAndPlan(String name, String plan) {
-        Faculty faculty = facultyRepository.findByNameAndPlan(name, plan).orElse(null);
-        if (faculty == null) {
-            logger.error("Faculty not found: " + name);
-            throw new ResourceNotFoundException("Faculty not found: " + name);
-        }
-        return faculty;
+  public Faculty getFacultyByNameAndPlan(String name, String plan) {
+    Faculty faculty = facultyRepository.findByNameAndPlan(name, plan).orElse(null);
+    if (faculty == null) {
+      logger.error("Faculty not found: " + name);
+      throw new ResourceNotFoundException("Faculty not found: " + name);
     }
+    return faculty;
+  }
 
   public Faculty updateFacultyByNameAndPlan(FacultyDto facultyDto) {
     Faculty faculty =
@@ -141,119 +141,120 @@ public class FacultyService {
     }
   }
 
-    public List<Course> findCoursesByFacultyNameAndPlan(String facultyName, String plan) {
-        Faculty faculty = getFacultyByNameAndPlan(facultyName, plan);
-        if (faculty == null) {
-            logger.error("Faculty not found: " + facultyName);
-            throw new ResourceNotFoundException("Faculty not found: " + facultyName);
-        }
-        return new ArrayList<>(faculty.getCourses());
+  public List<Course> findCoursesByFacultyNameAndPlan(String facultyName, String plan) {
+    Faculty faculty = getFacultyByNameAndPlan(facultyName, plan);
+    if (faculty == null) {
+      logger.error("Faculty not found: " + facultyName);
+      throw new ResourceNotFoundException("Faculty not found: " + facultyName);
+    }
+    return new ArrayList<>(faculty.getCourses());
+  }
+
+  /**
+   * Creates a new course with the provided details.
+   *
+   * @param request The course details to create
+   * @return The created course
+   * @throws BusinessException if a course with the same abbreviation already exists
+   */
+  public Faculty addCourse(CourseRequest request) {
+    Faculty faculty =
+        facultyRepository
+            .findByNameAndPlan(request.facultyName().toLowerCase(), request.plan())
+            .orElseThrow(
+                () -> new ResourceNotFoundException("Faculty not found: " + request.facultyName()));
+
+    if (faculty.getCourses().stream()
+        .anyMatch(c -> c.getAbbreviation().equals(request.abbreviation().toUpperCase()))) {
+      logger.error("Course already exists: " + request.abbreviation());
+      throw new ResourceAlreadyExistsException("Course already exists: " + request.abbreviation());
     }
 
-    /**
-     * Creates a new course with the provided details.
-     *
-     * @param request The course details to create
-     * @return The created course
-     * @throws BusinessException if a course with the same abbreviation already exists
-     */
-    public Faculty addCourse(CourseRequest request) {
-        Faculty faculty =
-                facultyRepository
-                        .findByNameAndPlan(request.facultyName().toLowerCase(), request.plan())
-                        .orElseThrow(
-                                () -> new ResourceNotFoundException("Faculty not found: " + request.facultyName()));
+    Course course = request.toEntity();
+    faculty.getCourses().add(course);
 
-        if (faculty.getCourses().stream()
-                .anyMatch(c -> c.getAbbreviation().equals(request.abbreviation().toUpperCase()))) {
-            logger.error("Course already exists: " + request.abbreviation());
-            throw new ResourceAlreadyExistsException("Course already exists: " + request.abbreviation());
-        }
+    return facultyRepository.save(faculty);
+  }
 
-        Course course = request.toEntity();
-        faculty.getCourses().add(course);
+  /**
+   * Updates an existing course with new details.
+   *
+   * @param courseAbbreviation The course abbreviation to update
+   * @param facultyName The faculty name of the faculty
+   * @param plan The plan of the faculty
+   * @param updateCourseDTO The updated course details
+   * @return An Optional containing the updated Course if found, or empty if not found
+   */
+  public Course updateCourse(
+      String courseAbbreviation, String facultyName, String plan, UpdateCourseDTO updateCourseDTO) {
+    Faculty faculty =
+        facultyRepository
+            .findByNameAndPlan(facultyName.toLowerCase(), plan)
+            .orElseThrow(() -> new ResourceNotFoundException("Faculty not found: " + facultyName));
 
-        return facultyRepository.save(faculty);
+    Course existingCourse =
+        faculty.getCourses().stream()
+            .filter(c -> c.getAbbreviation().equals(courseAbbreviation.toUpperCase()))
+            .findFirst()
+            .orElseThrow(
+                () -> new ResourceNotFoundException("Course not found: " + courseAbbreviation));
+
+    if (updateCourseDTO.courseName() != null)
+      existingCourse.setCourseName(updateCourseDTO.courseName().toLowerCase());
+    if (updateCourseDTO.credits() != null) existingCourse.setCredits(updateCourseDTO.credits());
+
+    facultyRepository.save(faculty);
+    return existingCourse;
+  }
+
+  /**
+   * Finds a course by its abbreviation.
+   *
+   * @param courseAbbreviation The course abbreviation to search for
+   * @param facultyName The faculty name of the faculty
+   * @param plan The plan of the faculty
+   * @return An Optional containing the Course if found, or throws BusinessException if not found
+   * @throws BusinessException if the course is not found or no faculties exist
+   */
+  public Course findCourseByAbbreviation(
+      String courseAbbreviation, String facultyName, String plan) {
+    Faculty faculty =
+        facultyRepository.findByNameAndPlan(facultyName.toLowerCase(), plan).orElse(null);
+
+    if (faculty == null) {
+      logger.error("Course not found: {} ", courseAbbreviation);
+      throw new ResourceNotFoundException("Course not found: " + courseAbbreviation);
     }
 
-    /**
-     * Updates an existing course with new details.
-     *
-     * @param courseAbbreviation The course abbreviation to update
-     * @param facultyName The faculty name of the faculty
-     * @param plan The plan of the faculty
-     * @param updateCourseDTO The updated course details
-     * @return An Optional containing the updated Course if found, or empty if not found
-     */
-    public Course updateCourse(
-            String courseAbbreviation, String facultyName, String plan, UpdateCourseDTO updateCourseDTO) {
-        Faculty faculty =
-                facultyRepository
-                        .findByNameAndPlan(facultyName.toLowerCase(), plan)
-                        .orElseThrow(() -> new ResourceNotFoundException("Faculty not found: " + facultyName));
-
-        Course existingCourse =
-                faculty.getCourses().stream()
-                        .filter(c -> c.getAbbreviation().equals(courseAbbreviation.toUpperCase()))
-                        .findFirst()
-                        .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseAbbreviation));
-
-        if (updateCourseDTO.courseName() != null)
-            existingCourse.setCourseName(updateCourseDTO.courseName().toLowerCase());
-        if (updateCourseDTO.credits() != null) existingCourse.setCredits(updateCourseDTO.credits());
-
-        facultyRepository.save(faculty);
-        return existingCourse;
+    List<Course> courses = faculty.getCourses();
+    if (courses == null || courses.isEmpty()) {
+      logger.error("No courses found for code: {}", courseAbbreviation);
+      throw new ResourceNotFoundException("Course data is corrupted for: " + courseAbbreviation);
     }
 
-    /**
-     * Finds a course by its abbreviation.
-     *
-     * @param courseAbbreviation The course abbreviation to search for
-     * @param facultyName The faculty name of the faculty
-     * @param plan The plan of the faculty
-     * @return An Optional containing the Course if found, or throws BusinessException if not found
-     * @throws BusinessException if the course is not found or no faculties exist
-     */
-    public Course findCourseByAbbreviation(
-            String courseAbbreviation, String facultyName, String plan) {
-        Faculty faculty =
-                facultyRepository.findByNameAndPlan(facultyName.toLowerCase(), plan).orElse(null);
+    return courses.stream()
+        .filter(c -> c.getAbbreviation().equals(courseAbbreviation.toUpperCase()))
+        .findFirst()
+        .orElse(null);
+  }
 
-        if (faculty == null) {
-            logger.error("Course not found: {} ", courseAbbreviation);
-            throw new ResourceNotFoundException("Course not found: " + courseAbbreviation);
-        }
-
-        List<Course> courses = faculty.getCourses();
-        if (courses == null || courses.isEmpty()) {
-            logger.error("No courses found for code: {}", courseAbbreviation);
-            throw new ResourceNotFoundException("Course data is corrupted for: " + courseAbbreviation);
-        }
-
-        return courses.stream()
-                .filter(c -> c.getAbbreviation().equals(courseAbbreviation.toUpperCase()))
-                .findFirst()
-                .orElse(null);
+  /**
+   * Deletes a course by its abbreviation.
+   *
+   * @param courseAbbreviation The abbreviation of the course to delete
+   * @param facultyName The faculty name of the faculty
+   * @param plan The plan of the faculty
+   */
+  public void deleteCourse(String courseAbbreviation, String facultyName, String plan) {
+    Faculty faculty =
+        facultyRepository.findByNameAndPlan(facultyName.toLowerCase(), plan).orElse(null);
+    if (faculty == null) {
+      logger.error("Faculty not found: " + facultyName);
+      throw new ResourceNotFoundException("Faculty not found: " + facultyName);
     }
-
-    /**
-     * Deletes a course by its abbreviation.
-     *
-     * @param courseAbbreviation The abbreviation of the course to delete
-     * @param facultyName The faculty name of the faculty
-     * @param plan The plan of the faculty
-     */
-    public void deleteCourse(String courseAbbreviation, String facultyName, String plan) {
-        Faculty faculty =
-                facultyRepository.findByNameAndPlan(facultyName.toLowerCase(), plan).orElse(null);
-        if (faculty == null) {
-            logger.error("Faculty not found: " + facultyName);
-            throw new ResourceNotFoundException("Faculty not found: " + facultyName);
-        }
-        faculty
-                .getCourses()
-                .removeIf(c -> c.getAbbreviation().equals(courseAbbreviation.toUpperCase()));
-        facultyRepository.save(faculty);
-    }
+    faculty
+        .getCourses()
+        .removeIf(c -> c.getAbbreviation().equals(courseAbbreviation.toUpperCase()));
+    facultyRepository.save(faculty);
+  }
 }
