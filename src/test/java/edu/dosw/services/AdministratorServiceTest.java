@@ -60,7 +60,6 @@ class AdministratorServiceTest {
                 .build();
     }
 
-    // Tests para generateAdministratorEmail usando reflection
     @Test
     void generateAdministratorEmail_WithValidThreePartName_ShouldGenerateCorrectEmail() throws Exception {
         Method method = AdministratorService.class.getDeclaredMethod("generateAdministratorEmail", String.class);
@@ -206,7 +205,6 @@ class AdministratorServiceTest {
         verify(administratorRepository, times(1)).findByUserId(ADMIN_ID);
     }
 
-    // Tests para updateAdministrator
     @Test
     void updateAdministrator_WhenAdministratorExists_ShouldUpdateAllFieldsSuccessfully() {
         AdministratorDto updateDto = new AdministratorDto("87654321", "Juan Carlos Perez Garcia");
@@ -381,7 +379,6 @@ class AdministratorServiceTest {
         verify(administratorRepository, times(1)).delete(existingAdministrator);
     }
 
-    // Tests adicionales para mejorar cobertura
     @Test
     void updateAdministrator_WithEmptyStringValues_ShouldHandleGracefully() {
         AdministratorDto updateDto = new AdministratorDto("", "");
@@ -436,7 +433,6 @@ class AdministratorServiceTest {
     }
     @Test
     void createAdministrator_WithNullIdentityDocument_ShouldThrowValidationException() {
-        // ORDEN CORRECTO: (fullName, identityDocument)
         AdministratorDto invalidDto = new AdministratorDto("Juan Carlos Perez Gomez", null);
 
         jakarta.validation.ValidationException exception = assertThrows(
@@ -450,7 +446,6 @@ class AdministratorServiceTest {
 
     @Test
     void createAdministrator_WithNullFullName_ShouldThrowValidationException() {
-        // ORDEN CORRECTO: (fullName, identityDocument)
         AdministratorDto invalidDto = new AdministratorDto(null, "12345678");
 
         jakarta.validation.ValidationException exception = assertThrows(
@@ -462,5 +457,4 @@ class AdministratorServiceTest {
         verify(administratorRepository, never()).save(any(Administrator.class));
     }
 
-// ... y similar para los otros tests de validación
 }
