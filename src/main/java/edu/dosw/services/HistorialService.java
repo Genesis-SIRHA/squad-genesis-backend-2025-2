@@ -89,4 +89,14 @@ public class HistorialService {
   public List<Historial> getAllHistorial() {
     return historialRepository.findAll();
   }
+
+  /**
+   * Retrieves all historical records for a student
+   *
+   * @param studentId The unique identifier of the student
+   * @return List of all historical records
+   */
+  public List<Historial> getAllHistorialsByStudentId(String studentId) {
+    return historialRepository.findByStudentId(studentId);
+  }
 }
