@@ -195,6 +195,7 @@
                                 <exclude>**/configurators/**</exclude>
                                 <exclude>**/exception/**</exclude>
                                 <exclude>**/default/**</exclude>
+                                <exclude>**/utils/**</exclude>
                             </excludes>
                         </configuration>
                     </execution>
