@@ -1,5 +1,6 @@
 package edu.dosw.services;
 
+import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Historial;
 import edu.dosw.model.Pemsum;
@@ -333,5 +334,158 @@ class PemsumServiceTest {
                 .year("2024")
                 .period("1")
                 .build();
+    }
+
+    @Test
+    void getStudentCoursesStatus_ShouldCombineHistorialAndPendingCourses() {
+        String studentId = "STU001";
+        Student student = new Student();
+        student.setUserId(studentId);
+        student.setFacultyName("Engineering");
+        student.setPlan("2024");
+
+        List<Course> facultyCourses = Arrays.asList(
+                new Course("MATH101", "Calculus I", 4),
+                new Course("PHYS101", "Physics I", 3),
+                new Course("CHEM101", "Chemistry I", 3),
+                new Course("CS101", "Programming", 3)
+        );
+
+        List<Historial> allHistorials = Arrays.asList(
+                createHistorial(studentId, "MATH101", HistorialStatus.FINISHED),
+                createHistorial(studentId, "PHYS101", HistorialStatus.ON_GOING),
+                createHistorial(studentId, "CHEM101", HistorialStatus.FAILED)
+        );
+
+        when(studentService.getStudentById(studentId)).thenReturn(student);
+        when(facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024"))
+                .thenReturn(facultyCourses);
+        when(historialService.getAllHistorial())
+                .thenReturn(allHistorials);
+
+        Map<String, String> result = pemsumService.getStudentCoursesStatus(studentId);
+
+        assertNotNull(result);
+        assertEquals(4, result.size());
+        assertEquals("FINISHED", result.get("MATH101"));
+        assertEquals("ON_GOING", result.get("PHYS101"));
+        assertEquals("FAILED", result.get("CHEM101"));
+        assertEquals("PENDING", result.get("CS101"));
+    }
+
+    @Test
+    void getStudentCoursesStatus_ShouldPrioritizeNewStatus_WhenCourseAlreadyExists() {
+        String studentId = "STU002";
+        Student student = new Student();
+        student.setUserId(studentId);
+        student.setFacultyName("Science");
+        student.setPlan("2024");
+
+        List<Course> facultyCourses = Arrays.asList(
+                new Course("BIO101", "Biology I", 3)
+        );
+
+        List<Historial> allHistorials = Arrays.asList(
+                createHistorial(studentId, "BIO101", HistorialStatus.FAILED),
+                createHistorial(studentId, "BIO101", HistorialStatus.ON_GOING)
+        );
+
+        when(studentService.getStudentById(studentId)).thenReturn(student);
+        when(facultyService.findCoursesByFacultyNameAndPlan("Science", "2024"))
+                .thenReturn(facultyCourses);
+        when(historialService.getAllHistorial())
+                .thenReturn(allHistorials);
+
+        Map<String, String> result = pemsumService.getStudentCoursesStatus(studentId);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("ON_GOING", result.get("BIO101"));
+    }
+
+    @Test
+    void getStudentCoursesStatus_ShouldThrowBusinessException_WhenTryingToChangeFinishedCourse() {
+        String studentId = "STU003";
+        Student student = new Student();
+        student.setUserId(studentId);
+        student.setFacultyName("Engineering");
+        student.setPlan("2024");
+
+        List<Course> facultyCourses = Arrays.asList(
+                new Course("MATH101", "Calculus I", 4)
+        );
+
+        List<Historial> allHistorials = Arrays.asList(
+                createHistorial(studentId, "MATH101", HistorialStatus.FINISHED),
+                createHistorial(studentId, "MATH101", HistorialStatus.FAILED)
+        );
+
+        when(studentService.getStudentById(studentId)).thenReturn(student);
+        when(facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024"))
+                .thenReturn(facultyCourses);
+        when(historialService.getAllHistorial())
+                .thenReturn(allHistorials);
+
+        BusinessException exception = assertThrows(BusinessException.class,
+                () -> pemsumService.getStudentCoursesStatus(studentId));
+
+        assertEquals("Cannot change status of finished course: MATH101", exception.getMessage());
+    }
+
+    @Test
+    void getStudentCoursesStatus_ShouldAllowSameFinishedStatus_WhenCourseIsAlreadyFinished() {
+        String studentId = "STU004";
+        Student student = new Student();
+        student.setUserId(studentId);
+        student.setFacultyName("Engineering");
+        student.setPlan("2024");
+
+        List<Course> facultyCourses = Arrays.asList(
+                new Course("MATH101", "Calculus I", 4)
+        );
+
+        List<Historial> allHistorials = Arrays.asList(
+                createHistorial(studentId, "MATH101", HistorialStatus.ON_GOING),
+                createHistorial(studentId, "MATH101", HistorialStatus.FINISHED)
+        );
+
+        when(studentService.getStudentById(studentId)).thenReturn(student);
+        when(facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024"))
+                .thenReturn(facultyCourses);
+        when(historialService.getAllHistorial())
+                .thenReturn(allHistorials);
+
+        Map<String, String> result = pemsumService.getStudentCoursesStatus(studentId);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("FINISHED", result.get("MATH101"));
+    }
+
+    @Test
+    void getStudentCoursesStatus_WithNoHistorial_ShouldReturnAllPending() {
+        String studentId = "STU005";
+        Student student = new Student();
+        student.setUserId(studentId);
+        student.setFacultyName("Science");
+        student.setPlan("2024");
+
+        List<Course> facultyCourses = Arrays.asList(
+                new Course("BIO101", "Biology I", 3),
+                new Course("CHEM101", "Chemistry I", 3)
+        );
+
+        when(studentService.getStudentById(studentId)).thenReturn(student);
+        when(facultyService.findCoursesByFacultyNameAndPlan("Science", "2024"))
+                .thenReturn(facultyCourses);
+        when(historialService.getAllHistorial())
+                .thenReturn(List.of());
+
+        Map<String, String> result = pemsumService.getStudentCoursesStatus(studentId);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("PENDING", result.get("BIO101"));
+        assertEquals("PENDING", result.get("CHEM101"));
     }
 }

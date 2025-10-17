@@ -141,24 +141,18 @@ public class PemsumService {
         Student student = studentService.getStudentById(studentId);
         String facultyName = student.getFacultyName();
         String plan = student.getPlan();
-
         List<Course> facultyCourses = facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan);
-
         if (facultyCourses.isEmpty()) {
             logger.error("Invalid faculty fullName or plan: " + facultyName + " - " + plan);
             throw new ResourceNotFoundException(
                     "Invalid faculty fullName or plan: " + facultyName + " - " + plan);
         }
-
         List<Historial> studentHistorial = historialService.getAllHistorial().stream()
                 .filter(historial -> historial.getStudentId().equals(studentId))
                 .collect(Collectors.toList());
-
         List<Historial> finishedHistorial = studentHistorial.stream()
                 .filter(historial -> historial.getStatus() == HistorialStatus.FINISHED)
                 .collect(Collectors.toList());
-
-
         int approvedCredits = finishedHistorial.stream()
                 .mapToInt(historial -> {
                     return facultyCourses.stream()
@@ -168,7 +162,6 @@ public class PemsumService {
                             .orElse(0);
                 })
                 .sum();
-
         int totalCredits = facultyCourses.stream()
                 .mapToInt(Course::getCredits)
                 .sum();
@@ -176,10 +169,42 @@ public class PemsumService {
         if (totalCredits == 0) {
             return 0.0;
         }
-
         return (double) approvedCredits / totalCredits * 100;
     }
 
+    public Map<String, String> getStudentCoursesStatus(String studentId) {
+        Student student = studentService.getStudentById(studentId);
+        String facultyName = student.getFacultyName();
+        String plan = student.getPlan();
 
+        List<Course> facultyCourses = facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan);
+
+        if (facultyCourses.isEmpty()) {
+            logger.error("Invalid faculty name or plan: " + facultyName + " - " + plan);
+            throw new ResourceNotFoundException("Invalid faculty name or plan: " + facultyName + " - " + plan);
+        }
+
+        Map<String, String> coursesStatus = new HashMap<>();
+
+        List<Historial> studentHistorial = historialService.getAllHistorial().stream()
+                .filter(historial -> historial.getStudentId().equals(studentId))
+                .collect(Collectors.toList());
+
+        for (Historial historial : studentHistorial) {
+            String courseAbbreviation = historial.getGroupCode();
+            String newStatus = historial.getStatus().toString();
+            String currentStatus = coursesStatus.get(courseAbbreviation);
+
+            if ("FINISHED".equals(currentStatus) && !"FINISHED".equals(newStatus)) {
+                logger.error("Cannot change status of finished course: " + courseAbbreviation);
+                throw new BusinessException("Cannot change status of finished course: " + courseAbbreviation);
+            }
+            coursesStatus.put(courseAbbreviation, newStatus);
+        }
+        for (Course course : facultyCourses) {
+            coursesStatus.putIfAbsent(course.getAbbreviation(), "PENDING");
+        }
+        return coursesStatus;
+    }
 
 }
