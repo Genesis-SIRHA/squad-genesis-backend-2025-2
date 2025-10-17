@@ -9,6 +9,8 @@ import edu.dosw.model.Course;
 import edu.dosw.model.Group;
 import edu.dosw.model.Session;
 import edu.dosw.model.enums.HistorialStatus;
+import edu.dosw.observer.GroupCapacityNotifier;
+import edu.dosw.observer.MessageGroupObserver;
 import edu.dosw.repositories.GroupRepository;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -30,6 +32,8 @@ public class GroupService {
   private final SessionService sessionService;
   private final HistorialService historialService;
   private final GroupValidator groupValidator;
+  private final GroupCapacityNotifier groupCapacityNotifier;
+  private final MessageGroupObserver messageGroupObserver;
 
   /**
    * Retrieves all groups associated with a specific course abbreviation.
@@ -82,7 +86,6 @@ public class GroupService {
             .enrolled(groupRequest.enrolled())
             .maxCapacity(groupRequest.maxCapacity())
             .build();
-
     return groupRepository.save(group);
   }
 
@@ -97,7 +100,6 @@ public class GroupService {
     if (groupRequest.groupNum() != null) group.setGroupNum(groupRequest.groupNum());
     if (groupRequest.maxCapacity() != null) group.setMaxCapacity(groupRequest.maxCapacity());
     if (groupRequest.enrolled() != null) group.setEnrolled(groupRequest.enrolled());
-
     return groupRepository.save(group);
   }
 
@@ -146,7 +148,8 @@ public class GroupService {
     groupValidator.validateAddStudentToGroup(group, studentId);
     try {
       group.setEnrolled(group.getEnrolled() + 1);
-      groupRepository.save(group);
+      Group updatedGroup = groupRepository.save(group);
+      groupCapacityNotifier.checkAndNotify(updatedGroup);
 
       HistorialDTO historialDTO = new HistorialDTO(studentId, groupCode, HistorialStatus.ON_GOING);
       historialService.addHistorial(historialDTO);
@@ -173,8 +176,8 @@ public class GroupService {
     }
 
     group.setEnrolled(group.getEnrolled() - 1);
-    groupRepository.save(group);
-
+    Group updatedGroup = groupRepository.save(group);
+    groupCapacityNotifier.checkAndNotify(updatedGroup);
     try {
       historialService.updateHistorial(studentId, groupCode, HistorialStatus.CANCELLED);
     } catch (Exception e) {
