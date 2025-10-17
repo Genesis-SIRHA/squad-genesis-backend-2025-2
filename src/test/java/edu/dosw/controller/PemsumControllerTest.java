@@ -1,5 +1,6 @@
 package edu.dosw.controller;
 
+import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Pemsum;
 import edu.dosw.services.PemsumService;
@@ -11,8 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -344,5 +343,18 @@ class PemsumControllerTest {
         assertNotNull(response.getBody());
         assertEquals(75.0, response.getBody(), 0.0);
         verify(pemsumService, times(1)).getCompletedCoursesPercentage(studentId);
+    }
+
+    @Test
+    void getStudentCoursesStatus_WhenServiceThrowsBusinessException_ShouldPropagateException() {
+        String studentId = "STU006";
+        when(pemsumService.getStudentCoursesStatus(studentId))
+                .thenThrow(new BusinessException("Cannot change status of finished course: MATH101"));
+
+        BusinessException exception = assertThrows(BusinessException.class,
+                () -> pemsumController.getStudentCoursesStatus(studentId));
+
+        assertEquals("Cannot change status of finished course: MATH101", exception.getMessage());
+        verify(pemsumService, times(1)).getStudentCoursesStatus(studentId);
     }
 }
