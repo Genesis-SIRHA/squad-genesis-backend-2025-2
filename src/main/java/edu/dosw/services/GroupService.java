@@ -5,6 +5,7 @@ import edu.dosw.dto.HistorialDTO;
 import edu.dosw.dto.SessionDTO;
 import edu.dosw.dto.UpdateGroupRequest;
 import edu.dosw.exception.BusinessException;
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Group;
 import edu.dosw.model.Session;
@@ -51,7 +52,7 @@ public class GroupService {
     Group group = groupRepository.findByGroupCode(groupCode).orElse(null);
     if (group == null) {
       logger.error("Group not found by id {}", groupCode);
-      throw new IllegalArgumentException("Group not found: " + groupCode);
+      throw new ResourceNotFoundException("Group not found: " + groupCode);
     }
     return group;
   }
@@ -67,7 +68,7 @@ public class GroupService {
         facultyService.findCourseByAbbreviation(groupRequest.abbreviation(), facultyName, plan);
     if (course == null) {
       logger.error("Faculty not found: " + groupRequest.abbreviation());
-      throw new BusinessException("Faculty not found: " + groupRequest.abbreviation());
+      throw new ResourceNotFoundException("Faculty not found: " + groupRequest.abbreviation());
     }
 
     Group group =
@@ -90,7 +91,7 @@ public class GroupService {
     Group group = groupRepository.findByGroupCode(groupCode).orElse(null);
     if (group == null) {
       logger.error("Group not found: {}", groupCode);
-      throw new BusinessException("Group not found: " + groupCode);
+      throw new ResourceNotFoundException("Group not found: " + groupCode);
     }
     if (groupRequest.professorId() != null) group.setProfessorId(groupRequest.professorId());
     if (groupRequest.isLab() != null) group.setLab(groupRequest.isLab());
@@ -165,7 +166,7 @@ public class GroupService {
           "The historial period and year does not match the one from the group: {} != {}",
           group.getPeriod(),
           periodService.getPeriod());
-      throw new IllegalArgumentException(
+      throw new BusinessException(
           "The historial period and year does not match the one from the group"
               + group.getPeriod()
               + " != "

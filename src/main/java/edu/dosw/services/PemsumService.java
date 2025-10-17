@@ -1,15 +1,18 @@
 package edu.dosw.services;
 
 import edu.dosw.exception.BusinessException;
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Historial;
 import edu.dosw.model.Pemsum;
 import edu.dosw.model.Student;
+import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.services.UserServices.StudentService;
 import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +74,7 @@ public class PemsumService {
     List<Course> courses = facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan);
     if (courses.isEmpty()) {
       logger.error("Invalid faculty fullName or plan: " + facultyName + " - " + plan);
-      throw new BusinessException(
+      throw new ResourceNotFoundException(
           "Invalid faculty fullName or plan: " + facultyName + " - " + plan);
     }
 
@@ -105,7 +108,7 @@ public class PemsumService {
   private int getApprovedCredits(Map<Course, String> coursesMap) {
     int approvedCredits = 0;
     for (Course course : coursesMap.keySet()) {
-      if ("approved".equalsIgnoreCase(coursesMap.get(course))) {
+      if ("FINISHED".equalsIgnoreCase(coursesMap.get(course))) {
         approvedCredits += course.getCredits();
       }
     }
@@ -130,5 +133,80 @@ public class PemsumService {
               () -> coursesMap.put(course, "pending"));
     }
     return coursesMap;
+  }
+
+  public double getCompletedCoursesPercentage(String studentId) {
+    Student student = studentService.getStudentById(studentId);
+    String facultyName = student.getFacultyName();
+    String plan = student.getPlan();
+    List<Course> facultyCourses = facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan);
+    if (facultyCourses.isEmpty()) {
+      logger.error("Invalid faculty fullName or plan: " + facultyName + " - " + plan);
+      throw new ResourceNotFoundException(
+          "Invalid faculty fullName or plan: " + facultyName + " - " + plan);
+    }
+    List<Historial> studentHistorial =
+        historialService.getAllHistorial().stream()
+            .filter(historial -> historial.getStudentId().equals(studentId))
+            .collect(Collectors.toList());
+    List<Historial> finishedHistorial =
+        studentHistorial.stream()
+            .filter(historial -> historial.getStatus() == HistorialStatus.FINISHED)
+            .collect(Collectors.toList());
+    int approvedCredits =
+        finishedHistorial.stream()
+            .mapToInt(
+                historial -> {
+                  return facultyCourses.stream()
+                      .filter(course -> course.getAbbreviation().equals(historial.getGroupCode()))
+                      .findFirst()
+                      .map(Course::getCredits)
+                      .orElse(0);
+                })
+            .sum();
+    int totalCredits = facultyCourses.stream().mapToInt(Course::getCredits).sum();
+
+    if (totalCredits == 0) {
+      return 0.0;
+    }
+    return (double) approvedCredits / totalCredits * 100;
+  }
+
+  public Map<String, String> getStudentCoursesStatus(String studentId) {
+    Student student = studentService.getStudentById(studentId);
+    String facultyName = student.getFacultyName();
+    String plan = student.getPlan();
+
+    List<Course> facultyCourses = facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan);
+
+    if (facultyCourses.isEmpty()) {
+      logger.error("Invalid faculty name or plan: " + facultyName + " - " + plan);
+      throw new ResourceNotFoundException(
+          "Invalid faculty name or plan: " + facultyName + " - " + plan);
+    }
+
+    Map<String, String> coursesStatus = new HashMap<>();
+
+    List<Historial> studentHistorial =
+        historialService.getAllHistorial().stream()
+            .filter(historial -> historial.getStudentId().equals(studentId))
+            .collect(Collectors.toList());
+
+    for (Historial historial : studentHistorial) {
+      String courseAbbreviation = historial.getGroupCode();
+      String newStatus = historial.getStatus().toString();
+      String currentStatus = coursesStatus.get(courseAbbreviation);
+
+      if ("FINISHED".equals(currentStatus) && !"FINISHED".equals(newStatus)) {
+        logger.error("Cannot change status of finished course: " + courseAbbreviation);
+        throw new BusinessException(
+            "Cannot change status of finished course: " + courseAbbreviation);
+      }
+      coursesStatus.put(courseAbbreviation, newStatus);
+    }
+    for (Course course : facultyCourses) {
+      coursesStatus.putIfAbsent(course.getAbbreviation(), "PENDING");
+    }
+    return coursesStatus;
   }
 }

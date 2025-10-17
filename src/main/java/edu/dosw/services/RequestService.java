@@ -3,6 +3,8 @@ package edu.dosw.services;
 import edu.dosw.dto.CreateRequestDto;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.dto.UpdateRequestDto;
+import edu.dosw.exception.BusinessException;
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Request;
 import edu.dosw.model.enums.RequestStatus;
 import edu.dosw.model.enums.Role;
@@ -65,7 +67,7 @@ public class RequestService {
 
     if (strategy == null) {
       logger.error("Unsupported role: {}", role);
-      throw new IllegalArgumentException("Unsupported role: " + role);
+      throw new BusinessException("Unsupported role: " + role);
     }
     return strategy.queryRequests(userId).stream()
         .sorted(Comparator.comparing(Request::getCreatedAt))
@@ -79,7 +81,7 @@ public class RequestService {
           .toList();
     } catch (Exception e) {
       logger.error("Failed to fetch all requests: {}", e.getMessage());
-      throw new RuntimeException("Failed to fetch all requests: " + e.getMessage());
+      throw new BusinessException("Failed to fetch all requests: " + e.getMessage());
     }
   }
 
@@ -98,7 +100,7 @@ public class RequestService {
       return requestRepository.save(request);
     } catch (Exception e) {
       logger.error("Failed to create request: {}", e.getMessage());
-      throw new RuntimeException("Failed to create request: " + e.getMessage());
+      throw new BusinessException("Failed to create request: " + e.getMessage());
     }
   }
 
@@ -116,7 +118,7 @@ public class RequestService {
       return requestRepository.save(request);
     } catch (Exception e) {
       logger.error("Failed to update request status: {}", e.getMessage());
-      throw new RuntimeException("Failed to update request status: " + e.getMessage());
+      throw new BusinessException("Failed to update request status: " + e.getMessage());
     }
   }
 
@@ -149,7 +151,7 @@ public class RequestService {
   public Request deleteRequestStatus(String requestId) {
     Request request = requestRepository.findByRequestId(requestId).orElse(null);
     if (request == null) {
-      throw new RuntimeException("Request not found with id: " + requestId);
+      throw new ResourceNotFoundException("Request not found with id: " + requestId);
     }
 
     try {
@@ -157,7 +159,7 @@ public class RequestService {
       return request;
     } catch (Exception e) {
       logger.error("Failed to delete request: {}", e.getMessage());
-      throw new RuntimeException("Failed to delete request: " + e.getMessage());
+      throw new BusinessException("Failed to delete request: " + e.getMessage());
     }
   }
 
@@ -165,7 +167,7 @@ public class RequestService {
     Request request = requestRepository.findByRequestId(requestId).orElse(null);
     if (request == null) {
       logger.error("Request not found with id: {}", requestId);
-      throw new RuntimeException("Request not found with id: " + requestId);
+      throw new ResourceNotFoundException("Request not found with id: " + requestId);
     }
     return request;
   }
@@ -187,7 +189,7 @@ public class RequestService {
           .toList();
     } catch (Exception e) {
       logger.error("Failed to fetch requests by faculty name: {}", e.getMessage());
-      throw new RuntimeException("Failed to fetch requests by faculty name: " + e.getMessage());
+      throw new BusinessException("Failed to fetch requests by faculty name: " + e.getMessage());
     }
   }
 }
