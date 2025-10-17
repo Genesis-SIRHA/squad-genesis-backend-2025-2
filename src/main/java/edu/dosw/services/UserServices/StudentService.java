@@ -129,4 +129,5 @@ public class StudentService {
         }
         return student.getFacultyName();
     }
+
 }

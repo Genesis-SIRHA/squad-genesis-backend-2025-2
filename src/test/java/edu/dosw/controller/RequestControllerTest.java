@@ -34,7 +34,7 @@ class RequestControllerTest {
     @InjectMocks
     private RequestController requestController;
 
-    // CREATE REQUEST TESTS (12 tests)
+
     @Test
     void createRequest_WithJoinType_ShouldReturnCreatedRequest() {
         CreateRequestDto createDto = new CreateRequestDto("STU001", RequestType.JOIN, "Request to join math group", null, "GROUP001");
