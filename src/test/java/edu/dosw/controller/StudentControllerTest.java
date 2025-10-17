@@ -138,10 +138,10 @@ class StudentControllerTest {
 
         when(studentService.updateStudent(anyString(), any(StudentDto.class))).thenReturn(updatedStudent);
 
-        // Act
+
         ResponseEntity<Student> response = studentController.updateStudent(updateDto, STUDENT_ID);
 
-        // Assert
+
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -154,13 +154,11 @@ class StudentControllerTest {
     @Test
     @DisplayName("DELETE /student/delete/{id} - Should delete student and return deleted entity")
     void deleteStudent_WhenValidId_ReturnsDeletedStudentWithAllData() {
-        // Arrange
+
         when(studentService.deleteStudent(STUDENT_ID)).thenReturn(student);
 
-        // Act
         ResponseEntity<Student> response = studentController.deleteStudent(STUDENT_ID);
 
-        // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -178,7 +176,7 @@ class StudentControllerTest {
     @Test
     @DisplayName("GET /student/{id} - Should handle student with masters degree")
     void getStudentById_WhenStudentHasMastersDegree_ReturnsStudent() {
-        // Arrange
+
         Student mastersStudent = new Student.StudentBuilder()
                 .userId("33333")
                 .identityDocument("ID333333")
@@ -192,10 +190,8 @@ class StudentControllerTest {
 
         when(studentService.getStudentById("33333")).thenReturn(mastersStudent);
 
-        // Act
         ResponseEntity<Student> response = studentController.getStudentById("33333");
 
-        // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(AcademicGrade.MASTERS_DEGREE, response.getBody().getAcademicGrade());
@@ -206,7 +202,7 @@ class StudentControllerTest {
     @Test
     @DisplayName("POST /student/create - Should handle student with doctors degree")
     void createStudent_WhenStudentHasDoctorsDegree_ReturnsCreatedStudent() {
-        // Arrange
+
         StudentDto doctorDto = new StudentDto(
                 "ID555555",
                 "Dr. Ana Martínez",
@@ -228,10 +224,8 @@ class StudentControllerTest {
 
         when(studentService.createStudent(doctorDto)).thenReturn(doctorStudent);
 
-        // Act
         ResponseEntity<Student> response = studentController.createStudent(doctorDto);
 
-        // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(AcademicGrade.DOCTORS_DEGREE, response.getBody().getAcademicGrade());
@@ -242,12 +236,11 @@ class StudentControllerTest {
     @Test
     @DisplayName("GET /student/{id} - Should propagate service exception")
     void getStudentById_WhenServiceThrowsException_PropagatesException() {
-        // Arrange
+
         String invalidId = "invalid-id";
         when(studentService.getStudentById(invalidId))
                 .thenThrow(new RuntimeException("Student not found with id: " + invalidId));
 
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             studentController.getStudentById(invalidId);
         });
@@ -259,7 +252,7 @@ class StudentControllerTest {
     @Test
     @DisplayName("PATCH /student/update/{id} - Should update student general average")
     void updateStudent_WhenUpdatingGeneralAverage_ReturnsUpdatedStudent() {
-        // Arrange
+
         StudentDto updateDto = new StudentDto(
                 "ID123456",
                 "Juan Pérez",
@@ -281,10 +274,8 @@ class StudentControllerTest {
 
         when(studentService.updateStudent(STUDENT_ID, updateDto)).thenReturn(updatedStudent);
 
-        // Act
         ResponseEntity<Student> response = studentController.updateStudent(updateDto, STUDENT_ID);
 
-        // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(92, response.getBody().getGeneralAverage());
@@ -294,12 +285,11 @@ class StudentControllerTest {
     @Test
     @DisplayName("DELETE /student/delete/{id} - Should handle non-existent student")
     void deleteStudent_WhenStudentNotFound_PropagatesException() {
-        // Arrange
+
         String nonExistentId = "99999";
         when(studentService.deleteStudent(nonExistentId))
                 .thenThrow(new RuntimeException("Student not found with id: " + nonExistentId));
 
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             studentController.deleteStudent(nonExistentId);
         });
@@ -311,7 +301,7 @@ class StudentControllerTest {
     @Test
     @DisplayName("All operations - Should maintain data integrity across CRUD operations")
     void allOperations_ShouldMaintainStudentDataIntegrity() {
-        // Arrange
+
         Student testStudent = new Student.StudentBuilder()
                 .userId("77777")
                 .identityDocument("ID777777")
@@ -328,7 +318,6 @@ class StudentControllerTest {
         when(studentService.updateStudent(anyString(), any(StudentDto.class))).thenReturn(testStudent);
         when(studentService.deleteStudent("77777")).thenReturn(testStudent);
 
-        // Act & Assert - Test data integrity across all operations
         ResponseEntity<Student> getResponse = studentController.getStudentById("77777");
         assertStudentDataIntegrity(getResponse.getBody());
 
@@ -341,7 +330,7 @@ class StudentControllerTest {
         ResponseEntity<Student> deleteResponse = studentController.deleteStudent("77777");
         assertStudentDataIntegrity(deleteResponse.getBody());
 
-        // Verify all service interactions
+
         verify(studentService, times(1)).getStudentById("77777");
         verify(studentService, times(1)).createStudent(studentDto);
         verify(studentService, times(1)).updateStudent("77777", studentDto);
