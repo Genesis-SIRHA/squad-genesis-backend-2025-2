@@ -11,6 +11,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -272,5 +274,75 @@ class PemsumControllerTest {
         assertNull(response.getBody().getFacultyName());
         assertNull(response.getBody().getCourses());
         verify(pemsumService, times(1)).getPemsum(studentId);
+    }
+    @Test
+    void getCompletedCoursesPercentage_WhenStudentHasCompletedCourses_ShouldReturnPercentage() {
+        String studentId = "STU001";
+        double expectedPercentage = 53.85;
+
+        when(pemsumService.getCompletedCoursesPercentage(studentId)).thenReturn(expectedPercentage);
+
+        ResponseEntity<Double> response = pemsumController.getCompletedCoursesPercentage(studentId);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(expectedPercentage, response.getBody(), 0.01);
+        verify(pemsumService, times(1)).getCompletedCoursesPercentage(studentId);
+    }
+
+    @Test
+    void getCompletedCoursesPercentage_WhenStudentHasNoCompletedCourses_ShouldReturnZero() {
+        String studentId = "STU002";
+        double expectedPercentage = 0.0;
+
+        when(pemsumService.getCompletedCoursesPercentage(studentId)).thenReturn(expectedPercentage);
+
+        ResponseEntity<Double> response = pemsumController.getCompletedCoursesPercentage(studentId);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(0.0, response.getBody(), 0.0);
+        verify(pemsumService, times(1)).getCompletedCoursesPercentage(studentId);
+    }
+
+    @Test
+    void getCompletedCoursesPercentage_WhenServiceThrowsException_ShouldPropagateException() {
+        String studentId = "STU003";
+        when(pemsumService.getCompletedCoursesPercentage(studentId))
+                .thenThrow(new RuntimeException("Student not found"));
+
+        assertThrows(RuntimeException.class, () ->
+                pemsumController.getCompletedCoursesPercentage(studentId));
+        verify(pemsumService, times(1)).getCompletedCoursesPercentage(studentId);
+    }
+
+    @Test
+    void getCompletedCoursesPercentage_WithAllCoursesCompleted_ShouldReturn100() {
+        String studentId = "STU004";
+        double expectedPercentage = 100.0;
+
+        when(pemsumService.getCompletedCoursesPercentage(studentId)).thenReturn(expectedPercentage);
+
+        ResponseEntity<Double> response = pemsumController.getCompletedCoursesPercentage(studentId);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(100.0, response.getBody(), 0.0);
+        verify(pemsumService, times(1)).getCompletedCoursesPercentage(studentId);
+    }
+
+    @Test
+    void getCompletedCoursesPercentage_WithPartialCompletion_ShouldReturnCorrectPercentage() {
+        String studentId = "STU005";
+        double expectedPercentage = 75.0;
+
+        when(pemsumService.getCompletedCoursesPercentage(studentId)).thenReturn(expectedPercentage);
+
+        ResponseEntity<Double> response = pemsumController.getCompletedCoursesPercentage(studentId);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(75.0, response.getBody(), 0.0);
+        verify(pemsumService, times(1)).getCompletedCoursesPercentage(studentId);
     }
 }
