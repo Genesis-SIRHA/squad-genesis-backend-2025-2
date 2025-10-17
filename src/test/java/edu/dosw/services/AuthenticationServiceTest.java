@@ -1,163 +1,162 @@
 package edu.dosw.services;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import edu.dosw.dto.UserCredentialsDto;
 import edu.dosw.exception.AuthenticationException;
 import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.User;
 import edu.dosw.repositories.UserCredentialsRepository;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class AuthenticationServiceTest {
 
-    @Mock
-    private UserCredentialsRepository userCredentialsRepository;
+  @Mock private UserCredentialsRepository userCredentialsRepository;
 
-    @InjectMocks
-    private AuthenticationService authenticationService;
+  @InjectMocks private AuthenticationService authenticationService;
 
+  @Test
+  void logIn_WithInvalidEmailFormat_ShouldThrowAuthenticationException() {
+    UserCredentialsDto loginRequest =
+        new UserCredentialsDto(null, "user123", "invalid@gmail.com", "password123");
 
+    AuthenticationException exception =
+        assertThrows(
+            AuthenticationException.class, () -> authenticationService.logIn(loginRequest));
 
-    @Test
-    void logIn_WithInvalidEmailFormat_ShouldThrowAuthenticationException() {
-        UserCredentialsDto loginRequest = new UserCredentialsDto(
-                null, "user123", "invalid@gmail.com", "password123"
-        );
+    assertEquals("Invalid email", exception.getMessage());
+    verify(userCredentialsRepository, never()).findByEmail(any());
+  }
 
-        AuthenticationException exception = assertThrows(AuthenticationException.class,
-                () -> authenticationService.logIn(loginRequest));
+  @Test
+  void logIn_WithNonExistentEmail_ShouldThrowAuthenticationException() {
+    UserCredentialsDto loginRequest =
+        new UserCredentialsDto(
+            null, "user123", "nonexistent@mail.escuelaing.edu.co", "password123");
 
-        assertEquals("Invalid email", exception.getMessage());
-        verify(userCredentialsRepository, never()).findByEmail(any());
-    }
+    when(userCredentialsRepository.findByEmail("nonexistent@mail.escuelaing.edu.co"))
+        .thenReturn(Optional.empty());
 
-    @Test
-    void logIn_WithNonExistentEmail_ShouldThrowAuthenticationException() {
-        UserCredentialsDto loginRequest = new UserCredentialsDto(
-                null, "user123", "nonexistent@mail.escuelaing.edu.co", "password123"
-        );
+    AuthenticationException exception =
+        assertThrows(
+            AuthenticationException.class, () -> authenticationService.logIn(loginRequest));
 
-        when(userCredentialsRepository.findByEmail("nonexistent@mail.escuelaing.edu.co"))
-                .thenReturn(Optional.empty());
+    assertEquals("User not found", exception.getMessage());
+    verify(userCredentialsRepository).findByEmail("nonexistent@mail.escuelaing.edu.co");
+  }
 
-        AuthenticationException exception = assertThrows(AuthenticationException.class,
-                () -> authenticationService.logIn(loginRequest));
+  @Test
+  void logIn_WithWrongPassword_ShouldThrowAuthenticationException() {
 
-        assertEquals("User not found", exception.getMessage());
-        verify(userCredentialsRepository).findByEmail("nonexistent@mail.escuelaing.edu.co");
-    }
+    UserCredentialsDto loginRequest =
+        new UserCredentialsDto(null, "user123", "test@mail.escuelaing.edu.co", "wrongPassword");
+    UserCredentialsDto storedUser =
+        new UserCredentialsDto(
+            "id123",
+            "user123",
+            "test@mail.escuelaing.edu.co",
+            "$2a$10$correctEncodedPassword" // Different from "wrongPassword"
+            );
 
-    @Test
-    void logIn_WithWrongPassword_ShouldThrowAuthenticationException() {
+    when(userCredentialsRepository.findByEmail("test@mail.escuelaing.edu.co"))
+        .thenReturn(Optional.of(storedUser));
 
-        UserCredentialsDto loginRequest = new UserCredentialsDto(
-                null, "user123", "test@mail.escuelaing.edu.co", "wrongPassword"
-        );
-        UserCredentialsDto storedUser = new UserCredentialsDto(
-                "id123", "user123", "test@mail.escuelaing.edu.co",
-                "$2a$10$correctEncodedPassword" // Different from "wrongPassword"
-        );
+    AuthenticationException exception =
+        assertThrows(
+            AuthenticationException.class, () -> authenticationService.logIn(loginRequest));
 
-        when(userCredentialsRepository.findByEmail("test@mail.escuelaing.edu.co"))
-                .thenReturn(Optional.of(storedUser));
+    assertEquals("Invalid password", exception.getMessage());
+    verify(userCredentialsRepository).findByEmail("test@mail.escuelaing.edu.co");
+  }
 
-        AuthenticationException exception = assertThrows(AuthenticationException.class,
-                () -> authenticationService.logIn(loginRequest));
+  @Test
+  void findByUserId_WithExistingUser_ShouldReturnUserCredentials() {
 
-        assertEquals("Invalid password", exception.getMessage());
-        verify(userCredentialsRepository).findByEmail("test@mail.escuelaing.edu.co");
-    }
+    String userId = "user123";
+    UserCredentialsDto expectedCredentials =
+        new UserCredentialsDto("id123", userId, "test@mail.escuelaing.edu.co", "encodedPassword");
 
-    @Test
-    void findByUserId_WithExistingUser_ShouldReturnUserCredentials() {
+    when(userCredentialsRepository.findByUserId(userId))
+        .thenReturn(Optional.of(expectedCredentials));
 
-        String userId = "user123";
-        UserCredentialsDto expectedCredentials = new UserCredentialsDto(
-                "id123", userId, "test@mail.escuelaing.edu.co", "encodedPassword"
-        );
+    Optional<UserCredentialsDto> result = authenticationService.findByUserId(userId);
 
-        when(userCredentialsRepository.findByUserId(userId))
-                .thenReturn(Optional.of(expectedCredentials));
+    assertTrue(result.isPresent());
+    assertEquals(expectedCredentials, result.get());
+    verify(userCredentialsRepository).findByUserId(userId);
+  }
 
-        Optional<UserCredentialsDto> result = authenticationService.findByUserId(userId);
+  @Test
+  void findByUserId_WithNonExistentUser_ShouldThrowResourceNotFoundException() {
 
-        assertTrue(result.isPresent());
-        assertEquals(expectedCredentials, result.get());
-        verify(userCredentialsRepository).findByUserId(userId);
-    }
+    String userId = "nonexistent";
 
-    @Test
-    void findByUserId_WithNonExistentUser_ShouldThrowResourceNotFoundException() {
+    when(userCredentialsRepository.findByUserId(userId)).thenReturn(Optional.empty());
 
-        String userId = "nonexistent";
+    ResourceNotFoundException exception =
+        assertThrows(
+            ResourceNotFoundException.class, () -> authenticationService.findByUserId(userId));
 
-        when(userCredentialsRepository.findByUserId(userId))
-                .thenReturn(Optional.empty());
+    assertEquals("User not found", exception.getMessage());
+    verify(userCredentialsRepository).findByUserId(userId);
+  }
 
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-                () -> authenticationService.findByUserId(userId));
+  @Test
+  void createAuthentication_ShouldSaveUserWithEncryptedPassword() {
 
-        assertEquals("User not found", exception.getMessage());
-        verify(userCredentialsRepository).findByUserId(userId);
-    }
+    User user = new User();
+    user.setUserId("user123");
+    user.setEmail("newuser@mail.escuelaing.edu.co");
 
-    @Test
-    void createAuthentication_ShouldSaveUserWithEncryptedPassword() {
+    when(userCredentialsRepository.save(any(UserCredentialsDto.class))).thenReturn(null);
 
-        User user = new User();
-        user.setUserId("user123");
-        user.setEmail("newuser@mail.escuelaing.edu.co");
+    authenticationService.createAuthentication(user);
 
-        when(userCredentialsRepository.save(any(UserCredentialsDto.class)))
-                .thenReturn(null);
+    verify(userCredentialsRepository).save(any(UserCredentialsDto.class));
+  }
 
-        authenticationService.createAuthentication(user);
+  @Test
+  void deleteAuthentication_WithExistingUser_ShouldDeleteCredentials() {
 
-        verify(userCredentialsRepository).save(any(UserCredentialsDto.class));
-    }
+    User user = new User();
+    user.setEmail("test@mail.escuelaing.edu.co");
+    UserCredentialsDto existingCredentials =
+        new UserCredentialsDto(
+            "id123", "user123", "test@mail.escuelaing.edu.co", "encodedPassword");
 
-    @Test
-    void deleteAuthentication_WithExistingUser_ShouldDeleteCredentials() {
+    when(userCredentialsRepository.findByEmail("test@mail.escuelaing.edu.co"))
+        .thenReturn(Optional.of(existingCredentials));
 
-        User user = new User();
-        user.setEmail("test@mail.escuelaing.edu.co");
-        UserCredentialsDto existingCredentials = new UserCredentialsDto(
-                "id123", "user123", "test@mail.escuelaing.edu.co", "encodedPassword"
-        );
+    authenticationService.deleteAuthentication(user);
 
-        when(userCredentialsRepository.findByEmail("test@mail.escuelaing.edu.co"))
-                .thenReturn(Optional.of(existingCredentials));
+    verify(userCredentialsRepository).delete(existingCredentials);
+    verify(userCredentialsRepository).findByEmail("test@mail.escuelaing.edu.co");
+  }
 
-        authenticationService.deleteAuthentication(user);
+  @Test
+  void deleteAuthentication_WithNonExistentUser_ShouldThrowResourceNotFoundException() {
 
-        verify(userCredentialsRepository).delete(existingCredentials);
-        verify(userCredentialsRepository).findByEmail("test@mail.escuelaing.edu.co");
-    }
+    User user = new User();
+    user.setEmail("nonexistent@mail.escuelaing.edu.co");
 
-    @Test
-    void deleteAuthentication_WithNonExistentUser_ShouldThrowResourceNotFoundException() {
+    when(userCredentialsRepository.findByEmail("nonexistent@mail.escuelaing.edu.co"))
+        .thenReturn(Optional.empty());
 
-        User user = new User();
-        user.setEmail("nonexistent@mail.escuelaing.edu.co");
+    ResourceNotFoundException exception =
+        assertThrows(
+            ResourceNotFoundException.class,
+            () -> authenticationService.deleteAuthentication(user));
 
-        when(userCredentialsRepository.findByEmail("nonexistent@mail.escuelaing.edu.co"))
-                .thenReturn(Optional.empty());
-
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-                () -> authenticationService.deleteAuthentication(user));
-
-        assertEquals("User not found", exception.getMessage());
-        verify(userCredentialsRepository).findByEmail("nonexistent@mail.escuelaing.edu.co");
-        verify(userCredentialsRepository, never()).delete(any());
-    }
+    assertEquals("User not found", exception.getMessage());
+    verify(userCredentialsRepository).findByEmail("nonexistent@mail.escuelaing.edu.co");
+    verify(userCredentialsRepository, never()).delete(any());
+  }
 }
