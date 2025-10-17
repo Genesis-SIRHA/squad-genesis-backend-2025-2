@@ -3,7 +3,6 @@ package edu.dosw.config;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 import java.util.Arrays;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,22 +22,22 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .authorizeHttpRequests(
-                    auth -> auth
-                            .requestMatchers(
-                                    "/api/swagger-ui/**",
-                                    "/v3/api-docs/**",
-                                    "/swagger-ui.html",
-                                    "/swagger-ui/**",
-                                    "/webjars/**"
-                            ).permitAll()
-                            .requestMatchers("/auth/**").permitAll()
-                            .anyRequest().authenticated()
-            )
-            .formLogin(withDefaults());
+    http.csrf(csrf -> csrf.disable())
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .authorizeHttpRequests(
+            auth ->
+                auth.requestMatchers(
+                        "/api/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/webjars/**")
+                    .permitAll()
+                    .requestMatchers("/auth/**")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
+        .formLogin(withDefaults());
 
     return http.build();
   }
@@ -60,11 +59,7 @@ public class SecurityConfig {
 
   @Bean
   public UserDetailsService userDetailsService() {
-    UserDetails user = User
-            .withUsername("usuario")
-            .password("{noop}1234")
-            .roles("USER")
-            .build();
+    UserDetails user = User.withUsername("usuario").password("{noop}1234").roles("USER").build();
 
     return new InMemoryUserDetailsManager(user);
   }
