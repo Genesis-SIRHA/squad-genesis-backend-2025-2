@@ -11,8 +11,6 @@ import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.observer.GroupCapacityNotifier;
 import edu.dosw.observer.MessageGroupObserver;
 import edu.dosw.repositories.GroupRepository;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +45,7 @@ class GroupServiceNotificationTest {
             .professorId("PROF123")
             .isLab(false)
             .groupNum("1")
-            .enrolled(18) // 90%
+            .enrolled(18)
             .maxCapacity(20)
             .build();
 
@@ -60,7 +58,7 @@ class GroupServiceNotificationTest {
             .professorId("PROF456")
             .isLab(false)
             .groupNum("1")
-            .enrolled(10) // 50%
+            .enrolled(10)
             .maxCapacity(20)
             .build();
   }
@@ -126,82 +124,6 @@ class GroupServiceNotificationTest {
   }
 
   @Test
-  void testVerifyGroupByGroupCode_DeberiaRetornarNullCuandoCapacidadBaja() {
-    when(groupRepository.findByGroupCode("G02")).thenReturn(Optional.of(grupoConBajaCapacidad));
-    doNothing().when(groupCapacityNotifier).checkAndNotify(grupoConBajaCapacidad);
-    when(messageGroupObserver.getNotifications()).thenReturn(List.of());
-
-    String resultado = groupService.verifyGroupByGroupCode("G02");
-
-    assertNull(resultado);
-    verify(messageGroupObserver).clearNotifications();
-    verify(groupCapacityNotifier).checkAndNotify(grupoConBajaCapacidad);
-  }
-
-  @Test
-  void testVerifyGroupByGroupCode_DeberiaRetornarMensajeErrorCuandoGrupoNoExiste() {
-    when(groupRepository.findByGroupCode("G99")).thenReturn(Optional.empty());
-
-    String resultado = groupService.verifyGroupByGroupCode("G99");
-
-    assertNotNull(resultado);
-    assertTrue(resultado.contains("Grupo no encontrado"));
-    verify(messageGroupObserver, never()).clearNotifications();
-    verify(groupCapacityNotifier, never()).checkAndNotify(any());
-  }
-
-  @Test
-  void testVerifyGroupByGroupCode_DeberiaRetornarMensajeCuandoCapacidadAlta() {
-    when(groupRepository.findByGroupCode("G01")).thenReturn(Optional.of(grupoConAltaCapacidad));
-    doNothing().when(groupCapacityNotifier).checkAndNotify(grupoConAltaCapacidad);
-    when(messageGroupObserver.getNotifications())
-        .thenReturn(List.of(" Grupo G01 - MAT101: Capacidad al 90.0% (18/20 estudiantes)"));
-
-    String resultado = groupService.verifyGroupByGroupCode("G01");
-
-    assertNotNull(resultado);
-    assertTrue(resultado.contains("G01"));
-    assertTrue(resultado.contains("90.0%"));
-
-    verify(messageGroupObserver).clearNotifications();
-    verify(groupCapacityNotifier).checkAndNotify(grupoConAltaCapacidad);
-  }
-
-  @Test
-  void testVerifyAllGroups_DeberiaRetornarNotificacionesParaGruposConAltaCapacidad() {
-    List<Group> grupos = Arrays.asList(grupoConAltaCapacidad, grupoConBajaCapacidad);
-    when(groupRepository.findAll()).thenReturn(grupos);
-    doNothing().when(groupCapacityNotifier).checkAndNotify(any(Group.class));
-    when(messageGroupObserver.getNotifications())
-        .thenReturn(List.of(" Grupo G01 - MAT101: Capacidad al 90.0% (18/20 estudiantes)"));
-
-    List<String> notificaciones = groupService.verifyAllGroups();
-
-    assertNotNull(notificaciones);
-    assertEquals(1, notificaciones.size());
-    assertTrue(notificaciones.get(0).contains("G01"));
-
-    verify(messageGroupObserver).clearNotifications();
-    verify(groupCapacityNotifier, times(2)).checkAndNotify(any(Group.class));
-  }
-
-  @Test
-  void testVerifyAllGroups_DeberiaRetornarListaVaciaCuandoNoHayNotificaciones() {
-    List<Group> grupos = Arrays.asList(grupoConBajaCapacidad);
-    when(groupRepository.findAll()).thenReturn(grupos);
-    doNothing().when(groupCapacityNotifier).checkAndNotify(any(Group.class));
-    when(messageGroupObserver.getNotifications()).thenReturn(List.of());
-
-    List<String> notificaciones = groupService.verifyAllGroups();
-
-    assertNotNull(notificaciones);
-    assertTrue(notificaciones.isEmpty());
-
-    verify(messageGroupObserver).clearNotifications();
-    verify(groupCapacityNotifier).checkAndNotify(grupoConBajaCapacidad);
-  }
-
-  @Test
   void testAddStudent_DeberiaLanzarExcepcionCuandoValidacionFalla() {
     when(groupRepository.findByGroupCode("G01")).thenReturn(Optional.of(grupoConAltaCapacidad));
     doThrow(new BusinessException("Validación fallida"))
@@ -222,8 +144,8 @@ class GroupServiceNotificationTest {
             .abbreviation("MAT101")
             .enrolled(19)
             .maxCapacity(20)
-            .year("2023") // Año diferente
-            .period("2") // Periodo diferente
+            .year("2023")
+            .period("2")
             .build();
 
     when(groupRepository.findByGroupCode("G01")).thenReturn(Optional.of(grupoPeriodoIncorrecto));
@@ -234,18 +156,5 @@ class GroupServiceNotificationTest {
 
     verify(groupRepository, never()).save(any());
     verify(groupCapacityNotifier, never()).checkAndNotify(any());
-  }
-
-  @Test
-  void testMultipleObservers_DeberiaFuncionarCorrectamenteConVariosObservers() {
-    when(groupRepository.findByGroupCode("G01")).thenReturn(Optional.of(grupoConAltaCapacidad));
-    doNothing().when(groupCapacityNotifier).checkAndNotify(grupoConAltaCapacidad);
-    when(messageGroupObserver.getNotifications())
-        .thenReturn(List.of("Notificación 1", "Notificación 2"));
-
-    String resultado = groupService.verifyGroupByGroupCode("G01");
-
-    assertNotNull(resultado);
-    assertEquals("Notificación 1", resultado);
   }
 }

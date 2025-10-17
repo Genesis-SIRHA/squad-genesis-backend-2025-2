@@ -13,7 +13,6 @@ import edu.dosw.observer.GroupCapacityNotifier;
 import edu.dosw.observer.MessageGroupObserver;
 import edu.dosw.repositories.GroupRepository;
 import java.util.List;
-import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +86,7 @@ public class GroupService {
             .enrolled(groupRequest.enrolled())
             .maxCapacity(groupRequest.maxCapacity())
             .build();
-    return group;
+    return groupRepository.save(group);
   }
 
   public Group updateGroup(String groupCode, UpdateGroupRequest groupRequest) {
@@ -186,35 +185,5 @@ public class GroupService {
       throw new BusinessException("Failed to update historial" + e.getMessage());
     }
     return group;
-  }
-
-  /** Method that verifies the capacity of all the groups and returns notifications */
-  public List<String> verifyAllGroups() {
-    messageGroupObserver.clearNotifications();
-
-    List<Group> grupos = groupRepository.findAll();
-    for (Group grupo : grupos) {
-      groupCapacityNotifier.checkAndNotify(grupo);
-    }
-
-    return messageGroupObserver.getNotifications();
-  }
-
-  /**
-   * method that checks the capacity of the group, given it's groupCode
-   *
-   * @param groupCode
-   * @return message
-   */
-  public String verifyGroupByGroupCode(String groupCode) {
-    Optional<Group> grupo = groupRepository.findByGroupCode(groupCode);
-    if (grupo.isPresent()) {
-      messageGroupObserver.clearNotifications();
-      groupCapacityNotifier.checkAndNotify(grupo.get());
-
-      List<String> notifications = messageGroupObserver.getNotifications();
-      return notifications.isEmpty() ? null : notifications.get(0);
-    }
-    return "Grupo no encontrado con código: " + groupCode;
   }
 }
