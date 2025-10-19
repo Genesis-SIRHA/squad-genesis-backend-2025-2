@@ -61,21 +61,27 @@ public class HistorialService {
     return lastCourseState;
   }
 
-  public Historial addHistorial(HistorialDTO historialDTO) {
-    getByStudentIdAndGroupCode(historialDTO.studentId(), historialDTO.groupCode());
-    historialValidator.validateHistorialCreation(historialDTO);
+    public Historial addHistorial(HistorialDTO historialDTO) {
+        historialValidator.validateHistorialCreation(historialDTO);
 
-    Historial historial =
-        new Historial.HistorialBuilder()
-            .studentId(historialDTO.studentId())
-            .groupCode(historialDTO.groupCode())
-            .status(historialDTO.status())
-            .year(periodService.getYear())
-            .period(periodService.getPeriod())
-            .build();
-    historialRepository.save(historial);
-    return historial;
-  }
+        try {
+            Historial existingHistorial = getByStudentIdAndGroupCode(historialDTO.studentId(), historialDTO.groupCode());
+
+            historialValidator.historialUpdateValidator(existingHistorial.getStatus(), historialDTO.status());
+            existingHistorial.setStatus(historialDTO.status());
+            return historialRepository.save(existingHistorial);
+
+        } catch (IllegalArgumentException e) {
+            Historial historial = new Historial.HistorialBuilder()
+                    .studentId(historialDTO.studentId())
+                    .groupCode(historialDTO.groupCode())
+                    .status(historialDTO.status())
+                    .year(periodService.getYear())
+                    .period(periodService.getPeriod())
+                    .build();
+            return historialRepository.save(historial);
+        }
+    }
 
   public Historial updateHistorial(String studentId, String groupCode, HistorialStatus newStatus) {
     Historial historial = getByStudentIdAndGroupCode(studentId, groupCode);
