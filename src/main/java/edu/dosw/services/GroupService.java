@@ -86,7 +86,13 @@ public class GroupService {
             .enrolled(groupRequest.enrolled())
             .maxCapacity(groupRequest.maxCapacity())
             .build();
-    return groupRepository.save(group);
+
+    Group savedGroup = groupRepository.save(group);
+
+    logger.info("Checking notifications for newly created group: {}", groupRequest.groupCode());
+    groupCapacityNotifier.checkAndNotify(savedGroup);
+
+    return savedGroup;
   }
 
   public Group updateGroup(String groupCode, UpdateGroupRequest groupRequest) {
@@ -95,12 +101,28 @@ public class GroupService {
       logger.error("Group not found: {}", groupCode);
       throw new BusinessException("Group not found: " + groupCode);
     }
+    Integer oldEnrolled = group.getEnrolled();
+    Integer oldMaxCapacity = group.getMaxCapacity();
+
     if (groupRequest.professorId() != null) group.setProfessorId(groupRequest.professorId());
     if (groupRequest.isLab() != null) group.setLab(groupRequest.isLab());
     if (groupRequest.groupNum() != null) group.setGroupNum(groupRequest.groupNum());
     if (groupRequest.maxCapacity() != null) group.setMaxCapacity(groupRequest.maxCapacity());
     if (groupRequest.enrolled() != null) group.setEnrolled(groupRequest.enrolled());
-    return groupRepository.save(group);
+
+    Group updatedGroup = groupRepository.save(group);
+
+    boolean capacityChanged =
+        (groupRequest.enrolled() != null && !groupRequest.enrolled().equals(oldEnrolled))
+            || (groupRequest.maxCapacity() != null
+                && !groupRequest.maxCapacity().equals(oldMaxCapacity));
+
+    if (capacityChanged) {
+      logger.info("Capacity changed for group {} - checking notifications", groupCode);
+      groupCapacityNotifier.checkAndNotify(updatedGroup);
+    }
+
+    return updatedGroup;
   }
 
   public Group deleteGroup(String groupCode) {
@@ -185,5 +207,19 @@ public class GroupService {
       throw new BusinessException("Failed to update historial" + e.getMessage());
     }
     return group;
+  }
+
+  /**
+   * Retrieves all capacity notifications
+   *
+   * @return a list of notification messages
+   */
+  public List<String> getCapacityNotifications() {
+    return messageGroupObserver.getNotifications();
+  }
+
+  /** Clears all capacity notifications */
+  public void clearCapacityNotifications() {
+    messageGroupObserver.clearNotifications();
   }
 }
