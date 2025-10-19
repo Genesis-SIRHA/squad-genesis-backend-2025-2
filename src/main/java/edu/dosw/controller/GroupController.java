@@ -141,4 +141,13 @@ public class GroupController {
   public ResponseEntity<List<String>> getCapacityNotifications() {
     return ResponseEntity.ok(groupService.getCapacityNotifications());
   }
+
+  @DeleteMapping("/notifications")
+  @Operation(
+      summary = "Clear all capacity notifications",
+      description = "Clears the list of capacity notifications")
+  public ResponseEntity<Void> clearCapacityNotifications() {
+    groupService.clearCapacityNotifications();
+    return ResponseEntity.noContent().build();
+  }
 }

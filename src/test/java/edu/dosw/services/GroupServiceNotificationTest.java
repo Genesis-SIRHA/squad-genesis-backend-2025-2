@@ -11,6 +11,8 @@ import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.observer.GroupCapacityNotifier;
 import edu.dosw.observer.MessageGroupObserver;
 import edu.dosw.repositories.GroupRepository;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,6 +65,7 @@ class GroupServiceNotificationTest {
             .build();
   }
 
+  // Tests existentes...
   @Test
   void testAddStudent_DeberiaNotificarCuandoAlcanzaUmbral() {
     Group grupoAntes =
@@ -156,5 +159,51 @@ class GroupServiceNotificationTest {
 
     verify(groupRepository, never()).save(any());
     verify(groupCapacityNotifier, never()).checkAndNotify(any());
+  }
+
+  @Test
+  void testGetCapacityNotifications_DeberiaRetornarListaDeNotificaciones() {
+    List<String> notificacionesEsperadas =
+        Arrays.asList(
+            "Grupo G01 - MAT101: Capacidad al 95.0% (19/20 estudiantes)",
+            "Grupo G02 - FIS201: Capacidad al 92.5% (37/40 estudiantes)");
+
+    when(messageGroupObserver.getNotifications()).thenReturn(notificacionesEsperadas);
+
+    List<String> resultado = groupService.getCapacityNotifications();
+
+    assertNotNull(resultado);
+    assertEquals(2, resultado.size());
+    assertEquals(notificacionesEsperadas, resultado);
+    verify(messageGroupObserver).getNotifications();
+  }
+
+  @Test
+  void testGetCapacityNotifications_DeberiaRetornarListaVaciaCuandoNoHayNotificaciones() {
+
+    when(messageGroupObserver.getNotifications()).thenReturn(Arrays.asList());
+
+    List<String> resultado = groupService.getCapacityNotifications();
+
+    assertNotNull(resultado);
+    assertTrue(resultado.isEmpty());
+    verify(messageGroupObserver).getNotifications();
+  }
+
+  @Test
+  void testClearCapacityNotifications_DeberiaLimpiarNotificaciones() {
+    doNothing().when(messageGroupObserver).clearNotifications();
+
+    groupService.clearCapacityNotifications();
+
+    verify(messageGroupObserver).clearNotifications();
+  }
+
+  @Test
+  void testClearCapacityNotifications_DeberiaEjecutarseSinErroresCuandoNoHayNotificaciones() {
+    doNothing().when(messageGroupObserver).clearNotifications();
+
+    assertDoesNotThrow(() -> groupService.clearCapacityNotifications());
+    verify(messageGroupObserver).clearNotifications();
   }
 }
