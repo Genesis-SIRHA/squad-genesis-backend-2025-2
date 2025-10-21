@@ -81,7 +81,6 @@ jobs:
   deploy-sandbox:
     runs-on: ubuntu-latest
     needs: build-and-test
-    if: github.ref == 'refs/heads/develop'
     environment: sandbox
     steps:
     - uses: actions/checkout@v4
