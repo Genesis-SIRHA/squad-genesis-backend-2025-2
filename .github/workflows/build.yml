@@ -74,8 +74,7 @@ jobs:
           -Dsonar.login=${SONAR_TOKEN} \
           -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
           -Dsonar.jacoco.reportPaths=target/jacoco.exec \
-          -Dsonar.sourceEncoding=UTF-8 \
-          -Dsonar.analysis.ci.autoconfig.disabled=true
+          -Dsonar.sourceEncoding=UTF-8
   
   deploy-sandbox:
     runs-on: ubuntu-latest
