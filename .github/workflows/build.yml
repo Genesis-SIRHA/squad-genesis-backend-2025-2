@@ -68,8 +68,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         mvn sonar:sonar \
-          -Dsonar.projectKey=genesis-sirha_squad-genesis-backend-2025-2 \
-          -Dsonar.organization=genesis-sirha \
+          -Dsonar.projectKey=genesis-sirha \
+          -Dsonar.organization=Genesis-SIRHA \
           -Dsonar.host.url=${SONAR_HOST_URL} \
           -Dsonar.login=${SONAR_TOKEN} \
           -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
