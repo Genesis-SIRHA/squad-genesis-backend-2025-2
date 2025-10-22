@@ -238,7 +238,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.example.squad-genesis-backend-2025-2.Application</mainClass>
+                    <mainClass>edu.dosw.Application</mainClass>
                     <finalName>app</finalName>
                 </configuration>
                 <executions>
