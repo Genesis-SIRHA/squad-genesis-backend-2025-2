@@ -3,6 +3,9 @@ package edu.dosw.repositories;
 import edu.dosw.model.Request;
 import java.util.List;
 import java.util.Optional;
+
+import edu.dosw.model.enums.RequestStatus;
+import edu.dosw.model.enums.RequestType;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
@@ -57,4 +60,66 @@ public interface RequestRepository extends MongoRepository<Request, String> {
 
   @Query(value = "{ 'destinationGroupId': ?0 }", sort = "{ 'createdAt': 1 }")
   List<Request> getRequestByDestinationGroupId(String destinationGroupCode);
+
+
+    /**
+     * Counts requests by type and status
+     */
+    @Query(value = "{ 'type': { $in: ?0 }, 'status': ?1 }", count = true)
+    long countByTypeInAndStatus(List<RequestType> types, RequestStatus status);
+
+    /**
+     * Counts requests by type
+     */
+    @Query(value = "{ 'type': { $in: ?0 } }", count = true)
+    long countByTypeIn(List<RequestType> types);
+
+    /**
+     * Counts requests by exceptional flag and status
+     */
+    @Query(value = "{ 'isExceptional': true, 'status': ?0 }", count = true)
+    long countByIsExceptionalTrueAndStatus(RequestStatus status);
+
+    /**
+     * Counts requests by exceptional flag
+     */
+    @Query(value = "{ 'isExceptional': true }", count = true)
+    long countByIsExceptionalTrue();
+
+    /**
+     * Counts requests that have both origin and destination group IDs
+     */
+    @Query(value = "{ 'originGroupId': { $exists: true, $ne: null }, 'destinationGroupId': { $exists: true, $ne: null } }", count = true)
+    long countByOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNull();
+
+    /**
+     * Counts requests that have both origin and destination group IDs with specific status
+     */
+    @Query(value = "{ 'originGroupId': { $exists: true, $ne: null }, 'destinationGroupId': { $exists: true, $ne: null }, 'status': ?0 }", count = true)
+    long countByOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNullAndStatus(RequestStatus status);
+
+    /**
+     * Counts requests by type with both origin and destination group IDs and status
+     */
+    @Query(value = "{ 'type': ?0, 'originGroupId': { $exists: true, $ne: null }, 'destinationGroupId': { $exists: true, $ne: null }, 'status': ?1 }", count = true)
+    long countByTypeAndOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNullAndStatus(RequestType type, RequestStatus status);
+
+    /**
+     * Counts requests by type with exceptional flag and status
+     */
+    @Query(value = "{ 'type': ?0, 'isExceptional': true, 'status': ?1 }", count = true)
+    long countByTypeAndIsExceptionalTrueAndStatus(RequestType type, RequestStatus status);
+
+    /**
+     * Counts requests by type
+     */
+    @Query(value = "{ 'type': ?0 }", count = true)
+    long countByType(RequestType type);
+
+    /**
+     * Counts requests by type and status
+     */
+    @Query(value = "{ 'type': ?0, 'status': ?1 }", count = true)
+    long countByTypeAndStatus(RequestType type, RequestStatus status);
 }
+
