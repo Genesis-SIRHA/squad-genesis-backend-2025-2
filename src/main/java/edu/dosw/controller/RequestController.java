@@ -1,6 +1,7 @@
 package edu.dosw.controller;
 
 import edu.dosw.dto.CreateRequestDto;
+import edu.dosw.dto.ReportDTO;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.dto.UpdateRequestDto;
 import edu.dosw.model.Request;
@@ -97,4 +98,36 @@ public class RequestController {
   public ResponseEntity<Request> deleteRequest(@PathVariable String requestId) {
     return ResponseEntity.ok(requestService.deleteRequestStatus(requestId));
   }
+
+    @GetMapping("/reports/materia")
+    @Operation(
+            summary = "Get materia reassignment statistics",
+            description = "Retrieves statistics about subject reassignments")
+    public ResponseEntity<ReportDTO> getMateriaReassignmentStats() {
+        return ResponseEntity.ok(requestService.getMateriaReassignmentStats());
+    }
+
+    @GetMapping("/reports/grupo")
+    @Operation(
+            summary = "Get group reassignment statistics",
+            description = "Retrieves statistics about group reassignments")
+    public ResponseEntity<ReportDTO> getGrupoReassignmentStats() {
+        return ResponseEntity.ok(requestService.getGrupoReassignmentStats());
+    }
+
+    @GetMapping("/reports/decanatura")
+    @Operation(
+            summary = "Get deanery reassignment statistics",
+            description = "Retrieves statistics about deanery reassignments")
+    public ResponseEntity<ReportDTO> getDecanaturaReassignmentStats() {
+        return ResponseEntity.ok(requestService.getDecanaturaReassignmentStats());
+    }
+
+    @GetMapping("/reports/global")
+    @Operation(
+            summary = "Get global reassignment statistics",
+            description = "Retrieves comprehensive statistics about all reassignments")
+    public ResponseEntity<ReportDTO> getGlobalReassignmentStats() {
+        return ResponseEntity.ok(requestService.getGlobalReassignmentStats());
+    }
 }

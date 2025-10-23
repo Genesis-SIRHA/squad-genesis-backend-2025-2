@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import edu.dosw.dto.CreateRequestDto;
+import edu.dosw.dto.ReportDTO;
 import edu.dosw.dto.UpdateRequestDto;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.exception.ResourceNotFoundException;
@@ -380,4 +381,139 @@ class RequestServiceTest {
     assertNull(request.getGestedBy());
     assertNull(request.getAnswer());
   }
+    @Test
+    void getMateriaReassignmentStats_ShouldReturnCorrectStats() {
+        List<RequestType> materiaTypes = List.of(RequestType.SWAP, RequestType.JOIN);
+
+        when(requestRepository.countByTypeIn(materiaTypes)).thenReturn(50L);
+        when(requestRepository.countByTypeInAndStatus(materiaTypes, RequestStatus.PENDING)).thenReturn(10L);
+        when(requestRepository.countByTypeInAndStatus(materiaTypes, RequestStatus.ACCEPTED)).thenReturn(30L);
+        when(requestRepository.countByTypeInAndStatus(materiaTypes, RequestStatus.REJECTED)).thenReturn(10L);
+        when(requestRepository.countByType(RequestType.CANCELLATION)).thenReturn(20L);
+        when(requestRepository.countByType(RequestType.SWAP)).thenReturn(25L);
+        when(requestRepository.countByType(RequestType.JOIN)).thenReturn(25L);
+
+        ReportDTO result = requestService.getMateriaReassignmentStats();
+
+        assertNotNull(result);
+        assertEquals(50L, result.total());
+        assertEquals(10L, result.pending());
+        assertEquals(30L, result.approved());
+        assertEquals(10L, result.rejected());
+        assertEquals(20L, result.cancellations());
+        assertEquals(25L, result.swaps());
+        assertEquals(25L, result.joins());
+
+        verify(requestRepository).countByTypeIn(materiaTypes);
+        verify(requestRepository).countByTypeInAndStatus(materiaTypes, RequestStatus.PENDING);
+        verify(requestRepository).countByTypeInAndStatus(materiaTypes, RequestStatus.ACCEPTED);
+        verify(requestRepository).countByTypeInAndStatus(materiaTypes, RequestStatus.REJECTED);
+    }
+
+    @Test
+    void getGrupoReassignmentStats_ShouldReturnCorrectStats() {
+        when(requestRepository.countByOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNull()).thenReturn(40L);
+        when(requestRepository.countByOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNullAndStatus(RequestStatus.PENDING))
+                .thenReturn(5L);
+        when(requestRepository.countByOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNullAndStatus(RequestStatus.ACCEPTED))
+                .thenReturn(30L);
+        when(requestRepository.countByOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNullAndStatus(RequestStatus.REJECTED))
+                .thenReturn(5L);
+        when(requestRepository.countByTypeAndOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNullAndStatus(
+                RequestType.CANCELLATION, RequestStatus.ACCEPTED)).thenReturn(10L);
+        when(requestRepository.countByTypeAndOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNullAndStatus(
+                RequestType.SWAP, RequestStatus.ACCEPTED)).thenReturn(15L);
+        when(requestRepository.countByTypeAndOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNullAndStatus(
+                RequestType.JOIN, RequestStatus.ACCEPTED)).thenReturn(5L);
+
+        ReportDTO result = requestService.getGrupoReassignmentStats();
+
+        assertNotNull(result);
+        assertEquals(40L, result.total());
+        assertEquals(5L, result.pending());
+        assertEquals(30L, result.approved());
+        assertEquals(5L, result.rejected());
+        assertEquals(10L, result.cancellations());
+        assertEquals(15L, result.swaps());
+        assertEquals(5L, result.joins());
+    }
+
+    @Test
+    void getDecanaturaReassignmentStats_ShouldReturnCorrectStats() {
+        when(requestRepository.countByIsExceptionalTrue()).thenReturn(15L);
+        when(requestRepository.countByIsExceptionalTrueAndStatus(RequestStatus.PENDING)).thenReturn(3L);
+        when(requestRepository.countByIsExceptionalTrueAndStatus(RequestStatus.ACCEPTED)).thenReturn(10L);
+        when(requestRepository.countByIsExceptionalTrueAndStatus(RequestStatus.REJECTED)).thenReturn(2L);
+        when(requestRepository.countByTypeAndIsExceptionalTrueAndStatus(RequestType.CANCELLATION, RequestStatus.ACCEPTED))
+                .thenReturn(4L);
+        when(requestRepository.countByTypeAndIsExceptionalTrueAndStatus(RequestType.SWAP, RequestStatus.ACCEPTED))
+                .thenReturn(5L);
+        when(requestRepository.countByTypeAndIsExceptionalTrueAndStatus(RequestType.JOIN, RequestStatus.ACCEPTED))
+                .thenReturn(1L);
+
+        ReportDTO result = requestService.getDecanaturaReassignmentStats();
+
+        assertNotNull(result);
+        assertEquals(15L, result.total());
+        assertEquals(3L, result.pending());
+        assertEquals(10L, result.approved());
+        assertEquals(2L, result.rejected());
+        assertEquals(4L, result.cancellations());
+        assertEquals(5L, result.swaps());
+        assertEquals(1L, result.joins());
+    }
+
+    @Test
+    void getGlobalReassignmentStats_ShouldReturnCorrectStats() {
+        when(requestRepository.count()).thenReturn(100L);
+        when(requestRepository.countByStatus("PENDING")).thenReturn(20L);
+        when(requestRepository.countByStatus("ACCEPTED")).thenReturn(70L);
+        when(requestRepository.countByStatus("REJECTED")).thenReturn(10L);
+        when(requestRepository.countByType(RequestType.CANCELLATION)).thenReturn(30L);
+        when(requestRepository.countByType(RequestType.SWAP)).thenReturn(40L);
+        when(requestRepository.countByType(RequestType.JOIN)).thenReturn(30L);
+
+        ReportDTO result = requestService.getGlobalReassignmentStats();
+
+        assertNotNull(result);
+        assertEquals(100L, result.total());
+        assertEquals(20L, result.pending());
+        assertEquals(70L, result.approved());
+        assertEquals(10L, result.rejected());
+        assertEquals(30L, result.cancellations());
+        assertEquals(40L, result.swaps());
+        assertEquals(30L, result.joins());
+    }
+
+    @Test
+    void getMateriaReassignmentStats_WhenNoData_ShouldReturnZeroStats() {
+        List<RequestType> materiaTypes = List.of(RequestType.SWAP, RequestType.JOIN);
+
+        when(requestRepository.countByTypeIn(materiaTypes)).thenReturn(0L);
+        when(requestRepository.countByTypeInAndStatus(materiaTypes, RequestStatus.PENDING)).thenReturn(0L);
+        when(requestRepository.countByTypeInAndStatus(materiaTypes, RequestStatus.ACCEPTED)).thenReturn(0L);
+        when(requestRepository.countByTypeInAndStatus(materiaTypes, RequestStatus.REJECTED)).thenReturn(0L);
+        when(requestRepository.countByType(RequestType.CANCELLATION)).thenReturn(0L);
+        when(requestRepository.countByType(RequestType.SWAP)).thenReturn(0L);
+        when(requestRepository.countByType(RequestType.JOIN)).thenReturn(0L);
+
+        ReportDTO result = requestService.getMateriaReassignmentStats();
+
+        assertNotNull(result);
+        assertEquals(0L, result.total());
+        assertEquals(0L, result.pending());
+        assertEquals(0L, result.approved());
+        assertEquals(0L, result.rejected());
+        assertEquals(0L, result.cancellations());
+        assertEquals(0L, result.swaps());
+        assertEquals(0L, result.joins());
+    }
+
+    @Test
+    void getReportStats_ShouldHandleRepositoryExceptions() {
+        when(requestRepository.count()).thenThrow(new RuntimeException("Database error"));
+
+        assertThrows(RuntimeException.class, () -> requestService.getGlobalReassignmentStats());
+        verify(requestRepository).count();
+    }
 }
