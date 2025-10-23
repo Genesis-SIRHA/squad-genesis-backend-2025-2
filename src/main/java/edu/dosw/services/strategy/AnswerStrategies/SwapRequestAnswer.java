@@ -2,6 +2,7 @@ package edu.dosw.services.strategy.AnswerStrategies;
 
 import edu.dosw.dto.HistorialDTO;
 import edu.dosw.dto.UpdateGroupRequest;
+import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
 import edu.dosw.model.enums.HistorialStatus;
@@ -41,7 +42,7 @@ public class SwapRequestAnswer implements AnswerStrategy {
     try {
       if (destinationGroup.getEnrolled() >= destinationGroup.getMaxCapacity()) {
         logger.error("Destination group {} is full", destinationGroup.getGroupCode());
-        throw new IllegalArgumentException(
+        throw new BusinessException(
             "Destination" + destinationGroup.getGroupCode() + "group is full");
       }
       groupService.updateGroup(originGroup.getGroupCode(), originGroupRequest);
@@ -56,7 +57,7 @@ public class SwapRequestAnswer implements AnswerStrategy {
           request.getStudentId(), request.getOriginGroupId(), HistorialStatus.SWAPPED);
     } catch (Exception e) {
       logger.error("Failed to answer request: {}", e.getMessage());
-      throw new RuntimeException("Failed to answer request: " + e.getMessage());
+      throw new BusinessException("Failed to answer request: " + e.getMessage());
     }
   }
 }

@@ -1,6 +1,7 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.HistorialDTO;
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Historial;
 import edu.dosw.model.enums.HistorialStatus;
@@ -35,7 +36,7 @@ public class HistorialService {
     Historial historial = historialRepository.findByStudentIdAndGroupCode(studentId, groupCode);
     if (historial == null) {
       logger.error("historial does not exist");
-      throw new IllegalArgumentException(
+      throw new ResourceNotFoundException(
           "historial not found with studentId " + studentId + " and groupCode " + groupCode);
     }
     return historial;

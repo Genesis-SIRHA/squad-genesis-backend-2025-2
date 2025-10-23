@@ -2,10 +2,12 @@ package edu.dosw.services.UserServices;
 
 import edu.dosw.dto.StudentDto;
 import edu.dosw.exception.BusinessException;
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Student;
 import edu.dosw.repositories.StudentRepository;
 import edu.dosw.services.AuthenticationService;
 import edu.dosw.utils.IdGenerator;
+import jakarta.validation.ValidationException;
 import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -28,7 +30,7 @@ public class StudentService {
   public Student getStudentById(String studentId) {
     Student student = studentRepository.findByUserId(studentId).orElse(null);
     if (student == null) {
-      throw new BusinessException("Student not found by id: " + studentId);
+      throw new ResourceNotFoundException("Student not found by id: " + studentId);
     }
     return student;
   }
@@ -37,12 +39,12 @@ public class StudentService {
     if (studentCreationRequest.identityDocument() == null
         || studentCreationRequest.fullName() == null) {
       logger.error("Personal data is incomplete");
-      throw new BusinessException("Personal data is incomplete");
+      throw new ValidationException("Personal data is incomplete");
     }
 
     if (studentCreationRequest.plan() == null || studentCreationRequest.facultyName() == null) {
       logger.error("Academic Data is incomplete");
-      throw new BusinessException("Academic Data is incomplete");
+      throw new ValidationException("Academic Data is incomplete");
     }
 
     String email = generateStudentEmail(studentCreationRequest.fullName());
@@ -70,7 +72,7 @@ public class StudentService {
     String[] names = fullName.toLowerCase().split(" ");
     if (names.length < 3) {
       logger.error("Invalid full name");
-      throw new BusinessException("Invalid full name: " + Arrays.toString(names));
+      throw new ValidationException("Invalid full name: " + Arrays.toString(names));
     }
     String firstName = names[0];
     String lastName = names[names.length - 2];
@@ -82,7 +84,7 @@ public class StudentService {
     Student student = studentRepository.findByUserId(studentId).orElse(null);
     if (student == null) {
       logger.error("Student not found");
-      throw new BusinessException("Student not found");
+      throw new ResourceNotFoundException("Student not found");
     }
     if (studentUpdateRequest.fullName() != null)
       student.setFullName(studentUpdateRequest.fullName());
@@ -106,7 +108,7 @@ public class StudentService {
     Student student = studentRepository.findByUserId(studentId).orElse(null);
     if (student == null) {
       logger.error("Student not found");
-      throw new BusinessException("Student not found");
+      throw new ResourceNotFoundException("Student not found");
     }
     try {
       authenticationService.deleteAuthentication(student);
@@ -122,7 +124,7 @@ public class StudentService {
     Student student = studentRepository.findByUserId(studentId).orElse(null);
     if (student == null) {
       logger.error("Student not found");
-      throw new BusinessException("Student not found");
+      throw new ResourceNotFoundException("Student not found");
     }
     return student.getFacultyName();
   }

@@ -1,6 +1,8 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.SessionDTO;
+import edu.dosw.exception.BusinessException;
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Session;
 import edu.dosw.model.enums.DayOfWeek;
 import edu.dosw.repositories.SessionRepository;
@@ -27,7 +29,7 @@ public class SessionService {
     ArrayList<Session> groupSchedule = sessionRepository.findByGroupCode(groupCode);
     if (groupSchedule == null) {
       logger.error("Group schedule not found by GroupCode: {}", groupCode);
-      throw new IllegalArgumentException("Group schedule not found by GroupCode: " + groupCode);
+      throw new ResourceNotFoundException("Group schedule not found by GroupCode: " + groupCode);
     }
     return groupSchedule;
   }
@@ -36,7 +38,7 @@ public class SessionService {
     Session session = sessionRepository.findBySessionId(sessionId);
     if (session == null) {
       logger.error("Session not found by sessionId: {}", sessionId);
-      throw new IllegalArgumentException("Session not found by sessionId: " + sessionId);
+      throw new ResourceNotFoundException("Session not found by sessionId: " + sessionId);
     }
     return session;
   }
@@ -51,7 +53,7 @@ public class SessionService {
         sessionRepository.getSessionByScheduleAndClassroom(classroom, slot, day, year, period);
     if (session == null) {
       logger.error("Session not found by scheduled and classroom: {} , {}", day, classroom);
-      throw new IllegalArgumentException(
+      throw new ResourceNotFoundException(
           "Session not found by sessionId: " + day + ", " + classroom);
     }
     return session;
@@ -69,7 +71,7 @@ public class SessionService {
 
     if (session == null) {
       logger.error("Session not found by scheduled and classroom: {} en la franja {}", day, slot);
-      throw new IllegalArgumentException(
+      throw new ResourceNotFoundException(
           "Session not found by sessionId: " + day + " en la franja " + slot);
     }
     return session;
@@ -91,7 +93,7 @@ public class SessionService {
       return sessionRepository.save(session);
     } catch (Exception e) {
       logger.error("Failed to create session: {}", e.getMessage());
-      throw new RuntimeException("Failed to create session: " + e.getMessage());
+      throw new BusinessException("Failed to create session: " + e.getMessage());
     }
   }
 
@@ -108,7 +110,7 @@ public class SessionService {
       return sessionRepository.save(session);
     } catch (Exception e) {
       logger.error("An unexpected error has occurred updating a session: {}", e.getMessage());
-      throw new RuntimeException(
+      throw new BusinessException(
           "An unexpected error has occurred updating a session:" + e.getMessage());
     }
   }
@@ -121,7 +123,7 @@ public class SessionService {
       return session;
     } catch (Exception e) {
       logger.error("An unexpected error has occurred deleting a session : {}", e.getMessage());
-      throw new RuntimeException(
+      throw new BusinessException(
           "An unexpected error has occurred updating a session: " + e.getMessage());
     }
   }

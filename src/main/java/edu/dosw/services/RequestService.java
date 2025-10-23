@@ -1,10 +1,14 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.CreateRequestDto;
+import edu.dosw.dto.ReportDTO;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.dto.UpdateRequestDto;
+import edu.dosw.exception.BusinessException;
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Request;
 import edu.dosw.model.enums.RequestStatus;
+import edu.dosw.model.enums.RequestType;
 import edu.dosw.model.enums.Role;
 import edu.dosw.repositories.RequestRepository;
 import edu.dosw.services.UserServices.DeanService;
@@ -65,7 +69,7 @@ public class RequestService {
 
     if (strategy == null) {
       logger.error("Unsupported role: {}", role);
-      throw new IllegalArgumentException("Unsupported role: " + role);
+      throw new BusinessException("Unsupported role: " + role);
     }
     return strategy.queryRequests(userId).stream()
         .sorted(Comparator.comparing(Request::getCreatedAt))
@@ -79,7 +83,7 @@ public class RequestService {
           .toList();
     } catch (Exception e) {
       logger.error("Failed to fetch all requests: {}", e.getMessage());
-      throw new RuntimeException("Failed to fetch all requests: " + e.getMessage());
+      throw new BusinessException("Failed to fetch all requests: " + e.getMessage());
     }
   }
 
@@ -98,7 +102,7 @@ public class RequestService {
       return requestRepository.save(request);
     } catch (Exception e) {
       logger.error("Failed to create request: {}", e.getMessage());
-      throw new RuntimeException("Failed to create request: " + e.getMessage());
+      throw new BusinessException("Failed to create request: " + e.getMessage());
     }
   }
 
@@ -116,7 +120,7 @@ public class RequestService {
       return requestRepository.save(request);
     } catch (Exception e) {
       logger.error("Failed to update request status: {}", e.getMessage());
-      throw new RuntimeException("Failed to update request status: " + e.getMessage());
+      throw new BusinessException("Failed to update request status: " + e.getMessage());
     }
   }
 
@@ -138,18 +142,79 @@ public class RequestService {
 
   }
 
-  public RequestStats getRequestStats() {
+public RequestStats getRequestStats() {
+long total = requestRepository.count();
+long pending = requestRepository.countByStatus("PENDING");
+long approved = requestRepository.countByStatus("ACCEPTED");
+long rejected = requestRepository.countByStatus("REJECTED");
+return new RequestStats(total, pending, approved, rejected);
+}
+
+public ReportDTO getMateriaReassignmentStats() {
+
+    List<RequestType> materiaTypes = List.of(RequestType.SWAP, RequestType.JOIN);
+
+    long total = requestRepository.countByTypeIn(materiaTypes);
+    long pending = requestRepository.countByTypeInAndStatus(materiaTypes, RequestStatus.PENDING);
+    long approved = requestRepository.countByTypeInAndStatus(materiaTypes, RequestStatus.ACCEPTED);
+    long rejected = requestRepository.countByTypeInAndStatus(materiaTypes, RequestStatus.REJECTED);
+
+    long cancellations = requestRepository.countByType(RequestType.CANCELLATION);
+    long swaps = requestRepository.countByType(RequestType.SWAP);
+    long joins = requestRepository.countByType(RequestType.JOIN);
+
+    return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
+}
+
+public ReportDTO getGrupoReassignmentStats() {
+
+    long total = requestRepository.countByOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNull();
+    long pending = requestRepository.countByOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNullAndStatus(RequestStatus.PENDING);
+    long approved = requestRepository.countByOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNullAndStatus(RequestStatus.ACCEPTED);
+    long rejected = requestRepository.countByOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNullAndStatus(RequestStatus.REJECTED);
+
+    long cancellations = requestRepository.countByTypeAndOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNullAndStatus(
+            RequestType.CANCELLATION, RequestStatus.ACCEPTED);
+    long swaps = requestRepository.countByTypeAndOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNullAndStatus(
+            RequestType.SWAP, RequestStatus.ACCEPTED);
+    long joins = requestRepository.countByTypeAndOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNullAndStatus(
+            RequestType.JOIN, RequestStatus.ACCEPTED);
+
+    return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
+}
+
+public ReportDTO getDecanaturaReassignmentStats() {
+
+    long total = requestRepository.countByIsExceptionalTrue();
+    long pending = requestRepository.countByIsExceptionalTrueAndStatus(RequestStatus.PENDING);
+    long approved = requestRepository.countByIsExceptionalTrueAndStatus(RequestStatus.ACCEPTED);
+    long rejected = requestRepository.countByIsExceptionalTrueAndStatus(RequestStatus.REJECTED);
+
+    long cancellations = requestRepository.countByTypeAndIsExceptionalTrueAndStatus(RequestType.CANCELLATION, RequestStatus.ACCEPTED);
+    long swaps = requestRepository.countByTypeAndIsExceptionalTrueAndStatus(RequestType.SWAP, RequestStatus.ACCEPTED);
+    long joins = requestRepository.countByTypeAndIsExceptionalTrueAndStatus(RequestType.JOIN, RequestStatus.ACCEPTED);
+
+    return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
+}
+
+public ReportDTO getGlobalReassignmentStats() {
+
     long total = requestRepository.count();
     long pending = requestRepository.countByStatus("PENDING");
     long approved = requestRepository.countByStatus("ACCEPTED");
     long rejected = requestRepository.countByStatus("REJECTED");
-    return new RequestStats(total, pending, approved, rejected);
-  }
+
+    long cancellations = requestRepository.countByType(RequestType.CANCELLATION);
+    long swaps = requestRepository.countByType(RequestType.SWAP);
+    long joins = requestRepository.countByType(RequestType.JOIN);
+
+    return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
+}
 
   public Request deleteRequestStatus(String requestId) {
     Request request = requestRepository.findByRequestId(requestId).orElse(null);
     if (request == null) {
-      throw new RuntimeException("Request not found with id: " + requestId);
+      throw new ResourceNotFoundException("Request not found with id: " + requestId);
     }
 
     try {
@@ -157,7 +222,7 @@ public class RequestService {
       return request;
     } catch (Exception e) {
       logger.error("Failed to delete request: {}", e.getMessage());
-      throw new RuntimeException("Failed to delete request: " + e.getMessage());
+      throw new BusinessException("Failed to delete request: " + e.getMessage());
     }
   }
 
@@ -165,7 +230,7 @@ public class RequestService {
     Request request = requestRepository.findByRequestId(requestId).orElse(null);
     if (request == null) {
       logger.error("Request not found with id: {}", requestId);
-      throw new RuntimeException("Request not found with id: " + requestId);
+      throw new ResourceNotFoundException("Request not found with id: " + requestId);
     }
     return request;
   }
@@ -187,7 +252,7 @@ public class RequestService {
           .toList();
     } catch (Exception e) {
       logger.error("Failed to fetch requests by faculty name: {}", e.getMessage());
-      throw new RuntimeException("Failed to fetch requests by faculty name: " + e.getMessage());
+      throw new BusinessException("Failed to fetch requests by faculty name: " + e.getMessage());
     }
   }
 }

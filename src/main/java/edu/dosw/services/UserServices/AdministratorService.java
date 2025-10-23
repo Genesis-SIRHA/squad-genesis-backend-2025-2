@@ -2,14 +2,18 @@ package edu.dosw.services.UserServices;
 
 import edu.dosw.dto.AdministratorDto;
 import edu.dosw.exception.BusinessException;
+import edu.dosw.exception.ResourceAlreadyExistsException;
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Administrator;
 import edu.dosw.repositories.AdministratorRepository;
 import edu.dosw.services.AuthenticationService;
 import edu.dosw.utils.IdGenerator;
+import jakarta.validation.ValidationException;
 import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -35,7 +39,7 @@ public class AdministratorService {
     Administrator administrator =
         administratorRepository.findByUserId(administratorId).orElse(null);
     if (administrator == null) {
-      throw new BusinessException("Administrator not found by id: " + administratorId);
+      throw new ResourceNotFoundException("Administrator not found by id: " + administratorId);
     }
     return administrator;
   }
@@ -52,7 +56,7 @@ public class AdministratorService {
     if (administratorCreationRequest.identityDocument() == null
         || administratorCreationRequest.fullName() == null) {
       logger.error("Personal data is incomplete");
-      throw new BusinessException("Personal data is incomplete");
+      throw new ValidationException("Personal data is incomplete");
     }
 
     String email = generateAdministratorEmail(administratorCreationRequest.fullName());
@@ -66,6 +70,8 @@ public class AdministratorService {
     try {
       authenticationService.createAuthentication(administrator);
       return administratorRepository.save(administrator);
+    } catch (DataIntegrityViolationException e) {
+      throw new ResourceAlreadyExistsException("Data integrity violation: " + e.getMessage());
     } catch (Exception e) {
       throw new BusinessException(
           "An inesperated error has occurred when creating the administrator");
@@ -83,7 +89,7 @@ public class AdministratorService {
     String[] names = fullName.toLowerCase().split(" ");
     if (names.length < 3) {
       logger.error("Invalid full name");
-      throw new BusinessException("Invalid full name: " + Arrays.toString(names));
+      throw new ValidationException("Invalid full name: " + Arrays.toString(names));
     }
     String firstName = names[0];
     String lastName = names[names.length - 2];
@@ -105,7 +111,7 @@ public class AdministratorService {
         administratorRepository.findByUserId(administratorId).orElse(null);
     if (administrator == null) {
       logger.error("Administrator not found");
-      throw new BusinessException("Administrator not found");
+      throw new ResourceNotFoundException("Administrator not found");
     }
     if (administratorUpdateRequest.fullName() != null)
       administrator.setFullName(administratorUpdateRequest.fullName());
@@ -114,6 +120,9 @@ public class AdministratorService {
 
     try {
       return administratorRepository.save(administrator);
+    } catch (DataIntegrityViolationException e) {
+      throw new ResourceAlreadyExistsException(
+          "Data integrity violation during update: " + e.getMessage());
     } catch (Exception e) {
       throw new BusinessException(
           "An inesperated error has occurred when updating the administrator");
@@ -132,7 +141,7 @@ public class AdministratorService {
         administratorRepository.findByUserId(administratorId).orElse(null);
     if (administrator == null) {
       logger.error("Administrator not found");
-      throw new BusinessException("Administrator not found");
+      throw new ResourceNotFoundException("Administrator not found");
     }
     try {
       authenticationService.deleteAuthentication(administrator);

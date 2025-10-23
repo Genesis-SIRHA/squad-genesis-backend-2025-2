@@ -1,5 +1,6 @@
 package edu.dosw.services.strategy.AnswerStrategies;
 
+import edu.dosw.exception.BusinessException;
 import edu.dosw.model.enums.RequestType;
 import edu.dosw.services.GroupService;
 import edu.dosw.services.HistorialService;
@@ -17,7 +18,7 @@ public class AnswerStrategyFactory {
       case JOIN -> new JoinRequestAnswer(groupService, historialService);
       case CANCELLATION -> new CancellationRequestAnswer(groupService, historialService);
       case SWAP -> new SwapRequestAnswer(groupService, historialService);
-      default -> throw new IllegalArgumentException("Invalid request type");
+      default -> throw new BusinessException("Invalid request type");
     };
   }
 }
