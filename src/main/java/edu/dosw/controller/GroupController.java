@@ -132,4 +132,22 @@ public class GroupController {
       @PathVariable String groupCode, @PathVariable String studentId) {
     return ResponseEntity.ok(groupService.deleteStudent(groupCode, studentId));
   }
+
+  @GetMapping("/notifications")
+  @Operation(
+      summary = "Get all capacity notifications",
+      description =
+          "Retrieves a list of all capacity notifications for groups that have reached 90% or more capacity")
+  public ResponseEntity<List<String>> getCapacityNotifications() {
+    return ResponseEntity.ok(groupService.getCapacityNotifications());
+  }
+
+  @DeleteMapping("/notifications")
+  @Operation(
+      summary = "Clear all capacity notifications",
+      description = "Clears the list of capacity notifications")
+  public ResponseEntity<Void> clearCapacityNotifications() {
+    groupService.clearCapacityNotifications();
+    return ResponseEntity.noContent().build();
+  }
 }
