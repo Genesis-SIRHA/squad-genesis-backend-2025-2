@@ -1,9 +1,15 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.UserCredentialsDto;
+import edu.dosw.dto.UserInfoDto;
 import edu.dosw.exception.BusinessException;
+import edu.dosw.model.Administrator;
+import edu.dosw.model.Dean;
+import edu.dosw.model.Professor;
+import edu.dosw.model.Student;
 import edu.dosw.model.User;
 import edu.dosw.repositories.UserCredentialsRepository;
+import edu.dosw.utils.JwtUtil;
 import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -16,15 +22,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthenticationService {
   private final UserCredentialsRepository userCredentialsRepository;
+  private final JwtUtil jwtUtil;
   private final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
   private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
   @Autowired
-  public AuthenticationService(UserCredentialsRepository userCredentialsRepository) {
+  public AuthenticationService(
+      UserCredentialsRepository userCredentialsRepository, JwtUtil jwtUtil) {
     this.userCredentialsRepository = userCredentialsRepository;
+    this.jwtUtil = jwtUtil;
   }
 
-  public boolean logIn(UserCredentialsDto userCredentialsDto) {
+  public String logIn(UserCredentialsDto userCredentialsDto) {
     String email = userCredentialsDto.email().toLowerCase();
     if (validateUserEmail(email)) {
       logger.error("Invalid email");
@@ -39,7 +48,7 @@ public class AuthenticationService {
       logger.error("Invalid password");
       throw new BusinessException("Invalid password");
     }
-    return true;
+    return jwtUtil.generateToken(userCredentials.get().userId(), email);
   }
 
   private boolean validateUserEmail(String email) {
@@ -66,9 +75,33 @@ public class AuthenticationService {
   public void createAuthentication(User user) {
     String password = encryptPassword(user.getUserId());
     String id = UUID.randomUUID().toString();
+    String role = determineUserRole(user);
     UserCredentialsDto userCredentialsDto =
-        new UserCredentialsDto(id, user.getUserId(), user.getEmail(), password);
+        new UserCredentialsDto(id, user.getUserId(), user.getEmail(), password, role);
     userCredentialsRepository.save(userCredentialsDto);
+  }
+
+  private String determineUserRole(User user) {
+    if (user instanceof Student) {
+      return "STUDENT";
+    } else if (user instanceof Professor) {
+      return "PROFESSOR";
+    } else if (user instanceof Administrator) {
+      return "ADMINISTRATOR";
+    } else if (user instanceof Dean) {
+      return "DEAN";
+    }
+    return "USER";
+  }
+
+  public UserInfoDto getUserInfo(String email) {
+    Optional<UserCredentialsDto> userCredentials = userCredentialsRepository.findByEmail(email);
+    if (userCredentials.isEmpty()) {
+      throw new BusinessException("User not found");
+    }
+
+    UserCredentialsDto user = userCredentials.get();
+    return new UserInfoDto(user.id(), user.userId(), user.email(), user.role());
   }
 
   public void deleteAuthentication(User user) {
