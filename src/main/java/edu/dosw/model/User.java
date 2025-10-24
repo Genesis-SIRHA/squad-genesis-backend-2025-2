@@ -8,7 +8,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @AllArgsConstructor
-@Document(collection = "universityMembers")
 public class User {
   @Id protected String id;
   protected String userId;
