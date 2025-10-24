@@ -17,10 +17,9 @@ import edu.dosw.services.strategy.queryStrategies.ProfessorStrategy;
 import edu.dosw.services.strategy.queryStrategies.QueryStrategy;
 import edu.dosw.services.strategy.queryStrategies.StudentStrategy;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -189,5 +188,24 @@ public class RequestService {
       logger.error("Failed to fetch requests by faculty name: {}", e.getMessage());
       throw new RuntimeException("Failed to fetch requests by faculty name: " + e.getMessage());
     }
+  }
+
+  public List<String> getWaitingListOfGroup(String groupCode){
+      List<Request> waitingListRequests = getRequestsByDestinationGroup(groupCode);
+
+      return waitingListRequests
+              .stream()
+              .filter(request -> RequestStatus.PENDING.equals(request.getStatus()))
+              .map(Request::getStudentId)
+              .collect(Collectors.toList());
+  }
+
+  private List<Request> getRequestsByDestinationGroup(String destinationGroupCode) {
+      List<Request> requests = requestRepository.getRequestByDestinationGroupId(destinationGroupCode);
+      if(requests == null){
+          logger.error("Request not found with destination group id: {}", destinationGroupCode);
+          throw new RuntimeException("Request not found with destination group id : " + destinationGroupCode);
+      }
+      return requests;
   }
 }
