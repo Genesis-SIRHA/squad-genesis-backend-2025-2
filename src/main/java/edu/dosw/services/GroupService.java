@@ -83,7 +83,7 @@ public class GroupService {
             .professorId(groupRequest.teacherId())
             .isLab(groupRequest.isLab())
             .groupNum(groupRequest.groupNum())
-            .enrolled(groupRequest.enrolled())
+            .enrolled(0)
             .maxCapacity(groupRequest.maxCapacity())
             .build();
 
