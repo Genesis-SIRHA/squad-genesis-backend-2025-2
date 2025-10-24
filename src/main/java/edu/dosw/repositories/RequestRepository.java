@@ -1,8 +1,6 @@
 package edu.dosw.repositories;
 
 import edu.dosw.model.Request;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -57,6 +55,6 @@ public interface RequestRepository extends MongoRepository<Request, String> {
   @Query("{ 'requestId': ?0 }")
   Optional<Request> findByRequestId(String requestid);
 
-    @Query(value = "{ 'destinationGroupId': ?0 }", sort = "{ 'createdAt': 1 }")
+  @Query(value = "{ 'destinationGroupId': ?0 }", sort = "{ 'createdAt': 1 }")
   List<Request> getRequestByDestinationGroupId(String destinationGroupCode);
 }

@@ -7,11 +7,9 @@ import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Faculty;
 import edu.dosw.repositories.FacultyRepository;
-
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,30 +74,30 @@ public class FacultyService {
     }
     if (facultyDto.courses() != null) {
 
-        Map<String, Course> courseDtoMap = facultyDto.courses()
-                .stream()
-                .collect(Collectors.toMap(Course::getAbbreviation, Function.identity()));
+      Map<String, Course> courseDtoMap =
+          facultyDto.courses().stream()
+              .collect(Collectors.toMap(Course::getAbbreviation, Function.identity()));
 
-        Map<String, Course> courseMap = faculty.getCourses()
-                .stream()
-                .collect(Collectors.toMap(Course::getAbbreviation, Function.identity()));
+      Map<String, Course> courseMap =
+          faculty.getCourses().stream()
+              .collect(Collectors.toMap(Course::getAbbreviation, Function.identity()));
 
-        for (String facultyAbbreviation : courseMap.keySet()) {
-            if(courseDtoMap.containsKey(facultyAbbreviation)) {
-                Course courseDTO = courseDtoMap.get(facultyAbbreviation);
-                Course course = courseMap.get(facultyAbbreviation);
-                course.setCourseName(courseDTO.getCourseName());
-                course.setCredits(courseDTO.getCredits());
-                courseDtoMap.remove(facultyAbbreviation);
-            }
+      for (String facultyAbbreviation : courseMap.keySet()) {
+        if (courseDtoMap.containsKey(facultyAbbreviation)) {
+          Course courseDTO = courseDtoMap.get(facultyAbbreviation);
+          Course course = courseMap.get(facultyAbbreviation);
+          course.setCourseName(courseDTO.getCourseName());
+          course.setCredits(courseDTO.getCredits());
+          courseDtoMap.remove(facultyAbbreviation);
         }
+      }
 
-        List<Course> newCourses = new ArrayList<>(courseDtoMap.values());
-        newCourses.addAll(courseMap.values());
-        faculty.setCourses(newCourses);
+      List<Course> newCourses = new ArrayList<>(courseDtoMap.values());
+      newCourses.addAll(courseMap.values());
+      faculty.setCourses(newCourses);
     }
 
-      try {
+    try {
       return facultyRepository.save(faculty);
     } catch (Exception e) {
       logger.error(
