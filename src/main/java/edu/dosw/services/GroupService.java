@@ -6,6 +6,7 @@ import edu.dosw.dto.SessionDTO;
 import edu.dosw.dto.UpdateGroupRequest;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Course;
+import edu.dosw.model.Faculty;
 import edu.dosw.model.Group;
 import edu.dosw.model.Session;
 import edu.dosw.model.enums.HistorialStatus;
@@ -182,5 +183,40 @@ public class GroupService {
       throw new BusinessException("Failed to update historial" + e.getMessage());
     }
     return group;
+  }
+
+  /**
+   * Finds a course by its group code by searching through all faculties and plans.
+   *
+   * @param groupCode The group code to search for
+   * @return The Course that contains the group with the specified group code
+   * @throws BusinessException if the group is not found or if there's an error during the search
+   */
+  public Course getCourseByGroupCode(String groupCode) {
+    if (groupCode == null || groupCode.trim().isEmpty()) {
+      throw new BusinessException("Group code cannot be empty");
+    }
+
+    List<Faculty> faculties = facultyService.getAllFaculties();
+
+    for (Faculty faculty : faculties) {
+      List<Course> courses = faculty.getCourses();
+      if (courses == null) continue;
+
+      for (Course course : courses) {
+        List<Group> groups = getAllGroupsByCourseAbbreviation(course.getAbbreviation());
+        if (groups!= null) {
+          boolean groupExists = groups.stream()
+                  .anyMatch(group -> groupCode.equalsIgnoreCase(group.getGroupCode()));
+
+          if (groupExists) {
+            return course;
+          }
+        }
+      }
+    }
+
+    logger.error("Group not found with code: {}", groupCode);
+    throw new BusinessException("Group not found with code: " + groupCode);
   }
 }
