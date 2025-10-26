@@ -63,7 +63,28 @@ public class FacultyService {
     return faculty;
   }
 
-  public Faculty updateFacultyByNameAndPlan(FacultyDto facultyDto) {
+
+    public Faculty updateFacultyByNameAndPlan(FacultyDto facultyDto) {
+        Faculty faculty =
+                facultyRepository
+                        .findByNameAndPlan(facultyDto.facultyName(), facultyDto.plan())
+                        .orElse(null);
+        if (faculty == null) {
+            logger.error("Faculty not found: {}", facultyDto.facultyName());
+            throw new BusinessException("Faculty not found: " + facultyDto.facultyName());
+        }
+        if (facultyDto.courses() != null) faculty.setCourses(facultyDto.courses());
+        try {
+            return facultyRepository.save(faculty);
+        } catch (Exception e) {
+            logger.error(
+                    "An inesperated error has occurred when updating the faculty: {}", e.getMessage());
+            throw new BusinessException(
+                    "An inesperated error has occurred when updating the faculty: " + e.getMessage());
+        }
+    }
+
+  public Faculty addCoursesToPlan(FacultyDto facultyDto) {
     Faculty faculty =
         facultyRepository
             .findByNameAndPlan(facultyDto.facultyName(), facultyDto.plan())
@@ -96,7 +117,6 @@ public class FacultyService {
       newCourses.addAll(courseMap.values());
       faculty.setCourses(newCourses);
     }
-
     try {
       return facultyRepository.save(faculty);
     } catch (Exception e) {
