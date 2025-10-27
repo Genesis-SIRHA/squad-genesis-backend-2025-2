@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,7 +18,7 @@ public class Course {
 
   private int credits;
   private String semester;
-  private List<String> requisites;
+  private List<String> prerequisites;
 
   public Course(String abbreviation, String courseName) {
     this.abbreviation = abbreviation;

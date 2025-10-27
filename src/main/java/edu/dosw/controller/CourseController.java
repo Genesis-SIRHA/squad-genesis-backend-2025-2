@@ -65,11 +65,11 @@ public class CourseController {
     return ResponseEntity.ok(facultyService.addCourse(courseRequest));
   }
 
-  @PatchMapping("/addCourses")
-  @Operation(summary = "Add courses to faculty")
-  public ResponseEntity<Faculty> addCoursesToFaculty(@RequestBody FacultyDto facultyDto) {
-    return ResponseEntity.ok(facultyService.addCoursesToPlan(facultyDto));
-  }
+    @PatchMapping("/addCourses")
+    @Operation(summary = "Add courses to faculty")
+    public ResponseEntity<Faculty> addCoursesToFaculty(@RequestBody FacultyDto facultyDto) {
+        return ResponseEntity.ok(facultyService.addCoursesToPlan(facultyDto));
+    }
 
   /**
    * Updates an existing course.

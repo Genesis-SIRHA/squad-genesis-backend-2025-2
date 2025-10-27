@@ -1,7 +1,6 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.CreateRequestDto;
-import edu.dosw.dto.RequestStats;
 import edu.dosw.dto.UpdateRequestDto;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.exception.ResourceNotFoundException;
@@ -13,7 +12,6 @@ import edu.dosw.repositories.RequestRepository;
 import edu.dosw.services.UserServices.DeanService;
 import edu.dosw.services.UserServices.ProfessorService;
 import edu.dosw.services.UserServices.StudentService;
-import edu.dosw.services.Validators.RequestValidator;
 import edu.dosw.services.strategy.AnswerStrategies.AnswerStrategy;
 import edu.dosw.services.strategy.AnswerStrategies.AnswerStrategyFactory;
 import edu.dosw.services.strategy.queryStrategies.DeanStrategy;

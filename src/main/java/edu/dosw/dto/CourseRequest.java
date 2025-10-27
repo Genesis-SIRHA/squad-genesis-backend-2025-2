@@ -2,6 +2,7 @@ package edu.dosw.dto;
 
 import edu.dosw.model.Course;
 import jakarta.validation.constraints.NotBlank;
+
 import java.util.List;
 
 /**
@@ -18,7 +19,8 @@ public record CourseRequest(
     String facultyName,
     String plan,
     String semester,
-    List<String> requisites) {
+    List<String> requisites
+    ) {
 
   public Course toEntity() {
     return new Course(
