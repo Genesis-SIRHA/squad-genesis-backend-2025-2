@@ -62,64 +62,18 @@ public interface RequestRepository extends MongoRepository<Request, String> {
   List<Request> getRequestByDestinationGroupId(String destinationGroupCode);
 
 
-    /**
-     * Counts requests by type and status
-     */
-    @Query(value = "{ 'type': { $in: ?0 }, 'status': ?1 }", count = true)
-    long countByTypeInAndStatus(List<RequestType> types, RequestStatus status);
+    @Query("{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ] }")
+    long countByGroupCodes(List<String> groupCodes);
 
-    /**
-     * Counts requests by type
-     */
-    @Query(value = "{ 'type': { $in: ?0 } }", count = true)
-    long countByTypeIn(List<RequestType> types);
+    @Query("{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ], 'status': ?1 }")
+    long countByGroupCodesAndStatus(List<String> groupCodes, RequestStatus status);
 
-    /**
-     * Counts requests by exceptional flag and status
-     */
-    @Query(value = "{ 'isExceptional': true, 'status': ?0 }", count = true)
-    long countByIsExceptionalTrueAndStatus(RequestStatus status);
+    @Query("{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ], 'type': ?1 }")
+    long countByGroupCodesAndType(List<String> groupCodes, RequestType type);
 
-    /**
-     * Counts requests by exceptional flag
-     */
-    @Query(value = "{ 'isExceptional': true }", count = true)
-    long countByIsExceptionalTrue();
-
-    /**
-     * Counts requests that have both origin and destination group IDs
-     */
-    @Query(value = "{ 'originGroupId': { $exists: true, $ne: null }, 'destinationGroupId': { $exists: true, $ne: null } }", count = true)
-    long countByOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNull();
-
-    /**
-     * Counts requests that have both origin and destination group IDs with specific status
-     */
-    @Query(value = "{ 'originGroupId': { $exists: true, $ne: null }, 'destinationGroupId': { $exists: true, $ne: null }, 'status': ?0 }", count = true)
-    long countByOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNullAndStatus(RequestStatus status);
-
-    /**
-     * Counts requests by type with both origin and destination group IDs and status
-     */
-    @Query(value = "{ 'type': ?0, 'originGroupId': { $exists: true, $ne: null }, 'destinationGroupId': { $exists: true, $ne: null }, 'status': ?1 }", count = true)
-    long countByTypeAndOriginGroupIdIsNotNullAndDestinationGroupIdIsNotNullAndStatus(RequestType type, RequestStatus status);
-
-    /**
-     * Counts requests by type with exceptional flag and status
-     */
-    @Query(value = "{ 'type': ?0, 'isExceptional': true, 'status': ?1 }", count = true)
-    long countByTypeAndIsExceptionalTrueAndStatus(RequestType type, RequestStatus status);
-
-    /**
-     * Counts requests by type
-     */
-    @Query(value = "{ 'type': ?0 }", count = true)
+    long countByStatus(RequestStatus status);
     long countByType(RequestType type);
 
-    /**
-     * Counts requests by type and status
-     */
-    @Query(value = "{ 'type': ?0, 'status': ?1 }", count = true)
-    long countByTypeAndStatus(RequestType type, RequestStatus status);
+
 }
 
