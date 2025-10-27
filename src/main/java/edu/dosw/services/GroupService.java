@@ -13,8 +13,6 @@ import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.repositories.GroupRepository;
 import edu.dosw.services.Validators.GroupValidator;
 import java.util.List;
-
-import edu.dosw.services.Validators.GroupValidator;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

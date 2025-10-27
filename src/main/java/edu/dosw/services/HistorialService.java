@@ -10,8 +10,6 @@ import edu.dosw.repositories.HistorialRepository;
 import edu.dosw.services.Validators.HistorialValidator;
 import java.util.ArrayList;
 import java.util.List;
-
-import edu.dosw.services.Validators.HistorialValidator;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
