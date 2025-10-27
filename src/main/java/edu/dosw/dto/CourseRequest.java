@@ -22,10 +22,6 @@ public record CourseRequest(
 
   public Course toEntity() {
     return new Course(
-        this.abbreviation(),
-        this.courseName(),
-        this.credits(),
-        this.semester(),
-        this.requisites());
+        this.abbreviation(), this.courseName(), this.credits(), this.semester(), this.requisites());
   }
 }

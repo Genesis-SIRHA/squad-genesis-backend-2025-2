@@ -44,7 +44,7 @@ public class FacultyValidator {
                         logger.error(
                             "The course {} has requisites that are not in previous courses: {}",
                             course.getAbbreviation(),
-                                invalidRequisites);
+                            invalidRequisites);
                         throw new IllegalArgumentException(
                             "The course "
                                 + course.getAbbreviation()
