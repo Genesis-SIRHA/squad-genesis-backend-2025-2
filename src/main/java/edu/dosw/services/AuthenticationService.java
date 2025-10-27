@@ -1,12 +1,9 @@
 package edu.dosw.services;
 
+import edu.dosw.dto.AuthResponseDto;
 import edu.dosw.dto.UserCredentialsDto;
 import edu.dosw.dto.UserInfoDto;
 import edu.dosw.exception.BusinessException;
-import edu.dosw.model.Administrator;
-import edu.dosw.model.Dean;
-import edu.dosw.model.Professor;
-import edu.dosw.model.Student;
 import edu.dosw.model.User;
 import edu.dosw.repositories.UserCredentialsRepository;
 import edu.dosw.utils.JwtUtil;
@@ -33,22 +30,21 @@ public class AuthenticationService {
     this.jwtUtil = jwtUtil;
   }
 
-  public String logIn(UserCredentialsDto userCredentialsDto) {
+  public AuthResponseDto logIn(UserCredentialsDto userCredentialsDto) {
     String email = userCredentialsDto.email().toLowerCase();
     if (validateUserEmail(email)) {
       logger.error("Invalid email");
       throw new BusinessException("Invalid email");
     }
-    Optional<UserCredentialsDto> userCredentials = userCredentialsRepository.findByEmail(email);
-    if (userCredentials.isEmpty()) {
-      logger.error("User not found");
-      throw new BusinessException("User not found");
-    }
+    Optional<UserCredentialsDto> userCredentials = this.getByEmail(email);
     if (!verifyPassword(userCredentialsDto.password(), userCredentials.get().password())) {
       logger.error("Invalid password");
       throw new BusinessException("Invalid password");
     }
-    return jwtUtil.generateToken(userCredentials.get().userId(), email);
+    String token = jwtUtil.generateToken(userCredentials.get().userId(), email);
+    UserCredentialsDto user = userCredentials.get();
+    UserInfoDto userInfo = new UserInfoDto(user.userId(), user.email(), user.role());
+    return new AuthResponseDto(token, userInfo);
   }
 
   private boolean validateUserEmail(String email) {
@@ -63,7 +59,16 @@ public class AuthenticationService {
     return passwordEncoder.matches(rawPassword, encodedPassword);
   }
 
-  public Optional<UserCredentialsDto> findByUserId(String id) {
+  public Optional<UserCredentialsDto> getByEmail(String email) {
+    Optional<UserCredentialsDto> userCredentials = userCredentialsRepository.findByEmail(email);
+    if (userCredentials.isEmpty()) {
+      logger.error("User not found");
+      throw new BusinessException("User not found");
+    }
+    return userCredentials;
+  }
+
+  public Optional<UserCredentialsDto> getByUserId(String id) {
     Optional<UserCredentialsDto> userCredentials = userCredentialsRepository.findByUserId(id);
     if (userCredentials.isEmpty()) {
       logger.error("User not found");
@@ -72,45 +77,25 @@ public class AuthenticationService {
     return userCredentials;
   }
 
-  public void createAuthentication(User user) {
-    String password = encryptPassword(user.getUserId());
-    String id = UUID.randomUUID().toString();
-    String role = determineUserRole(user);
+  public void createAuthentication(UserInfoDto userInfoDto) {
     UserCredentialsDto userCredentialsDto =
-        new UserCredentialsDto(id, user.getUserId(), user.getEmail(), password, role);
+        new UserCredentialsDto(
+            UUID.randomUUID().toString(),
+            userInfoDto.userId(),
+            userInfoDto.email(),
+            encryptPassword(userInfoDto.userId()),
+            userInfoDto.role());
     userCredentialsRepository.save(userCredentialsDto);
   }
 
-  private String determineUserRole(User user) {
-    if (user instanceof Student) {
-      return "STUDENT";
-    } else if (user instanceof Professor) {
-      return "PROFESSOR";
-    } else if (user instanceof Administrator) {
-      return "ADMINISTRATOR";
-    } else if (user instanceof Dean) {
-      return "DEAN";
-    }
-    return "USER";
-  }
-
   public UserInfoDto getUserInfo(String email) {
-    Optional<UserCredentialsDto> userCredentials = userCredentialsRepository.findByEmail(email);
-    if (userCredentials.isEmpty()) {
-      throw new BusinessException("User not found");
-    }
-
+    Optional<UserCredentialsDto> userCredentials = this.getByEmail(email);
     UserCredentialsDto user = userCredentials.get();
-    return new UserInfoDto(user.id(), user.userId(), user.email(), user.role());
+    return new UserInfoDto(user.userId(), user.email(), user.role());
   }
 
   public void deleteAuthentication(User user) {
-    Optional<UserCredentialsDto> userCredentialsDto =
-        userCredentialsRepository.findByEmail(user.getEmail());
-    if (userCredentialsDto.isEmpty()) {
-      logger.error("User not found");
-      throw new BusinessException("User not found");
-    }
+    Optional<UserCredentialsDto> userCredentialsDto = this.getByEmail(user.getEmail());
     userCredentialsRepository.delete(userCredentialsDto.get());
   }
 }

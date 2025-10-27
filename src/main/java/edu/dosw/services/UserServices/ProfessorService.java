@@ -1,8 +1,10 @@
 package edu.dosw.services.UserServices;
 
 import edu.dosw.dto.ProfessorDto;
+import edu.dosw.dto.UserInfoDto;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Professor;
+import edu.dosw.model.enums.Role;
 import edu.dosw.repositories.ProfessorRepository;
 import edu.dosw.services.AuthenticationService;
 import edu.dosw.utils.IdGenerator;
@@ -66,7 +68,8 @@ public class ProfessorService {
             .facultyName(professorCreationRequest.facultyName())
             .build();
     try {
-      authenticationService.createAuthentication(professor);
+      authenticationService.createAuthentication(
+          new UserInfoDto(professor.getUserId(), professor.getEmail(), Role.PROFESSOR));
       return professorRepository.save(professor);
     } catch (Exception e) {
       throw new BusinessException(

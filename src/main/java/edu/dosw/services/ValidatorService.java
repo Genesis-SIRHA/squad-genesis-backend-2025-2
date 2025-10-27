@@ -65,7 +65,7 @@ public class ValidatorService {
 
   public void validateUpdateRequest(
       String userId, Request request, UpdateRequestDto updateRequestDto) {
-    UserCredentialsDto user = authenticationService.findByUserId(userId).orElse(null);
+    UserCredentialsDto user = authenticationService.getByUserId(userId).orElse(null);
     if (user == null) {
       throw new RuntimeException("User not found with id: " + userId);
     }

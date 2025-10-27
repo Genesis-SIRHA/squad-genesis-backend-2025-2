@@ -29,10 +29,7 @@ public class AuthenticationController {
   @Operation(summary = "Log in")
   public ResponseEntity<AuthResponseDto> login(
       @RequestBody @Valid UserCredentialsDto userCredentialsDto) {
-    String token = authenticationService.logIn(userCredentialsDto);
-    UserInfoDto userInfo = authenticationService.getUserInfo(userCredentialsDto.email());
-
-    AuthResponseDto response = new AuthResponseDto(token, userInfo);
+    AuthResponseDto response = authenticationService.logIn(userCredentialsDto);
     return ResponseEntity.ok(response);
   }
 
