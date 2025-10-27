@@ -31,8 +31,8 @@ class FacultyServiceTest {
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
-      Course course = new Course("CS101", "Algorithms", 4, "1", List.of());
-      Faculty faculty = new Faculty("Engineering", "2025", List.of(course));
+    Course course = new Course("CS101", "Algorithms", 4, "1", List.of());
+    Faculty faculty = new Faculty("Engineering", "2025", List.of(course));
   }
 
   //

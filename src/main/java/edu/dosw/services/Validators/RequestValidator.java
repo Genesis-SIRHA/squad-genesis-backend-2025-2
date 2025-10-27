@@ -1,6 +1,5 @@
 package edu.dosw.services.Validators;
 
-import edu.dosw.dto.CoursesDto;
 import edu.dosw.dto.CreateRequestDto;
 import edu.dosw.dto.UpdateRequestDto;
 import edu.dosw.dto.UserCredentialsDto;
@@ -12,11 +11,7 @@ import edu.dosw.services.AuthenticationService;
 import edu.dosw.services.FacultyService;
 import edu.dosw.services.GroupService;
 import edu.dosw.services.UserServices.StudentService;
-
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,21 +37,22 @@ public class RequestValidator {
 
     Student student = studentService.getStudentById(request.studentId());
     if (!request.type().equals(RequestType.JOIN)) {
-       groupService.getGroupByGroupCode(request.originGroupId());
+      groupService.getGroupByGroupCode(request.originGroupId());
     }
 
     if (!request.type().equals(RequestType.CANCELLATION)) {
-        Group destinationGroup = groupService.getGroupByGroupCode(request.destinationGroupId());
-       Faculty faculty =facultyService.getFacultyByNameAndPlan(student.getFacultyName(), student.getPlan());
-       if (faculty.getCourses().stream()
-               .filter(c -> c.getAbbreviation().equals(destinationGroup.getAbbreviation()))
-               .findFirst()
-               .get()
-               .getAbbreviation()
-               == null) {
-           logger.error("The destination group is not in your plan");
-           throw new IllegalArgumentException("The origin group is not in your plan");
-       }
+      Group destinationGroup = groupService.getGroupByGroupCode(request.destinationGroupId());
+      Faculty faculty =
+          facultyService.getFacultyByNameAndPlan(student.getFacultyName(), student.getPlan());
+      if (faculty.getCourses().stream()
+              .filter(c -> c.getAbbreviation().equals(destinationGroup.getAbbreviation()))
+              .findFirst()
+              .get()
+              .getAbbreviation()
+          == null) {
+        logger.error("The destination group is not in your plan");
+        throw new IllegalArgumentException("The origin group is not in your plan");
+      }
     }
 
     // TODO: realizar validacion de que el estudiante si quiere cancelar o hacer swap el este en el

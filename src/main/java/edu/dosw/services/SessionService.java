@@ -4,10 +4,9 @@ import edu.dosw.dto.SessionDTO;
 import edu.dosw.model.Session;
 import edu.dosw.model.enums.DayOfWeek;
 import edu.dosw.repositories.SessionRepository;
+import edu.dosw.services.Validators.SessionValidator;
 import java.util.ArrayList;
 import java.util.List;
-
-import edu.dosw.services.Validators.SessionValidator;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
