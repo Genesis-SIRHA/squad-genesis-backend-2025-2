@@ -18,7 +18,7 @@ public record CourseRequest(
     String facultyName,
     String plan,
     String semester,
-    List<String> prerequisites) {
+    List<String> requisites) {
 
   public Course toEntity() {
     return new Course(
@@ -26,6 +26,6 @@ public record CourseRequest(
         this.courseName(),
         this.credits(),
         this.semester(),
-        this.prerequisites());
+        this.requisites());
   }
 }

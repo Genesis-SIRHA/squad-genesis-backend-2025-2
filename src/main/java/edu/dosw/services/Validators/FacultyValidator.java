@@ -29,27 +29,27 @@ public class FacultyValidator {
               semesterCourses.forEach(
                   course -> {
                     if ("1".equals(semester)) {
-                      if (!course.getPrerequisites().isEmpty()) {
-                        logger.error("The first Semester classes cannot have prerequisites");
+                      if (!course.getRequisites().isEmpty()) {
+                        logger.error("The first Semester classes cannot have requisites");
                         throw new IllegalArgumentException(
-                            "The first Semester classes cannot have prerequisites");
+                            "The first Semester classes cannot have requisites");
                       }
                     } else {
-                      List<String> invalidPrerequisites =
-                          course.getPrerequisites().stream()
-                              .filter(prerequisite -> !previousCourses.contains(prerequisite))
+                      List<String> invalidRequisites =
+                          course.getRequisites().stream()
+                              .filter(requisite -> !previousCourses.contains(requisite))
                               .collect(Collectors.toList());
 
-                      if (!invalidPrerequisites.isEmpty()) {
+                      if (!invalidRequisites.isEmpty()) {
                         logger.error(
-                            "The course {} has prerequisites that are not in previous courses: {}",
+                            "The course {} has requisites that are not in previous courses: {}",
                             course.getAbbreviation(),
-                            invalidPrerequisites);
+                                invalidRequisites);
                         throw new IllegalArgumentException(
                             "The course "
                                 + course.getAbbreviation()
-                                + " has prerequisites that are not in previous courses: "
-                                + invalidPrerequisites);
+                                + " has requisites that are not in previous courses: "
+                                + invalidRequisites);
                       }
                     }
                     previousCourses.add(course.getAbbreviation());
