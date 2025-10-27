@@ -10,6 +10,7 @@ import edu.dosw.repositories.RequestRepository;
 import edu.dosw.services.UserServices.DeanService;
 import edu.dosw.services.UserServices.ProfessorService;
 import edu.dosw.services.UserServices.StudentService;
+import edu.dosw.services.Validators.RequestValidator;
 import edu.dosw.services.strategy.AnswerStrategies.AnswerStrategy;
 import edu.dosw.services.strategy.AnswerStrategies.AnswerStrategyFactory;
 import edu.dosw.services.strategy.queryStrategies.DeanStrategy;
@@ -29,7 +30,7 @@ public class RequestService {
 
   private static final Logger logger = LoggerFactory.getLogger(RequestService.class);
   private final RequestRepository requestRepository;
-  private final ValidatorService validatorService;
+  private final RequestValidator requestValidator;
   private final AuthenticationService authenticationService;
   private final StudentService studentService;
   private final Map<Role, QueryStrategy> strategyMap;
@@ -38,14 +39,14 @@ public class RequestService {
   @Autowired
   public RequestService(
       RequestRepository requestRepository,
-      ValidatorService validatorService,
+      RequestValidator requestValidator,
       DeanService deanService,
       ProfessorService professorService,
       StudentService studentService,
       AuthenticationService authenticationService,
       AnswerStrategyFactory answerStrategyFactory) {
     this.requestRepository = requestRepository;
-    this.validatorService = validatorService;
+    this.requestValidator = requestValidator;
     this.authenticationService = authenticationService;
     this.studentService = studentService;
     this.answerStrategyFactory = answerStrategyFactory;
@@ -82,7 +83,7 @@ public class RequestService {
   }
 
   public Request createRequest(CreateRequestDto requestDTO) {
-    validatorService.validateCreateRequest(requestDTO);
+    requestValidator.validateCreateRequest(requestDTO);
 
     Request request =
         new Request.RequestBuilder()
@@ -102,7 +103,7 @@ public class RequestService {
 
   public Request updateRequest(String userId, UpdateRequestDto updateRequestDto) {
     Request request = requestRepository.findByRequestId(updateRequestDto.requestId()).orElse(null);
-    validatorService.validateUpdateRequest(userId, request, updateRequestDto);
+    requestValidator.validateUpdateRequest(userId, request, updateRequestDto);
 
     request.setStatus(updateRequestDto.status());
     if (updateRequestDto.answer() != null) request.setAnswer(updateRequestDto.answer());
@@ -169,7 +170,7 @@ public class RequestService {
   }
 
   public List<Request> fetchRequestsByFacultyName(String facultyName) {
-    validatorService.validateFacultyName(facultyName);
+    requestValidator.validateFacultyName(facultyName);
     List<Request> requests = requestRepository.findAll();
     List<Request> facultyRequest = new ArrayList<>();
 

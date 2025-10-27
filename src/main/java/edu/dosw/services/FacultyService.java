@@ -1,6 +1,7 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.CourseRequest;
+import edu.dosw.dto.CoursesDto;
 import edu.dosw.dto.FacultyDto;
 import edu.dosw.dto.UpdateCourseDTO;
 import edu.dosw.exception.BusinessException;
@@ -10,6 +11,8 @@ import edu.dosw.repositories.FacultyRepository;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import edu.dosw.services.Validators.FacultyValidator;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +27,14 @@ import org.springframework.stereotype.Service;
 public class FacultyService {
   private static final Logger logger = LoggerFactory.getLogger(FacultyService.class);
   private final FacultyRepository facultyRepository;
+  private final FacultyValidator facultyValidator;
 
   public Faculty createFaculty(FacultyDto facultyDto) {
     Faculty faculty = new Faculty();
     faculty.setFacultyName(facultyDto.facultyName());
     faculty.setPlan(facultyDto.plan());
+    facultyValidator.validateAddCourses(new CoursesDto(facultyDto.courses().stream()
+              .collect(Collectors.groupingBy(Course::getSemester))));
     if (facultyDto.courses() != null) faculty.setCourses(facultyDto.courses());
     return facultyRepository.save(faculty);
   }
@@ -63,25 +69,28 @@ public class FacultyService {
     return faculty;
   }
 
-  public Faculty updateFacultyByNameAndPlan(FacultyDto facultyDto) {
-    Faculty faculty =
-        facultyRepository
-            .findByNameAndPlan(facultyDto.facultyName(), facultyDto.plan())
-            .orElse(null);
-    if (faculty == null) {
-      logger.error("Faculty not found: {}", facultyDto.facultyName());
-      throw new BusinessException("Faculty not found: " + facultyDto.facultyName());
+    public Faculty updateFacultyByNameAndPlan(FacultyDto facultyDto) {
+        Faculty faculty =
+                facultyRepository
+                        .findByNameAndPlan(facultyDto.facultyName(), facultyDto.plan())
+                        .orElse(null);
+        if (faculty == null) {
+            logger.error("Faculty not found: {}", facultyDto.facultyName());
+            throw new BusinessException("Faculty not found: " + facultyDto.facultyName());
+        }
+        facultyValidator.validateAddCourses(new CoursesDto(facultyDto.courses().stream()
+                .collect(Collectors.groupingBy(Course::getSemester))));
+
+        if (facultyDto.courses() != null) faculty.setCourses(facultyDto.courses());
+        try {
+            return facultyRepository.save(faculty);
+        } catch (Exception e) {
+            logger.error(
+                    "An inesperated error has occurred when updating the faculty: {}", e.getMessage());
+            throw new BusinessException(
+                    "An inesperated error has occurred when updating the faculty: " + e.getMessage());
+        }
     }
-    if (facultyDto.courses() != null) faculty.setCourses(facultyDto.courses());
-    try {
-      return facultyRepository.save(faculty);
-    } catch (Exception e) {
-      logger.error(
-          "An inesperated error has occurred when updating the faculty: {}", e.getMessage());
-      throw new BusinessException(
-          "An inesperated error has occurred when updating the faculty: " + e.getMessage());
-    }
-  }
 
   public Faculty addCoursesToPlan(FacultyDto facultyDto) {
     Faculty faculty =

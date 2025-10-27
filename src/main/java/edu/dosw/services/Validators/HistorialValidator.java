@@ -1,4 +1,4 @@
-package edu.dosw.services;
+package edu.dosw.services.Validators;
 
 import edu.dosw.dto.HistorialDTO;
 import edu.dosw.model.enums.HistorialStatus;
