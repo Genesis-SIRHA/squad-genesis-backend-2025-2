@@ -16,7 +16,7 @@ public class Course {
 
   private int credits;
   private String semester;
-  private List<String> prerequisites;
+  private List<String> requisites;
 
   public Course(String abbreviation, String courseName) {
     this.abbreviation = abbreviation;
