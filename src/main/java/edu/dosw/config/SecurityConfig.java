@@ -37,7 +37,18 @@ public class SecurityConfig {
                         "/swagger-ui.html",
                         "/swagger-ui/**",
                         "/webjars/**",
-                        "/auth/**")
+                        "/auth/**",
+                        "/administrator/**",
+                        "/courses/**",
+                        "/dean/**",
+                        "/faculty/**",
+                        "/group/**",
+                        "/historial/**",
+                        "/professor/**",
+                        "/student/**",
+                        "/pemsum/**",
+                        "/requests/**",
+                        "/schedules/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated())

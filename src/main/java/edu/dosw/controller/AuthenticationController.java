@@ -1,7 +1,7 @@
 package edu.dosw.controller;
 
 import edu.dosw.dto.AuthResponseDto;
-import edu.dosw.dto.UserCredentialsDto;
+import edu.dosw.dto.LogInDTO;
 import edu.dosw.dto.UserInfoDto;
 import edu.dosw.services.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,9 +27,8 @@ public class AuthenticationController {
 
   @PostMapping("/login")
   @Operation(summary = "Log in")
-  public ResponseEntity<AuthResponseDto> login(
-      @RequestBody @Valid UserCredentialsDto userCredentialsDto) {
-    AuthResponseDto response = authenticationService.logIn(userCredentialsDto);
+  public ResponseEntity<AuthResponseDto> login(@RequestBody @Valid LogInDTO logInDTO) {
+    AuthResponseDto response = authenticationService.logIn(logInDTO);
     return ResponseEntity.ok(response);
   }
 

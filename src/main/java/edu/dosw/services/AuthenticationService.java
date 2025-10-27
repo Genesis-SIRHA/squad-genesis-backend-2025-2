@@ -1,6 +1,7 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.AuthResponseDto;
+import edu.dosw.dto.LogInDTO;
 import edu.dosw.dto.UserCredentialsDto;
 import edu.dosw.dto.UserInfoDto;
 import edu.dosw.exception.BusinessException;
@@ -30,14 +31,14 @@ public class AuthenticationService {
     this.jwtUtil = jwtUtil;
   }
 
-  public AuthResponseDto logIn(UserCredentialsDto userCredentialsDto) {
-    String email = userCredentialsDto.email().toLowerCase();
+  public AuthResponseDto logIn(LogInDTO logInDTO) {
+    String email = logInDTO.email().toLowerCase();
     if (validateUserEmail(email)) {
       logger.error("Invalid email");
       throw new BusinessException("Invalid email");
     }
     Optional<UserCredentialsDto> userCredentials = this.getByEmail(email);
-    if (!verifyPassword(userCredentialsDto.password(), userCredentials.get().password())) {
+    if (!verifyPassword(logInDTO.password(), userCredentials.get().password())) {
       logger.error("Invalid password");
       throw new BusinessException("Invalid password");
     }
