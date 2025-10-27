@@ -76,13 +76,6 @@ public class RequestController {
     return ResponseEntity.ok(requests);
   }
 
-  @GetMapping("/stats")
-  @Operation(
-      summary = "Get request statistics",
-      description = "Retrieves statistics about requests")
-  public ResponseEntity<RequestStats> getRequestStats() {
-    return ResponseEntity.ok(requestService.getRequestStats());
-  }
 
   @PatchMapping("/status/{userId}")
   @Operation(
@@ -99,35 +92,4 @@ public class RequestController {
     return ResponseEntity.ok(requestService.deleteRequestStatus(requestId));
   }
 
-    @GetMapping("/reports/materia")
-    @Operation(
-            summary = "Get materia reassignment statistics",
-            description = "Retrieves statistics about subject reassignments")
-    public ResponseEntity<ReportDTO> getMateriaReassignmentStats() {
-        return ResponseEntity.ok(requestService.getMateriaReassignmentStats());
-    }
-
-    @GetMapping("/reports/grupo")
-    @Operation(
-            summary = "Get group reassignment statistics",
-            description = "Retrieves statistics about group reassignments")
-    public ResponseEntity<ReportDTO> getGrupoReassignmentStats() {
-        return ResponseEntity.ok(requestService.getGrupoReassignmentStats());
-    }
-
-    @GetMapping("/reports/decanatura")
-    @Operation(
-            summary = "Get deanery reassignment statistics",
-            description = "Retrieves statistics about deanery reassignments")
-    public ResponseEntity<ReportDTO> getDecanaturaReassignmentStats() {
-        return ResponseEntity.ok(requestService.getDecanaturaReassignmentStats());
-    }
-
-    @GetMapping("/reports/global")
-    @Operation(
-            summary = "Get global reassignment statistics",
-            description = "Retrieves comprehensive statistics about all reassignments")
-    public ResponseEntity<ReportDTO> getGlobalReassignmentStats() {
-        return ResponseEntity.ok(requestService.getGlobalReassignmentStats());
-    }
 }
