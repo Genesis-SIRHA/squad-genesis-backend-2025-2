@@ -47,7 +47,7 @@ public class SchedulerService {
    */
   private Schedule buildSchedule(String studentId, String year, String period) {
     List<String> groupCodes =
-        historialService.getCurrentSessionsByStudentIdAndPeriod(studentId, year, period);
+        historialService.getGroupCodesByStudentIdAndPeriod(studentId, year, period);
     ArrayList<Session> sessions = new ArrayList<>();
 
     for (String groupCode : groupCodes) {
@@ -64,7 +64,7 @@ public class SchedulerService {
    * @param studentId The unique identifier of the student
    * @return A Schedule object containing the student's current sessions
    */
-  public Schedule getScheduleById(String studentId) {
+  public Schedule getActualScheduleByStudentId(String studentId) {
     String year = periodService.getYear();
     String period = periodService.getPeriod();
     return buildSchedule(studentId, year, period);
