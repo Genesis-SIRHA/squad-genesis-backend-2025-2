@@ -5,11 +5,11 @@ import edu.dosw.dto.LogInDTO;
 import edu.dosw.dto.UserInfoDto;
 import edu.dosw.services.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,16 +26,18 @@ public class AuthenticationController {
   private final AuthenticationService authenticationService;
 
   @PostMapping("/login")
-  @Operation(summary = "Log in")
+  @PreAuthorize("permitAll()")
+  @Operation(
+      summary = "Log in",
+      security = {})
   public ResponseEntity<AuthResponseDto> login(@RequestBody @Valid LogInDTO logInDTO) {
     AuthResponseDto response = authenticationService.logIn(logInDTO);
     return ResponseEntity.ok(response);
   }
 
   @GetMapping("/me")
-  @Operation(
-      summary = "Get current user info",
-      security = @SecurityRequirement(name = "bearerAuth"))
+  @PreAuthorize("isAuthenticated()")
+  @Operation(summary = "Get current user info")
   public ResponseEntity<UserInfoDto> getCurrentUser(Authentication authentication) {
     String email = authentication.getName();
     UserInfoDto userInfo = authenticationService.getUserInfo(email);

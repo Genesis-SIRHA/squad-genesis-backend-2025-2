@@ -6,6 +6,7 @@ import edu.dosw.dto.UserCredentialsDto;
 import edu.dosw.dto.UserInfoDto;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.model.User;
+import edu.dosw.model.enums.Role; // Make sure to import this
 import edu.dosw.repositories.UserCredentialsRepository;
 import edu.dosw.utils.JwtUtil;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication; // Add this import
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -98,5 +100,51 @@ public class AuthenticationService {
   public void deleteAuthentication(User user) {
     Optional<UserCredentialsDto> userCredentialsDto = this.getByEmail(user.getEmail());
     userCredentialsRepository.delete(userCredentialsDto.get());
+  }
+
+  public boolean canAccessStudentData(Authentication authentication, String studentId) {
+    String currentUserEmail = authentication.getName();
+    UserInfoDto currentUser = getUserInfo(currentUserEmail);
+
+    if (currentUser.role() == Role.STUDENT) {
+      return currentUser.userId().equals(studentId);
+    }
+
+    return true;
+  }
+
+  public boolean canAccessUserData(Authentication authentication, String userId) {
+    String currentUserEmail = authentication.getName();
+    UserInfoDto currentUser = getUserInfo(currentUserEmail);
+
+    if (currentUser.role() == Role.STUDENT || currentUser.role() == Role.PROFESSOR) {
+      return currentUser.userId().equals(userId);
+    }
+
+    return true;
+  }
+
+  public boolean canAccessUserRequest(Authentication authentication, String requestId) {
+    String currentUserEmail = authentication.getName();
+    UserInfoDto currentUser = getUserInfo(currentUserEmail);
+
+    if (currentUser.role() == Role.STUDENT) {
+      logger.warn("Student request ownership check not yet implemented for request: {}", requestId);
+      return true;
+    }
+
+    return true;
+  }
+
+  public String getCurrentUserId(Authentication authentication) {
+    String currentUserEmail = authentication.getName();
+    UserInfoDto currentUser = getUserInfo(currentUserEmail);
+    return currentUser.userId();
+  }
+
+  public Role getCurrentUserRole(Authentication authentication) {
+    String currentUserEmail = authentication.getName();
+    UserInfoDto currentUser = getUserInfo(currentUserEmail);
+    return currentUser.role();
   }
 }

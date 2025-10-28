@@ -11,12 +11,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Controller that handles all request-related HTTP operations. Provides endpoints for creating,
- * retrieving, updating, and deleting requests, as well as retrieving request statistics.
- */
 @RestController
 @AllArgsConstructor
 @RequestMapping("/requests")
@@ -25,6 +22,7 @@ public class RequestController {
   private final RequestService requestService;
 
   @PostMapping
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT')")
   @Operation(
       summary = "Create a new request",
       description = "Creates a new request with the provided details")
@@ -34,6 +32,8 @@ public class RequestController {
   }
 
   @GetMapping("/{role}/{userId}")
+  @PreAuthorize(
+      "hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT') and @authenticationService.canAccessUserData(authentication, #userId)")
   @Operation(
       summary = "Get requests by role",
       description = "Retrieves requests based on user role and userId")
@@ -44,6 +44,7 @@ public class RequestController {
   }
 
   @GetMapping("/global")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(summary = "Get all requests", description = "Retrieves all requests ")
   public ResponseEntity<List<Request>> fetchAllRequests() {
     List<Request> requests = requestService.fetchAllRequests();
@@ -51,6 +52,7 @@ public class RequestController {
   }
 
   @GetMapping("/{requestId}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT')")
   @Operation(summary = "Get requests by id", description = "Retrieves request by id ")
   public ResponseEntity<Request> getRequest(@PathVariable String requestId) {
     Request request = requestService.getRequest(requestId);
@@ -58,6 +60,8 @@ public class RequestController {
   }
 
   @GetMapping("/student/{studentId}")
+  @PreAuthorize(
+      "hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT') and @authenticationService.canAccessStudentData(authentication, #studentId)")
   @Operation(
       summary = "Get historical requests by studentId",
       description = "Retrieves requests based on user role and userId")
@@ -67,6 +71,7 @@ public class RequestController {
   }
 
   @GetMapping("/faculty/{facultyName}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR')")
   @Operation(
       summary = "Get faculty requests",
       description = "Retrieves requests based on faculty name")
@@ -76,6 +81,7 @@ public class RequestController {
   }
 
   @GetMapping("/stats")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(
       summary = "Get request statistics",
       description = "Retrieves statistics about requests")
@@ -84,6 +90,7 @@ public class RequestController {
   }
 
   @PatchMapping("/status/{userId}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR')")
   @Operation(
       summary = "Update request status",
       description = "Updates the status of an existing request")
@@ -93,6 +100,8 @@ public class RequestController {
   }
 
   @DeleteMapping("/{requestId}")
+  @PreAuthorize(
+      "hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT') and @authenticationService.canAccessUserRequest(authentication, #requestId)")
   @Operation(summary = "Cancel a request", description = "Cancels a request by its requestId")
   public ResponseEntity<Request> deleteRequest(@PathVariable String requestId) {
     return ResponseEntity.ok(requestService.deleteRequestStatus(requestId));

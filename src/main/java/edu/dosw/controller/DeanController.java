@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,18 +18,21 @@ public class DeanController {
   private final DeanService deanService;
 
   @GetMapping("/{deanId}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(summary = "Get dean by ID", description = "Retrieves a dean by its unique identifier")
   public ResponseEntity<Dean> getDeanById(@PathVariable String deanId) {
     return ResponseEntity.ok(deanService.getDeanById(deanId));
   }
 
   @PostMapping("/create")
+  @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(summary = "Create dean", description = "Creates a new dean")
   public ResponseEntity<Dean> createDean(@RequestBody DeanDto deanCreationRequest) {
     return ResponseEntity.ok(deanService.createDean(deanCreationRequest));
   }
 
   @PatchMapping("/update/{deanId}")
+  @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(summary = "Update dean", description = "Updates an existing dean")
   public ResponseEntity<Dean> updateDean(
       @RequestBody DeanDto deanUpdateRequest, @PathVariable String deanId) {
@@ -36,6 +40,7 @@ public class DeanController {
   }
 
   @DeleteMapping("/delete/{deanId}")
+  @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(summary = "Delete dean", description = "Deletes an existing dean")
   public ResponseEntity<Dean> deleteDean(@PathVariable String deanId) {
     return ResponseEntity.ok(deanService.deleteDean(deanId));

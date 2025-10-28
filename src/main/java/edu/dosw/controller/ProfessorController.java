@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,6 +18,7 @@ public class ProfessorController {
   private final ProfessorService professorService;
 
   @GetMapping("/{professorId}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR')")
   @Operation(
       summary = "Get professor by ID",
       description = "Retrieves a professor by its unique identifier")
@@ -25,6 +27,7 @@ public class ProfessorController {
   }
 
   @PostMapping("/create")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(summary = "Create professor", description = "Creates a new professor")
   public ResponseEntity<Professor> createProfessor(
       @RequestBody ProfessorDto professorCreationRequest) {
@@ -32,6 +35,7 @@ public class ProfessorController {
   }
 
   @PatchMapping("/update/{professorId}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(summary = "Update professor", description = "Updates an existing professor")
   public ResponseEntity<Professor> updateProfessor(
       @RequestBody ProfessorDto professorUpdateRequest, @PathVariable String professorId) {
@@ -39,6 +43,7 @@ public class ProfessorController {
   }
 
   @DeleteMapping("/delete/{professorId}")
+  @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(summary = "Delete professor", description = "Deletes an existing professor")
   public ResponseEntity<Professor> deleteProfessor(@PathVariable String professorId) {
     return ResponseEntity.ok(professorService.deleteProfessor(professorId));

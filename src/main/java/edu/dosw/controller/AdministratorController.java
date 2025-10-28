@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,6 +18,7 @@ public class AdministratorController {
   private final AdministratorService administratorService;
 
   @GetMapping("/{administratorId}")
+  @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(
       summary = "Get administrator by ID",
       description = "Retrieves a administrator by its unique identifier")
@@ -25,6 +27,7 @@ public class AdministratorController {
   }
 
   @PostMapping("/create")
+  @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(summary = "Create administrator", description = "Creates a new administrator")
   public ResponseEntity<Administrator> createAdministrator(
       @RequestBody AdministratorDto administratorCreationRequest) {
@@ -33,6 +36,7 @@ public class AdministratorController {
   }
 
   @PatchMapping("/update/{administratorId}")
+  @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(summary = "Update administrator", description = "Updates an existing administrator")
   public ResponseEntity<Administrator> updateAdministrator(
       @RequestBody AdministratorDto administratorUpdateRequest,
@@ -42,6 +46,7 @@ public class AdministratorController {
   }
 
   @DeleteMapping("/delete/{administratorId}")
+  @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(summary = "Delete administrator", description = "Deletes an existing administrator")
   public ResponseEntity<Administrator> deleteAdministrator(@PathVariable String administratorId) {
     return ResponseEntity.ok(administratorService.deleteAdministrator(administratorId));
