@@ -20,10 +20,10 @@ public class StatsService {
   private final GroupService groupService;
 
   public RequestStats getRequestStats() {
-    int total = (int) requestService.countTotalRequests();
-    int pending = (int) requestService.countByStatus(RequestStatus.PENDING);
-    int approved = (int) requestService.countByStatus(RequestStatus.ACCEPTED);
-    int rejected = (int) requestService.countByStatus(RequestStatus.REJECTED);
+    Integer total =  requestService.countTotalRequests();
+    Integer pending =  requestService.countByStatus(RequestStatus.PENDING);
+    Integer approved =  requestService.countByStatus(RequestStatus.ACCEPTED);
+    Integer rejected =  requestService.countByStatus(RequestStatus.REJECTED);
     return new RequestStats(total, pending, approved, rejected);
   }
 
@@ -35,18 +35,18 @@ public class StatsService {
       return new ReportDTO(0, 0, 0, 0, 0, 0, 0);
     }
 
-    int total = (int) requestService.countByGroupCodes(groupCodes);
-    int pending =
-        (int) requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.PENDING);
-    int approved =
-        (int) requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.ACCEPTED);
-    int rejected =
-        (int) requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.REJECTED);
+    Integer total =  requestService.countByGroupCodes(groupCodes);
+    Integer pending =
+         requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.PENDING);
+    Integer approved =
+         requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.ACCEPTED);
+    Integer rejected =
+         requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.REJECTED);
 
-    int cancellations =
-        (int) requestService.countByGroupCodesAndType(groupCodes, RequestType.CANCELLATION);
-    int swaps = (int) requestService.countByGroupCodesAndType(groupCodes, RequestType.SWAP);
-    int joins = (int) requestService.countByGroupCodesAndType(groupCodes, RequestType.JOIN);
+    Integer cancellations =
+         requestService.countByGroupCodesAndType(groupCodes, RequestType.CANCELLATION);
+    Integer swaps =  requestService.countByGroupCodesAndType(groupCodes, RequestType.SWAP);
+    Integer joins =  requestService.countByGroupCodesAndType(groupCodes, RequestType.JOIN);
 
     return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
   }
@@ -54,18 +54,18 @@ public class StatsService {
   public ReportDTO getGroupReassignmentStats(String groupCode) {
     List<String> singleGroup = List.of(groupCode);
 
-    int total = (int) requestService.countByGroupCodes(singleGroup);
-    int pending =
-        (int) requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.PENDING);
-    int approved =
-        (int) requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.ACCEPTED);
-    int rejected =
-        (int) requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.REJECTED);
+    Integer total =  requestService.countByGroupCodes(singleGroup);
+    Integer pending =
+         requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.PENDING);
+    Integer approved =
+         requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.ACCEPTED);
+    Integer rejected =
+         requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.REJECTED);
 
-    int cancellations =
-        (int) requestService.countByGroupCodesAndType(singleGroup, RequestType.CANCELLATION);
-    int swaps = (int) requestService.countByGroupCodesAndType(singleGroup, RequestType.SWAP);
-    int joins = (int) requestService.countByGroupCodesAndType(singleGroup, RequestType.JOIN);
+    Integer cancellations =
+         requestService.countByGroupCodesAndType(singleGroup, RequestType.CANCELLATION);
+    Integer swaps =  requestService.countByGroupCodesAndType(singleGroup, RequestType.SWAP);
+    Integer joins =  requestService.countByGroupCodesAndType(singleGroup, RequestType.JOIN);
 
     return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
   }
@@ -92,31 +92,31 @@ public class StatsService {
       return new ReportDTO(0, 0, 0, 0, 0, 0, 0);
     }
 
-    int total = (int) requestService.countByGroupCodes(facultyGroupCodes);
-    int pending =
-        (int) requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.PENDING);
-    int approved =
-        (int) requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.ACCEPTED);
-    int rejected =
-        (int) requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.REJECTED);
+    Integer total =  requestService.countByGroupCodes(facultyGroupCodes);
+    Integer pending =
+         requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.PENDING);
+    Integer approved =
+         requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.ACCEPTED);
+    Integer rejected =
+         requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.REJECTED);
 
-    int cancellations =
-        (int) requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.CANCELLATION);
-    int swaps = (int) requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.SWAP);
-    int joins = (int) requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.JOIN);
+    Integer cancellations =
+         requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.CANCELLATION);
+    Integer swaps =  requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.SWAP);
+    Integer joins =  requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.JOIN);
 
     return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
   }
 
   public ReportDTO getGlobalReassignmentStats() {
-    int total = (int) requestService.countTotalRequests();
-    int pending = (int) requestService.countByStatus(RequestStatus.PENDING);
-    int approved = (int) requestService.countByStatus(RequestStatus.ACCEPTED);
-    int rejected = (int) requestService.countByStatus(RequestStatus.REJECTED);
+    Integer total =  requestService.countTotalRequests();
+    Integer pending =  requestService.countByStatus(RequestStatus.PENDING);
+    Integer approved =  requestService.countByStatus(RequestStatus.ACCEPTED);
+    Integer rejected =  requestService.countByStatus(RequestStatus.REJECTED);
 
-    int cancellations = (int) requestService.countByType(RequestType.CANCELLATION);
-    int swaps = (int) requestService.countByType(RequestType.SWAP);
-    int joins = (int) requestService.countByType(RequestType.JOIN);
+    Integer cancellations =  requestService.countByType(RequestType.CANCELLATION);
+    Integer swaps =  requestService.countByType(RequestType.SWAP);
+    Integer joins =  requestService.countByType(RequestType.JOIN);
 
     return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
   }

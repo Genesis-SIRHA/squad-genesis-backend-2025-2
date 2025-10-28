@@ -185,7 +185,7 @@ public class RequestService {
     }
   }
 
-  public long countByGroupCodes(List<String> groupCodes) {
+  public Integer countByGroupCodes(List<String> groupCodes) {
     try {
       return requestRepository.countByGroupCodes(groupCodes);
     } catch (Exception e) {
@@ -194,7 +194,7 @@ public class RequestService {
     }
   }
 
-  public long countByGroupCodesAndStatus(List<String> groupCodes, RequestStatus status) {
+  public Integer countByGroupCodesAndStatus(List<String> groupCodes, RequestStatus status) {
     try {
       return requestRepository.countByGroupCodesAndStatus(groupCodes, status);
     } catch (Exception e) {
@@ -204,7 +204,7 @@ public class RequestService {
     }
   }
 
-  public long countByGroupCodesAndType(List<String> groupCodes, RequestType type) {
+  public Integer countByGroupCodesAndType(List<String> groupCodes, RequestType type) {
     try {
       return requestRepository.countByGroupCodesAndType(groupCodes, type);
     } catch (Exception e) {
@@ -214,7 +214,7 @@ public class RequestService {
     }
   }
 
-  public long countByStatus(RequestStatus status) {
+  public Integer countByStatus(RequestStatus status) {
     try {
       return requestRepository.countByStatus(status);
     } catch (Exception e) {
@@ -223,7 +223,7 @@ public class RequestService {
     }
   }
 
-  public long countByType(RequestType type) {
+  public Integer countByType(RequestType type) {
     try {
       return requestRepository.countByType(type);
     } catch (Exception e) {
@@ -232,9 +232,9 @@ public class RequestService {
     }
   }
 
-  public long countTotalRequests() {
+  public Integer countTotalRequests() {
     try {
-      return requestRepository.count();
+      return Math.toIntExact(requestRepository.count());
     } catch (Exception e) {
       logger.error("Failed to count total requests: {}", e.getMessage());
       throw new BusinessException("Failed to count total requests: " + e.getMessage());

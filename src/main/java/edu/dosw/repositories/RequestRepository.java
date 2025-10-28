@@ -48,13 +48,8 @@ public interface RequestRepository extends MongoRepository<Request, String> {
   @Query("{ 'studentId': ?0 }")
   List<Request> findByStudentId(String studentId);
 
-  /**
-   * Counts the number of requests with a specific status.
-   *
-   * @param status The status to count (e.g., 'PENDING', 'ACCEPTED', 'REJECTED')
-   * @return The count of requests with the specified status
-   */
-  long countByStatus(String status);
+
+
 
   @Query("{ 'faculty': ?0, 'isExceptional': true }")
   List<Request> findAvailableByFacultyAndIsExceptional();
@@ -66,19 +61,19 @@ public interface RequestRepository extends MongoRepository<Request, String> {
   Optional<Request> findByRequestId(String requestid);
 
   @Query("{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ] }")
-  long countByGroupCodes(List<String> groupCodes);
+  Integer countByGroupCodes(List<String> groupCodes);
 
   @Query(
       "{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ], 'status': ?1 }")
-  long countByGroupCodesAndStatus(List<String> groupCodes, RequestStatus status);
+  Integer countByGroupCodesAndStatus(List<String> groupCodes, RequestStatus status);
 
   @Query(
       "{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ], 'type': ?1 }")
-  long countByGroupCodesAndType(List<String> groupCodes, RequestType type);
+  Integer countByGroupCodesAndType(List<String> groupCodes, RequestType type);
 
   @Query("{ 'status': ?0 }")
-  long countByStatus(RequestStatus status);
+  Integer countByStatus(RequestStatus status);
 
   @Query("{ 'type': ?0 }")
-  long countByType(RequestType type);
+  Integer countByType(RequestType type);
 }

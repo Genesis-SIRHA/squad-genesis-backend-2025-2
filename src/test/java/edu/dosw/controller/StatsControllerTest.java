@@ -23,7 +23,7 @@ class StatsControllerTest {
 
   @Test
   void getCourseReassignmentStats_ShouldReturnReportDTO() {
-    ReportDTO expectedReport = new ReportDTO(50L, 10L, 30L, 10L, 20L, 25L, 25L);
+    ReportDTO expectedReport = new ReportDTO(50, 10, 30, 10, 20, 25, 25);
     when(statsService.getCourseReassignmentStats("MATH101")).thenReturn(expectedReport);
 
     ResponseEntity<ReportDTO> response = statsController.getCourseReassignmentStats("MATH101");
@@ -31,58 +31,58 @@ class StatsControllerTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(expectedReport, response.getBody());
-    assertEquals(50L, response.getBody().total());
-    assertEquals(10L, response.getBody().pending());
+    assertEquals(50, response.getBody().total());
+    assertEquals(10, response.getBody().pending());
     verify(statsService, times(1)).getCourseReassignmentStats("MATH101");
   }
 
   @Test
   void getGroupReassignmentStats_ShouldReturnReportDTO() {
-    ReportDTO expectedReport = new ReportDTO(40L, 5L, 30L, 5L, 10L, 15L, 5L);
+    ReportDTO expectedReport = new ReportDTO(40, 5, 30, 5, 10, 15, 5);
     when(statsService.getGroupReassignmentStats("GROUP001")).thenReturn(expectedReport);
 
     ResponseEntity<ReportDTO> response = statsController.getGroupReassignmentStats("GROUP001");
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(expectedReport, response.getBody());
-    assertEquals(40L, response.getBody().total());
-    assertEquals(30L, response.getBody().approved());
+    assertEquals(40, response.getBody().total());
+    assertEquals(30, response.getBody().approved());
     verify(statsService, times(1)).getGroupReassignmentStats("GROUP001");
   }
 
   @Test
   void getFacultyReassignmentStats_ShouldReturnReportDTO() {
-    ReportDTO expectedReport = new ReportDTO(15L, 3L, 10L, 2L, 4L, 5L, 1L);
+    ReportDTO expectedReport = new ReportDTO(15, 3, 10, 2, 4, 5, 1);
     when(statsService.getFacultyReassignmentStats("Engineering", "2024"))
-        .thenReturn(expectedReport);
+            .thenReturn(expectedReport);
 
     ResponseEntity<ReportDTO> response =
-        statsController.getFacultyReassignmentStats("Engineering", "2024");
+            statsController.getFacultyReassignmentStats("Engineering", "2024");
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(expectedReport, response.getBody());
-    assertEquals(15L, response.getBody().total());
-    assertEquals(10L, response.getBody().approved());
+    assertEquals(15, response.getBody().total());
+    assertEquals(10, response.getBody().approved());
     verify(statsService, times(1)).getFacultyReassignmentStats("Engineering", "2024");
   }
 
   @Test
   void getGlobalReassignmentStats_ShouldReturnReportDTO() {
-    ReportDTO expectedReport = new ReportDTO(100L, 20L, 70L, 10L, 30L, 40L, 30L);
+    ReportDTO expectedReport = new ReportDTO(100, 20, 70, 10, 30, 40, 30);
     when(statsService.getGlobalReassignmentStats()).thenReturn(expectedReport);
 
     ResponseEntity<ReportDTO> response = statsController.getGlobalReassignmentStats();
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(expectedReport, response.getBody());
-    assertEquals(100L, response.getBody().total());
-    assertEquals(70L, response.getBody().approved());
+    assertEquals(100, response.getBody().total());
+    assertEquals(70, response.getBody().approved());
     verify(statsService, times(1)).getGlobalReassignmentStats();
   }
 
   @Test
   void getRequestStats_ShouldReturnRequestStats() {
-    RequestStats expectedStats = new RequestStats(100L, 20L, 70L, 10L);
+    RequestStats expectedStats = new RequestStats(100, 20, 70, 10);
     when(statsService.getRequestStats()).thenReturn(expectedStats);
 
     ResponseEntity<RequestStats> response = statsController.getRequestStats();
@@ -90,28 +90,28 @@ class StatsControllerTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(expectedStats, response.getBody());
-    assertEquals(100L, response.getBody().total());
-    assertEquals(20L, response.getBody().pending());
+    assertEquals(100, response.getBody().total());
+    assertEquals(20, response.getBody().pending());
     verify(statsService, times(1)).getRequestStats();
   }
 
   @Test
   void getCourseReassignmentStats_WhenServiceReturnsEmpty_ShouldReturnEmptyReport() {
-    ReportDTO emptyReport = new ReportDTO(0L, 0L, 0L, 0L, 0L, 0L, 0L);
+    ReportDTO emptyReport = new ReportDTO(0, 0, 0, 0, 0, 0, 0);
     when(statsService.getCourseReassignmentStats("UNKNOWN")).thenReturn(emptyReport);
 
     ResponseEntity<ReportDTO> response = statsController.getCourseReassignmentStats("UNKNOWN");
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(emptyReport, response.getBody());
-    assertEquals(0L, response.getBody().total());
-    assertEquals(0L, response.getBody().approved());
+    assertEquals(0, response.getBody().total());
+    assertEquals(0, response.getBody().approved());
   }
 
   @Test
   void getAllEndpoints_ShouldCallServiceExactlyOnce() {
-    ReportDTO report = new ReportDTO(10L, 2L, 6L, 2L, 3L, 4L, 3L);
-    RequestStats stats = new RequestStats(50L, 10L, 30L, 10L);
+    ReportDTO report = new ReportDTO(10, 2, 6, 2, 3, 4, 3);
+    RequestStats stats = new RequestStats(50, 10, 30, 10);
 
     when(statsService.getCourseReassignmentStats("MATH101")).thenReturn(report);
     when(statsService.getGroupReassignmentStats("GROUP001")).thenReturn(report);
@@ -136,25 +136,25 @@ class StatsControllerTest {
   @Test
   void getCourseReassignmentStats_WhenServiceThrowsException_ShouldPropagateException() {
     when(statsService.getCourseReassignmentStats("MATH101"))
-        .thenThrow(new RuntimeException("Service error"));
+            .thenThrow(new RuntimeException("Service error"));
 
     assertThrows(
-        RuntimeException.class, () -> statsController.getCourseReassignmentStats("MATH101"));
+            RuntimeException.class, () -> statsController.getCourseReassignmentStats("MATH101"));
     verify(statsService, times(1)).getCourseReassignmentStats("MATH101");
   }
 
   @Test
   void getFacultyReassignmentStats_WithDifferentPlan_ShouldUseCorrectPlan() {
-    ReportDTO expectedReport = new ReportDTO(25L, 5L, 15L, 5L, 8L, 10L, 7L);
+    ReportDTO expectedReport = new ReportDTO(25, 5, 15, 5, 8, 10, 7);
     when(statsService.getFacultyReassignmentStats("Science", "2025B")).thenReturn(expectedReport);
 
     ResponseEntity<ReportDTO> response =
-        statsController.getFacultyReassignmentStats("Science", "2025B");
+            statsController.getFacultyReassignmentStats("Science", "2025B");
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(expectedReport, response.getBody());
-    assertEquals(25L, response.getBody().total());
-    assertEquals(15L, response.getBody().approved());
+    assertEquals(25, response.getBody().total());
+    assertEquals(15, response.getBody().approved());
     verify(statsService, times(1)).getFacultyReassignmentStats("Science", "2025B");
   }
 }
