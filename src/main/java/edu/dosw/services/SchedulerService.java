@@ -1,12 +1,10 @@
 package edu.dosw.services;
 
+import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Historial;
 import edu.dosw.model.Schedule;
 import edu.dosw.model.Session;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -81,7 +79,18 @@ public class SchedulerService {
    * @return A schedule object containing the student's sessions of the specified period
    */
   public Schedule getScheduleByPeriod(String studentId, String year, String period) {
-    return buildSchedule(studentId, year, period);
+    try {
+      return buildSchedule(studentId, year, period);
+    } catch (Exception e) {
+      throw new BusinessException(
+          "Error al obtener el horario del estudiante "
+              + studentId
+              + " para el periodo "
+              + year
+              + " - "
+              + period,
+          e);
+    }
   }
 
   /**
@@ -91,39 +100,41 @@ public class SchedulerService {
    * @return List of past schedules
    */
   public List<Schedule> getPastSchedules(String studentId) {
-    String currentYear = periodService.getYear();
-    String currentPeriod = periodService.getPeriod();
+    try {
+      String currentYear = periodService.getYear();
+      String currentPeriod = periodService.getPeriod();
 
-    List<Historial> allHistorials = historialService.getAllHistorialsByStudentId(studentId);
+      List<Historial> historials = historialService.getAllHistorialsByStudentId(studentId);
 
-    Set<String[]> uniquePeriods = new LinkedHashSet<>();
+      Collection<Historial> uniqueHistorials =
+          historials.stream()
+              .collect(
+                  Collectors.toMap(
+                      h -> h.getYear() + "-" + h.getPeriod(),
+                      h -> h,
+                      (h1, h2) -> h1,
+                      LinkedHashMap::new))
+              .values();
 
-    for (Historial historial : allHistorials) {
-      uniquePeriods.add(new String[] {historial.getYear(), historial.getPeriod()});
+      return uniqueHistorials.stream()
+          .filter(h -> isBefore(h.getYear(), h.getPeriod(), currentYear, currentPeriod))
+          .sorted(
+              Comparator.comparing(Historial::getYear)
+                  .reversed()
+                  .thenComparing(Historial::getPeriod, Comparator.reverseOrder()))
+          .map(h -> buildSchedule(studentId, h.getYear(), h.getPeriod()))
+          .collect(Collectors.toList());
+
+    } catch (BusinessException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new BusinessException(
+          "Error al obtener los horarios pasados del estudiante " + studentId, e);
     }
+  }
 
-    List<String[]> pastPeriods =
-        uniquePeriods.stream()
-            .filter(
-                periodInfo -> {
-                  String year = periodInfo[0];
-                  String period = periodInfo[1];
-                  return year.compareTo(currentYear) < 0
-                      || (year.equals(currentYear) && period.compareTo(currentPeriod) < 0);
-                })
-            .sorted(
-                (a, b) -> {
-                  int yearCompare = b[0].compareTo(a[0]);
-                  return yearCompare != 0 ? yearCompare : b[1].compareTo(a[1]);
-                })
-            .collect(Collectors.toList());
-
-    List<Schedule> pastSchedules = new ArrayList<>();
-    for (String[] periodInfo : pastPeriods) {
-      Schedule schedule = buildSchedule(studentId, periodInfo[0], periodInfo[1]);
-      pastSchedules.add(schedule);
-    }
-
-    return pastSchedules;
+  private boolean isBefore(String year, String period, String currentYear, String currentPeriod) {
+    return year.compareTo(currentYear) < 0
+        || (year.equals(currentYear) && period.compareTo(currentPeriod) < 0);
   }
 }

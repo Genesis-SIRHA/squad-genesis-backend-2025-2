@@ -2,6 +2,7 @@ package edu.dosw.services;
 
 import edu.dosw.dto.HistorialDTO;
 import edu.dosw.exception.ResourceNotFoundException;
+import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Historial;
 import edu.dosw.model.enums.HistorialStatus;
@@ -63,35 +64,67 @@ public class HistorialService {
     return lastCourseState;
   }
 
-    public Historial addHistorial(HistorialDTO historialDTO) {
-        historialValidator.validateHistorialCreation(historialDTO);
+  /**
+   * Adds historial of a groyp for a student
+   *
+   * @param dto
+   * @return
+   */
+  public Historial addHistorial(HistorialDTO dto) {
+    historialValidator.validateHistorialCreation(dto);
 
-        try {
-            Historial existingHistorial = getByStudentIdAndGroupCode(historialDTO.studentId(), historialDTO.groupCode());
+    Historial existing =
+        historialRepository.findByStudentIdAndGroupCode(dto.studentId(), dto.groupCode());
 
-            historialValidator.historialUpdateValidator(existingHistorial.getStatus(), historialDTO.status());
-            existingHistorial.setStatus(historialDTO.status());
-            return historialRepository.save(existingHistorial);
-
-        } catch (IllegalArgumentException e) {
-            Historial historial = new Historial.HistorialBuilder()
-                    .studentId(historialDTO.studentId())
-                    .groupCode(historialDTO.groupCode())
-                    .status(historialDTO.status())
-                    .year(periodService.getYear())
-                    .period(periodService.getPeriod())
-                    .build();
-            return historialRepository.save(historial);
-        }
+    if (existing != null) {
+      throw new BusinessException(
+          "Ya existe un historial para el estudiante "
+              + dto.studentId()
+              + " y el grupo "
+              + dto.groupCode());
     }
 
-  public Historial updateHistorial(String studentId, String groupCode, HistorialStatus newStatus) {
-    Historial historial = getByStudentIdAndGroupCode(studentId, groupCode);
-    historialValidator.historialUpdateValidator(historial.getStatus(), newStatus);
+    Historial historial =
+        new Historial.HistorialBuilder()
+            .studentId(dto.studentId())
+            .groupCode(dto.groupCode())
+            .status(dto.status())
+            .year(periodService.getYear())
+            .period(periodService.getPeriod())
+            .build();
 
-    historial.setStatus(newStatus);
-    historialRepository.save(historial);
-    return historial;
+    try {
+      return historialRepository.save(historial);
+    } catch (Exception e) {
+      throw new BusinessException("Error al guardar el historial", e);
+    }
+  }
+
+  /**
+   * Updates the historial of a student for a certain groyp
+   *
+   * @param studentId
+   * @param groupCode
+   * @param newStatus
+   * @return
+   */
+  public Historial updateHistorial(String studentId, String groupCode, HistorialStatus newStatus) {
+    try {
+      Historial historial = getByStudentIdAndGroupCode(studentId, groupCode);
+
+      historialValidator.historialUpdateValidator(historial.getStatus(), newStatus);
+
+      historial.setStatus(newStatus);
+      return historialRepository.save(historial);
+
+    } catch (Exception e) {
+      throw new BusinessException(
+          "Error al actualizar el historial del estudiante "
+              + studentId
+              + " en el grupo "
+              + groupCode,
+          e);
+    }
   }
 
   public List<Historial> getAllHistorial() {
@@ -114,6 +147,18 @@ public class HistorialService {
    * @return List of all historical records
    */
   public List<Historial> getAllHistorialsByStudentId(String studentId) {
-    return historialRepository.findByStudentId(studentId);
+    try {
+      List<Historial> historials = historialRepository.findByStudentId(studentId);
+
+      if (historials == null || historials.isEmpty()) {
+        throw new BusinessException(
+            "No se encontraron historiales para el estudiante " + studentId);
+      }
+
+      return historials;
+    } catch (Exception e) {
+      throw new BusinessException(
+          "Error al obtener los historiales del estudiante " + studentId, e);
+    }
   }
 }
