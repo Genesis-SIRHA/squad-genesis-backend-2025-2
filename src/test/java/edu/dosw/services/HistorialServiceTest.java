@@ -78,8 +78,7 @@ class HistorialServiceTest {
     String studentId = "123";
     String year = "2024";
     String period = "1";
-    when(historialRepository.findHistorialByStudentIdAndYearAndPeriod(
-            studentId, year, period))
+    when(historialRepository.findHistorialByStudentIdAndYearAndPeriod(studentId, year, period))
         .thenReturn(new ArrayList<>(Arrays.asList(historial1)));
 
     List<String> result =

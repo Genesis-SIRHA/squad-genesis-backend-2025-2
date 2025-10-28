@@ -58,11 +58,11 @@ class SchedulerControllerTest {
   }
 
   @Test
-  void getScheduleById_ShouldReturnSchedule() {
+  void getScheduleById_ShouldReturnActualScheduleStudent() {
     String studentId = "123";
     when(schedulerService.getActualScheduleByStudentId(studentId)).thenReturn(currentSchedule);
 
-    ResponseEntity<Schedule> response = schedulerController.getScheduleById(studentId);
+    ResponseEntity<Schedule> response = schedulerController.getActualScheduleByStudentId(studentId);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
