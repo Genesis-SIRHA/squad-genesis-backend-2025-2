@@ -3,6 +3,7 @@ package edu.dosw.services;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Historial;
 import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.repositories.HistorialRepository;
@@ -59,14 +60,16 @@ class HistorialServiceTest {
   }
 
   @Test
-  void getAllHistorialsByStudentId_WhenNoHistorials_ShouldReturnEmptyList() {
+  void getAllHistorialsByStudentId_WhenNoHistorials_ShouldThrowBusinessException() {
     String studentId = "999";
     when(historialRepository.findByStudentId(studentId)).thenReturn(new ArrayList<>());
 
-    List<Historial> result = historialService.getAllHistorialsByStudentId(studentId);
+    BusinessException exception =
+        assertThrows(
+            BusinessException.class, () -> historialService.getAllHistorialsByStudentId(studentId));
 
-    assertNotNull(result);
-    assertTrue(result.isEmpty());
+    assertEquals(
+        "Error al obtener los historiales del estudiante " + studentId, exception.getMessage());
     verify(historialRepository, times(1)).findByStudentId(studentId);
   }
 
