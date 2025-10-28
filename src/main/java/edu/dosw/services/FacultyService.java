@@ -7,10 +7,9 @@ import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Faculty;
 import edu.dosw.repositories.FacultyRepository;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,9 +72,50 @@ public class FacultyService {
       logger.error("Faculty not found: {}", facultyDto.facultyName());
       throw new BusinessException("Faculty not found: " + facultyDto.facultyName());
     }
-    faculty.setFacultyName(facultyDto.facultyName());
-    faculty.setPlan(facultyDto.plan());
     if (facultyDto.courses() != null) faculty.setCourses(facultyDto.courses());
+    try {
+      return facultyRepository.save(faculty);
+    } catch (Exception e) {
+      logger.error(
+          "An inesperated error has occurred when updating the faculty: {}", e.getMessage());
+      throw new BusinessException(
+          "An inesperated error has occurred when updating the faculty: " + e.getMessage());
+    }
+  }
+
+  public Faculty addCoursesToPlan(FacultyDto facultyDto) {
+    Faculty faculty =
+        facultyRepository
+            .findByNameAndPlan(facultyDto.facultyName(), facultyDto.plan())
+            .orElse(null);
+    if (faculty == null) {
+      logger.error("Faculty not found: {}", facultyDto.facultyName());
+      throw new BusinessException("Faculty not found: " + facultyDto.facultyName());
+    }
+    if (facultyDto.courses() != null) {
+
+      Map<String, Course> courseDtoMap =
+          facultyDto.courses().stream()
+              .collect(Collectors.toMap(Course::getAbbreviation, Function.identity()));
+
+      Map<String, Course> courseMap =
+          faculty.getCourses().stream()
+              .collect(Collectors.toMap(Course::getAbbreviation, Function.identity()));
+
+      for (String facultyAbbreviation : courseMap.keySet()) {
+        if (courseDtoMap.containsKey(facultyAbbreviation)) {
+          Course courseDTO = courseDtoMap.get(facultyAbbreviation);
+          Course course = courseMap.get(facultyAbbreviation);
+          course.setCourseName(courseDTO.getCourseName());
+          course.setCredits(courseDTO.getCredits());
+          courseDtoMap.remove(facultyAbbreviation);
+        }
+      }
+
+      List<Course> newCourses = new ArrayList<>(courseDtoMap.values());
+      newCourses.addAll(courseMap.values());
+      faculty.setCourses(newCourses);
+    }
     try {
       return facultyRepository.save(faculty);
     } catch (Exception e) {
