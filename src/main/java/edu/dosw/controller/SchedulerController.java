@@ -30,7 +30,7 @@ public class SchedulerController {
   @Operation(
       summary = "Get schedule by ID",
       description = "Retrieves a schedule by its unique identifier")
-  public ResponseEntity<Schedule> getScheduleById(@PathVariable String studentId) {
+  public ResponseEntity<Schedule> getActualScheduleByStudentId(@PathVariable String studentId) {
     return ResponseEntity.ok(schedulerService.getActualScheduleByStudentId(studentId));
   }
 

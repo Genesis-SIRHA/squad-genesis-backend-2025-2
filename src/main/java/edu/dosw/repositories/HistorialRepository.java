@@ -13,11 +13,12 @@ public interface HistorialRepository extends MongoRepository<Historial, String> 
   ArrayList<Historial> findCurrentHistorialByStudentIdAndYearAndPeriod(
       String studentId, String year, String period);
 
-    @Query("{ 'studentId': ?0, 'year': ?1, 'period': ?2, 'status': { $in: ['ON_GOING', 'FINISHED'] } }")
-    ArrayList<Historial> findHistorialByStudentIdAndYearAndPeriod(
-            String studentId, String year, String period);
+  @Query(
+      "{ 'studentId': ?0, 'year': ?1, 'period': ?2, 'status': { $in: ['ON_GOING', 'FINISHED'] } }")
+  ArrayList<Historial> findHistorialByStudentIdAndYearAndPeriod(
+      String studentId, String year, String period);
 
-    @Query("{ 'studentId': ?0}")
+  @Query("{ 'studentId': ?0}")
   ArrayList<Historial> findByStudentId(String studentId);
 
   @Query("{ 'studentId' : ?0, 'groupCode' : ?1 }")

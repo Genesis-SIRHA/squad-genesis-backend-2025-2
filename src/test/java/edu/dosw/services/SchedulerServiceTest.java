@@ -103,8 +103,7 @@ class SchedulerServiceTest {
     assertEquals("2024", returnedSession.getYear());
     assertEquals("1", returnedSession.getPeriod());
 
-    verify(historialService, times(1))
-        .getGroupCodesByStudentIdAndPeriod(studentId, year, period);
+    verify(historialService, times(1)).getGroupCodesByStudentIdAndPeriod(studentId, year, period);
     verify(sessionService, times(1)).getSessionsByGroupCode("MAT101");
   }
 
@@ -173,8 +172,7 @@ class SchedulerServiceTest {
 
     when(periodService.getYear()).thenReturn(currentYear);
     when(periodService.getPeriod()).thenReturn(currentPeriod);
-    when(historialService.getGroupCodesByStudentIdAndPeriod(
-            studentId, currentYear, currentPeriod))
+    when(historialService.getGroupCodesByStudentIdAndPeriod(studentId, currentYear, currentPeriod))
         .thenReturn(groupCodes);
     when(sessionService.getSessionsByGroupCode("MAT101")).thenReturn(Arrays.asList(session1));
 
