@@ -6,107 +6,116 @@ import edu.dosw.model.Course;
 import edu.dosw.model.Group;
 import edu.dosw.model.enums.RequestStatus;
 import edu.dosw.model.enums.RequestType;
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
 public class StatsService {
 
-    private final RequestService requestService;
-    private final FacultyService facultyService;
-    private final GroupService groupService;
+  private final RequestService requestService;
+  private final FacultyService facultyService;
+  private final GroupService groupService;
 
-    public RequestStats getRequestStats() {
-        long total = requestService.countTotalRequests();
-        long pending = requestService.countByStatus(RequestStatus.PENDING);
-        long approved = requestService.countByStatus(RequestStatus.ACCEPTED);
-        long rejected = requestService.countByStatus(RequestStatus.REJECTED);
-        return new RequestStats(total, pending, approved, rejected);
+  public RequestStats getRequestStats() {
+    Integer total = requestService.countTotalRequests();
+    Integer pending = requestService.countByStatus(RequestStatus.PENDING);
+    Integer approved = requestService.countByStatus(RequestStatus.ACCEPTED);
+    Integer rejected = requestService.countByStatus(RequestStatus.REJECTED);
+    return new RequestStats(total, pending, approved, rejected);
+  }
+
+  public ReportDTO getCourseReassignmentStats(String courseAbbreviation) {
+    List<Group> groups = groupService.getAllGroupsByCourseAbbreviation(courseAbbreviation);
+    List<String> groupCodes = groups.stream().map(Group::getGroupCode).collect(Collectors.toList());
+
+    if (groupCodes.isEmpty()) {
+      return new ReportDTO(0, 0, 0, 0, 0, 0, 0);
     }
 
-    public ReportDTO getCourseReassignmentStats(String courseAbbreviation) {
-        List<Group> groups = groupService.getAllGroupsByCourseAbbreviation(courseAbbreviation);
-        List<String> groupCodes = groups.stream()
-                .map(Group::getGroupCode)
-                .collect(Collectors.toList());
+    Integer total = requestService.countByGroupCodes(groupCodes);
+    Integer pending = requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.PENDING);
+    Integer approved =
+        requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.ACCEPTED);
+    Integer rejected =
+        requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.REJECTED);
 
-        if (groupCodes.isEmpty()) {
-            return new ReportDTO(0L, 0L, 0L, 0L, 0L, 0L, 0L);
-        }
+    Integer cancellations =
+        requestService.countByGroupCodesAndType(groupCodes, RequestType.CANCELLATION);
+    Integer swaps = requestService.countByGroupCodesAndType(groupCodes, RequestType.SWAP);
+    Integer joins = requestService.countByGroupCodesAndType(groupCodes, RequestType.JOIN);
 
-        long total = requestService.countByGroupCodes(groupCodes);
-        long pending = requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.PENDING);
-        long approved = requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.ACCEPTED);
-        long rejected = requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.REJECTED);
+    return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
+  }
 
-        long cancellations = requestService.countByGroupCodesAndType(groupCodes, RequestType.CANCELLATION);
-        long swaps = requestService.countByGroupCodesAndType(groupCodes, RequestType.SWAP);
-        long joins = requestService.countByGroupCodesAndType(groupCodes, RequestType.JOIN);
+  public ReportDTO getGroupReassignmentStats(String groupCode) {
+    List<String> singleGroup = List.of(groupCode);
 
-        return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
+    Integer total = requestService.countByGroupCodes(singleGroup);
+    Integer pending = requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.PENDING);
+    Integer approved =
+        requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.ACCEPTED);
+    Integer rejected =
+        requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.REJECTED);
+
+    Integer cancellations =
+        requestService.countByGroupCodesAndType(singleGroup, RequestType.CANCELLATION);
+    Integer swaps = requestService.countByGroupCodesAndType(singleGroup, RequestType.SWAP);
+    Integer joins = requestService.countByGroupCodesAndType(singleGroup, RequestType.JOIN);
+
+    return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
+  }
+
+  public ReportDTO getFacultyReassignmentStats(String facultyName, String plan) {
+    List<Course> facultyCourses = facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan);
+    List<String> courseAbbreviations =
+        facultyCourses.stream().map(Course::getAbbreviation).collect(Collectors.toList());
+
+    if (courseAbbreviations.isEmpty()) {
+      return new ReportDTO(0, 0, 0, 0, 0, 0, 0);
     }
 
-    public ReportDTO getGroupReassignmentStats(String groupCode) {
-        List<String> singleGroup = List.of(groupCode);
+    List<String> facultyGroupCodes =
+        courseAbbreviations.stream()
+            .flatMap(
+                abbreviation ->
+                    groupService.getAllGroupsByCourseAbbreviation(abbreviation).stream())
+            .map(Group::getGroupCode)
+            .distinct()
+            .collect(Collectors.toList());
 
-        long total = requestService.countByGroupCodes(singleGroup);
-        long pending = requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.PENDING);
-        long approved = requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.ACCEPTED);
-        long rejected = requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.REJECTED);
-
-        long cancellations = requestService.countByGroupCodesAndType(singleGroup, RequestType.CANCELLATION);
-        long swaps = requestService.countByGroupCodesAndType(singleGroup, RequestType.SWAP);
-        long joins = requestService.countByGroupCodesAndType(singleGroup, RequestType.JOIN);
-
-        return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
+    if (facultyGroupCodes.isEmpty()) {
+      return new ReportDTO(0, 0, 0, 0, 0, 0, 0);
     }
 
-    public ReportDTO getFacultyReassignmentStats(String facultyName) {
-        List<Course> facultyCourses = facultyService.findCoursesByFacultyNameAndPlan(facultyName, "2024");
-        List<String> courseAbbreviations = facultyCourses.stream()
-                .map(Course::getAbbreviation)
-                .collect(Collectors.toList());
+    Integer total = requestService.countByGroupCodes(facultyGroupCodes);
+    Integer pending =
+        requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.PENDING);
+    Integer approved =
+        requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.ACCEPTED);
+    Integer rejected =
+        requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.REJECTED);
 
-        if (courseAbbreviations.isEmpty()) {
-            return new ReportDTO(0L, 0L, 0L, 0L, 0L, 0L, 0L);
-        }
+    Integer cancellations =
+        requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.CANCELLATION);
+    Integer swaps = requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.SWAP);
+    Integer joins = requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.JOIN);
 
-        List<String> facultyGroupCodes = courseAbbreviations.stream()
-                .flatMap(abbreviation -> groupService.getAllGroupsByCourseAbbreviation(abbreviation).stream())
-                .map(Group::getGroupCode)
-                .distinct()
-                .collect(Collectors.toList());
+    return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
+  }
 
-        if (facultyGroupCodes.isEmpty()) {
-            return new ReportDTO(0L, 0L, 0L, 0L, 0L, 0L, 0L);
-        }
+  public ReportDTO getGlobalReassignmentStats() {
+    Integer total = requestService.countTotalRequests();
+    Integer pending = requestService.countByStatus(RequestStatus.PENDING);
+    Integer approved = requestService.countByStatus(RequestStatus.ACCEPTED);
+    Integer rejected = requestService.countByStatus(RequestStatus.REJECTED);
 
-        long total = requestService.countByGroupCodes(facultyGroupCodes);
-        long pending = requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.PENDING);
-        long approved = requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.ACCEPTED);
-        long rejected = requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.REJECTED);
+    Integer cancellations = requestService.countByType(RequestType.CANCELLATION);
+    Integer swaps = requestService.countByType(RequestType.SWAP);
+    Integer joins = requestService.countByType(RequestType.JOIN);
 
-        long cancellations = requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.CANCELLATION);
-        long swaps = requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.SWAP);
-        long joins = requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.JOIN);
-
-        return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
-    }
-
-    public ReportDTO getGlobalReassignmentStats() {
-        long total = requestService.countTotalRequests();
-        long pending = requestService.countByStatus(RequestStatus.PENDING);
-        long approved = requestService.countByStatus(RequestStatus.ACCEPTED);
-        long rejected = requestService.countByStatus(RequestStatus.REJECTED);
-
-        long cancellations = requestService.countByType(RequestType.CANCELLATION);
-        long swaps = requestService.countByType(RequestType.SWAP);
-        long joins = requestService.countByType(RequestType.JOIN);
-
-        return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
-    }
+    return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
+  }
 }

@@ -92,10 +92,11 @@ public class HistorialService {
   }
 
   public List<Historial> getHistorialByStudentId(String studentId) {
-        return historialRepository.findByStudentId(studentId);
+    return historialRepository.findByStudentId(studentId);
   }
 
-  public List<Historial> getHistorialByStudentIdAndStatus(String studentId, HistorialStatus status) {
-        return historialRepository.findByStudentIdAndStatus(studentId, status);
+  public List<Historial> getHistorialByStudentIdAndStatus(
+      String studentId, HistorialStatus status) {
+    return historialRepository.findByStudentIdAndStatus(studentId, status);
   }
 }

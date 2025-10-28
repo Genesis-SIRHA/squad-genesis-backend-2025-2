@@ -1,202 +1,273 @@
 package edu.dosw.services;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import edu.dosw.dto.ReportDTO;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.model.Course;
 import edu.dosw.model.Group;
 import edu.dosw.model.enums.RequestStatus;
 import edu.dosw.model.enums.RequestType;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class StatsServiceTest {
 
-    @Mock
-    private RequestService requestService;
+  @Mock private RequestService requestService;
 
-    @Mock
-    private FacultyService facultyService;
+  @Mock private FacultyService facultyService;
 
-    @Mock
-    private GroupService groupService;
+  @Mock private GroupService groupService;
 
-    @InjectMocks
-    private StatsService statsService;
+  @InjectMocks private StatsService statsService;
 
-    @Test
-    void getRequestStats_ShouldReturnCorrectStats() {
-        when(requestService.countTotalRequests()).thenReturn(100L);
-        when(requestService.countByStatus(RequestStatus.PENDING)).thenReturn(20L);
-        when(requestService.countByStatus(RequestStatus.ACCEPTED)).thenReturn(70L);
-        when(requestService.countByStatus(RequestStatus.REJECTED)).thenReturn(10L);
+  @Test
+  void getRequestStats_ShouldReturnCorrectStats() {
+    when(requestService.countTotalRequests()).thenReturn(100);
+    when(requestService.countByStatus(RequestStatus.PENDING)).thenReturn(20);
+    when(requestService.countByStatus(RequestStatus.ACCEPTED)).thenReturn(70);
+    when(requestService.countByStatus(RequestStatus.REJECTED)).thenReturn(10);
 
-        RequestStats result = statsService.getRequestStats();
+    RequestStats result = statsService.getRequestStats();
 
-        assertNotNull(result);
-        assertEquals(100L, result.total());
-        assertEquals(20L, result.pending());
-        assertEquals(70L, result.approved());
-        assertEquals(10L, result.rejected());
-    }
+    assertNotNull(result);
+    assertEquals(100, result.total());
+    assertEquals(20, result.pending());
+    assertEquals(70, result.approved());
+    assertEquals(10, result.rejected());
+  }
 
-    @Test
-    void getCourseReassignmentStats_ShouldReturnCorrectStats() {
-        String courseAbbreviation = "MATH101";
-        List<Group> groups = List.of(
-                createGroup("MATH101-G01", "MATH101"),
-                createGroup("MATH101-G02", "MATH101")
-        );
-        List<String> groupCodes = List.of("MATH101-G01", "MATH101-G02");
+  @Test
+  void getCourseReassignmentStats_ShouldReturnCorrectStats() {
+    String courseAbbreviation = "MATH101";
+    List<Group> groups =
+        List.of(createGroup("MATH101-G01", "MATH101"), createGroup("MATH101-G02", "MATH101"));
+    List<String> groupCodes = List.of("MATH101-G01", "MATH101-G02");
 
-        when(groupService.getAllGroupsByCourseAbbreviation(courseAbbreviation)).thenReturn(groups);
-        when(requestService.countByGroupCodes(groupCodes)).thenReturn(50L);
-        when(requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.PENDING)).thenReturn(10L);
-        when(requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.ACCEPTED)).thenReturn(30L);
-        when(requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.REJECTED)).thenReturn(10L);
-        when(requestService.countByGroupCodesAndType(groupCodes, RequestType.CANCELLATION)).thenReturn(20L);
-        when(requestService.countByGroupCodesAndType(groupCodes, RequestType.SWAP)).thenReturn(25L);
-        when(requestService.countByGroupCodesAndType(groupCodes, RequestType.JOIN)).thenReturn(25L);
+    when(groupService.getAllGroupsByCourseAbbreviation(courseAbbreviation)).thenReturn(groups);
+    when(requestService.countByGroupCodes(groupCodes)).thenReturn(50);
+    when(requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.PENDING))
+        .thenReturn(10);
+    when(requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.ACCEPTED))
+        .thenReturn(30);
+    when(requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.REJECTED))
+        .thenReturn(10);
+    when(requestService.countByGroupCodesAndType(groupCodes, RequestType.CANCELLATION))
+        .thenReturn(20);
+    when(requestService.countByGroupCodesAndType(groupCodes, RequestType.SWAP)).thenReturn(25);
+    when(requestService.countByGroupCodesAndType(groupCodes, RequestType.JOIN)).thenReturn(25);
 
-        ReportDTO result = statsService.getCourseReassignmentStats(courseAbbreviation);
+    ReportDTO result = statsService.getCourseReassignmentStats(courseAbbreviation);
 
-        assertNotNull(result);
-        assertEquals(50L, result.total());
-        assertEquals(10L, result.pending());
-        assertEquals(30L, result.approved());
-        assertEquals(10L, result.rejected());
-        assertEquals(20L, result.cancellations());
-        assertEquals(25L, result.swaps());
-        assertEquals(25L, result.joins());
-    }
+    assertNotNull(result);
+    assertEquals(50, result.total());
+    assertEquals(10, result.pending());
+    assertEquals(30, result.approved());
+    assertEquals(10, result.rejected());
+    assertEquals(20, result.cancellations());
+    assertEquals(25, result.swaps());
+    assertEquals(25, result.joins());
+  }
 
-    @Test
-    void getCourseReassignmentStats_WhenNoGroups_ShouldReturnZeroStats() {
-        String courseAbbreviation = "UNKNOWN";
-        when(groupService.getAllGroupsByCourseAbbreviation(courseAbbreviation)).thenReturn(List.of());
+  @Test
+  void getCourseReassignmentStats_WhenNoGroups_ShouldReturnZeroStats() {
+    String courseAbbreviation = "UNKNOWN";
+    when(groupService.getAllGroupsByCourseAbbreviation(courseAbbreviation)).thenReturn(List.of());
 
-        ReportDTO result = statsService.getCourseReassignmentStats(courseAbbreviation);
+    ReportDTO result = statsService.getCourseReassignmentStats(courseAbbreviation);
 
-        assertNotNull(result);
-        assertEquals(0L, result.total());
-        assertEquals(0L, result.pending());
-        assertEquals(0L, result.approved());
-        assertEquals(0L, result.rejected());
-        assertEquals(0L, result.cancellations());
-        assertEquals(0L, result.swaps());
-        assertEquals(0L, result.joins());
-    }
+    assertNotNull(result);
+    assertEquals(0, result.total());
+    assertEquals(0, result.pending());
+    assertEquals(0, result.approved());
+    assertEquals(0, result.rejected());
+    assertEquals(0, result.cancellations());
+    assertEquals(0, result.swaps());
+    assertEquals(0, result.joins());
+  }
 
-    @Test
-    void getGroupReassignmentStats_ShouldReturnCorrectStats() {
-        String groupCode = "MATH101-G01";
-        List<String> singleGroup = List.of(groupCode);
+  @Test
+  void getGroupReassignmentStats_ShouldReturnCorrectStats() {
+    String groupCode = "MATH101-G01";
+    List<String> singleGroup = List.of(groupCode);
 
-        when(requestService.countByGroupCodes(singleGroup)).thenReturn(40L);
-        when(requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.PENDING)).thenReturn(5L);
-        when(requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.ACCEPTED)).thenReturn(30L);
-        when(requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.REJECTED)).thenReturn(5L);
-        when(requestService.countByGroupCodesAndType(singleGroup, RequestType.CANCELLATION)).thenReturn(10L);
-        when(requestService.countByGroupCodesAndType(singleGroup, RequestType.SWAP)).thenReturn(15L);
-        when(requestService.countByGroupCodesAndType(singleGroup, RequestType.JOIN)).thenReturn(5L);
+    when(requestService.countByGroupCodes(singleGroup)).thenReturn(40);
+    when(requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.PENDING))
+        .thenReturn(5);
+    when(requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.ACCEPTED))
+        .thenReturn(30);
+    when(requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.REJECTED))
+        .thenReturn(5);
+    when(requestService.countByGroupCodesAndType(singleGroup, RequestType.CANCELLATION))
+        .thenReturn(10);
+    when(requestService.countByGroupCodesAndType(singleGroup, RequestType.SWAP)).thenReturn(15);
+    when(requestService.countByGroupCodesAndType(singleGroup, RequestType.JOIN)).thenReturn(5);
 
-        ReportDTO result = statsService.getGroupReassignmentStats(groupCode);
+    ReportDTO result = statsService.getGroupReassignmentStats(groupCode);
 
-        assertNotNull(result);
-        assertEquals(40L, result.total());
-        assertEquals(5L, result.pending());
-        assertEquals(30L, result.approved());
-        assertEquals(5L, result.rejected());
-        assertEquals(10L, result.cancellations());
-        assertEquals(15L, result.swaps());
-        assertEquals(5L, result.joins());
-    }
+    assertNotNull(result);
+    assertEquals(40, result.total());
+    assertEquals(5, result.pending());
+    assertEquals(30, result.approved());
+    assertEquals(5, result.rejected());
+    assertEquals(10, result.cancellations());
+    assertEquals(15, result.swaps());
+    assertEquals(5, result.joins());
+  }
 
-    @Test
-    void getFacultyReassignmentStats_ShouldReturnCorrectStats() {
-        String facultyName = "Engineering";
-        List<Course> facultyCourses = List.of(
-                new Course("MATH101", "Mathematics", 3),
-                new Course("PHYS101", "Physics", 4)
-        );
-        List<Group> mathGroups = List.of(createGroup("MATH101-G01", "MATH101"));
-        List<Group> physicsGroups = List.of(createGroup("PHYS101-G01", "PHYS101"));
-        List<String> facultyGroupCodes = List.of("MATH101-G01", "PHYS101-G01");
+  @Test
+  void getFacultyReassignmentStats_ShouldReturnCorrectStats() {
+    String facultyName = "Engineering";
+    String plan = "2024";
+    List<Course> facultyCourses =
+        List.of(new Course("MATH101", "Mathematics", 3), new Course("PHYS101", "Physics", 4));
+    List<Group> mathGroups = List.of(createGroup("MATH101-G01", "MATH101"));
+    List<Group> physicsGroups = List.of(createGroup("PHYS101-G01", "PHYS101"));
+    List<String> facultyGroupCodes = List.of("MATH101-G01", "PHYS101-G01");
 
-        when(facultyService.findCoursesByFacultyNameAndPlan(facultyName, "2024")).thenReturn(facultyCourses);
-        when(groupService.getAllGroupsByCourseAbbreviation("MATH101")).thenReturn(mathGroups);
-        when(groupService.getAllGroupsByCourseAbbreviation("PHYS101")).thenReturn(physicsGroups);
-        when(requestService.countByGroupCodes(facultyGroupCodes)).thenReturn(15L);
-        when(requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.PENDING)).thenReturn(3L);
-        when(requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.ACCEPTED)).thenReturn(10L);
-        when(requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.REJECTED)).thenReturn(2L);
-        when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.CANCELLATION)).thenReturn(4L);
-        when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.SWAP)).thenReturn(5L);
-        when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.JOIN)).thenReturn(1L);
+    when(facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan))
+        .thenReturn(facultyCourses);
+    when(groupService.getAllGroupsByCourseAbbreviation("MATH101")).thenReturn(mathGroups);
+    when(groupService.getAllGroupsByCourseAbbreviation("PHYS101")).thenReturn(physicsGroups);
+    when(requestService.countByGroupCodes(facultyGroupCodes)).thenReturn(15);
+    when(requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.PENDING))
+        .thenReturn(3);
+    when(requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.ACCEPTED))
+        .thenReturn(10);
+    when(requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.REJECTED))
+        .thenReturn(2);
+    when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.CANCELLATION))
+        .thenReturn(4);
+    when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.SWAP))
+        .thenReturn(5);
+    when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.JOIN))
+        .thenReturn(1);
 
-        ReportDTO result = statsService.getFacultyReassignmentStats(facultyName);
+    ReportDTO result = statsService.getFacultyReassignmentStats(facultyName, plan);
 
-        assertNotNull(result);
-        assertEquals(15L, result.total());
-        assertEquals(3L, result.pending());
-        assertEquals(10L, result.approved());
-        assertEquals(2L, result.rejected());
-        assertEquals(4L, result.cancellations());
-        assertEquals(5L, result.swaps());
-        assertEquals(1L, result.joins());
-    }
+    assertNotNull(result);
+    assertEquals(15, result.total());
+    assertEquals(3, result.pending());
+    assertEquals(10, result.approved());
+    assertEquals(2, result.rejected());
+    assertEquals(4, result.cancellations());
+    assertEquals(5, result.swaps());
+    assertEquals(1, result.joins());
+  }
 
-    @Test
-    void getFacultyReassignmentStats_WhenNoCourses_ShouldReturnZeroStats() {
-        String facultyName = "Unknown";
-        when(facultyService.findCoursesByFacultyNameAndPlan(facultyName, "2024")).thenReturn(List.of());
+  @Test
+  void getFacultyReassignmentStats_WhenNoCourses_ShouldReturnZeroStats() {
+    String facultyName = "Unknown";
+    String plan = "2024";
+    when(facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan)).thenReturn(List.of());
 
-        ReportDTO result = statsService.getFacultyReassignmentStats(facultyName);
+    ReportDTO result = statsService.getFacultyReassignmentStats(facultyName, plan);
 
-        assertNotNull(result);
-        assertEquals(0L, result.total());
-        assertEquals(0L, result.pending());
-        assertEquals(0L, result.approved());
-        assertEquals(0L, result.rejected());
-        assertEquals(0L, result.cancellations());
-        assertEquals(0L, result.swaps());
-        assertEquals(0L, result.joins());
-    }
+    assertNotNull(result);
+    assertEquals(0, result.total());
+    assertEquals(0, result.pending());
+    assertEquals(0, result.approved());
+    assertEquals(0, result.rejected());
+    assertEquals(0, result.cancellations());
+    assertEquals(0, result.swaps());
+    assertEquals(0, result.joins());
+  }
 
-    @Test
-    void getGlobalReassignmentStats_ShouldReturnCorrectStats() {
-        when(requestService.countTotalRequests()).thenReturn(100L);
-        when(requestService.countByStatus(RequestStatus.PENDING)).thenReturn(20L);
-        when(requestService.countByStatus(RequestStatus.ACCEPTED)).thenReturn(70L);
-        when(requestService.countByStatus(RequestStatus.REJECTED)).thenReturn(10L);
-        when(requestService.countByType(RequestType.CANCELLATION)).thenReturn(30L);
-        when(requestService.countByType(RequestType.SWAP)).thenReturn(40L);
-        when(requestService.countByType(RequestType.JOIN)).thenReturn(30L);
+  @Test
+  void getFacultyReassignmentStats_WhenNoGroups_ShouldReturnZeroStats() {
+    String facultyName = "Engineering";
+    String plan = "2023";
+    List<Course> facultyCourses =
+        List.of(new Course("MATH101", "Mathematics", 3), new Course("PHYS101", "Physics", 4));
 
-        ReportDTO result = statsService.getGlobalReassignmentStats();
+    when(facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan))
+        .thenReturn(facultyCourses);
+    when(groupService.getAllGroupsByCourseAbbreviation("MATH101")).thenReturn(List.of());
+    when(groupService.getAllGroupsByCourseAbbreviation("PHYS101")).thenReturn(List.of());
 
-        assertNotNull(result);
-        assertEquals(100L, result.total());
-        assertEquals(20L, result.pending());
-        assertEquals(70L, result.approved());
-        assertEquals(10L, result.rejected());
-        assertEquals(30L, result.cancellations());
-        assertEquals(40L, result.swaps());
-        assertEquals(30L, result.joins());
-    }
+    ReportDTO result = statsService.getFacultyReassignmentStats(facultyName, plan);
 
-    private Group createGroup(String groupCode, String abbreviation) {
-        Group group = new Group();
-        group.setGroupCode(groupCode);
-        group.setAbbreviation(abbreviation);
-        return group;
-    }
+    assertNotNull(result);
+    assertEquals(0, result.total());
+    assertEquals(0, result.pending());
+    assertEquals(0, result.approved());
+    assertEquals(0, result.rejected());
+    assertEquals(0, result.cancellations());
+    assertEquals(0, result.swaps());
+    assertEquals(0, result.joins());
+  }
+
+  @Test
+  void getFacultyReassignmentStats_WithDifferentPlan_ShouldUseCorrectPlan() {
+    String facultyName = "Science";
+    String plan = "2025B";
+    List<Course> facultyCourses = List.of(new Course("CHEM101", "Chemistry", 3));
+    List<Group> chemGroups = List.of(createGroup("CHEM101-G01", "CHEM101"));
+    List<String> facultyGroupCodes = List.of("CHEM101-G01");
+
+    when(facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan))
+        .thenReturn(facultyCourses);
+    when(groupService.getAllGroupsByCourseAbbreviation("CHEM101")).thenReturn(chemGroups);
+    when(requestService.countByGroupCodes(facultyGroupCodes)).thenReturn(8);
+    when(requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.PENDING))
+        .thenReturn(1);
+    when(requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.ACCEPTED))
+        .thenReturn(6);
+    when(requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.REJECTED))
+        .thenReturn(1);
+    when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.CANCELLATION))
+        .thenReturn(2);
+    when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.SWAP))
+        .thenReturn(3);
+    when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.JOIN))
+        .thenReturn(3);
+
+    ReportDTO result = statsService.getFacultyReassignmentStats(facultyName, plan);
+
+    assertNotNull(result);
+    assertEquals(8, result.total());
+    assertEquals(1, result.pending());
+    assertEquals(6, result.approved());
+    assertEquals(1, result.rejected());
+    assertEquals(2, result.cancellations());
+    assertEquals(3, result.swaps());
+    assertEquals(3, result.joins());
+
+    verify(facultyService).findCoursesByFacultyNameAndPlan(facultyName, plan);
+  }
+
+  @Test
+  void getGlobalReassignmentStats_ShouldReturnCorrectStats() {
+    when(requestService.countTotalRequests()).thenReturn(100);
+    when(requestService.countByStatus(RequestStatus.PENDING)).thenReturn(20);
+    when(requestService.countByStatus(RequestStatus.ACCEPTED)).thenReturn(70);
+    when(requestService.countByStatus(RequestStatus.REJECTED)).thenReturn(10);
+    when(requestService.countByType(RequestType.CANCELLATION)).thenReturn(30);
+    when(requestService.countByType(RequestType.SWAP)).thenReturn(40);
+    when(requestService.countByType(RequestType.JOIN)).thenReturn(30);
+
+    ReportDTO result = statsService.getGlobalReassignmentStats();
+
+    assertNotNull(result);
+    assertEquals(100, result.total());
+    assertEquals(20, result.pending());
+    assertEquals(70, result.approved());
+    assertEquals(10, result.rejected());
+    assertEquals(30, result.cancellations());
+    assertEquals(40, result.swaps());
+    assertEquals(30, result.joins());
+  }
+
+  private Group createGroup(String groupCode, String abbreviation) {
+    Group group = new Group();
+    group.setGroupCode(groupCode);
+    group.setAbbreviation(abbreviation);
+    return group;
+  }
 }

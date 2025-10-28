@@ -1,11 +1,10 @@
 package edu.dosw.repositories;
 
 import edu.dosw.model.Request;
-import java.util.List;
-import java.util.Optional;
-
 import edu.dosw.model.enums.RequestStatus;
 import edu.dosw.model.enums.RequestType;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
@@ -49,14 +48,6 @@ public interface RequestRepository extends MongoRepository<Request, String> {
   @Query("{ 'studentId': ?0 }")
   List<Request> findByStudentId(String studentId);
 
-  /**
-   * Counts the number of requests with a specific status.
-   *
-   * @param status The status to count (e.g., 'PENDING', 'ACCEPTED', 'REJECTED')
-   * @return The count of requests with the specified status
-   */
-  long countByStatus(String status);
-
   @Query("{ 'faculty': ?0, 'isExceptional': true }")
   List<Request> findAvailableByFacultyAndIsExceptional();
 
@@ -66,19 +57,20 @@ public interface RequestRepository extends MongoRepository<Request, String> {
   @Query("{ 'requestId': ?0 }")
   Optional<Request> findByRequestId(String requestid);
 
+  @Query("{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ] }")
+  Integer countByGroupCodes(List<String> groupCodes);
 
-    @Query("{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ] }")
-    long countByGroupCodes(List<String> groupCodes);
+  @Query(
+      "{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ], 'status': ?1 }")
+  Integer countByGroupCodesAndStatus(List<String> groupCodes, RequestStatus status);
 
-    @Query("{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ], 'status': ?1 }")
-    long countByGroupCodesAndStatus(List<String> groupCodes, RequestStatus status);
+  @Query(
+      "{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ], 'type': ?1 }")
+  Integer countByGroupCodesAndType(List<String> groupCodes, RequestType type);
 
-    @Query("{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ], 'type': ?1 }")
-    long countByGroupCodesAndType(List<String> groupCodes, RequestType type);
+  @Query("{ 'status': ?0 }")
+  Integer countByStatus(RequestStatus status);
 
-    long countByStatus(RequestStatus status);
-    long countByType(RequestType type);
-
-
+  @Query("{ 'type': ?0 }")
+  Integer countByType(RequestType type);
 }
-
