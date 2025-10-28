@@ -1,8 +1,6 @@
 package edu.dosw.controller;
 
 import edu.dosw.dto.CreateRequestDto;
-import edu.dosw.dto.ReportDTO;
-import edu.dosw.dto.RequestStats;
 import edu.dosw.dto.UpdateRequestDto;
 import edu.dosw.model.Request;
 import edu.dosw.model.enums.Role;
@@ -85,7 +83,6 @@ public class RequestController {
     return ResponseEntity.ok(requests);
   }
 
-
   @PatchMapping("/status/{userId}")
   @Operation(
       summary = "Update request status",
@@ -100,5 +97,4 @@ public class RequestController {
   public ResponseEntity<Request> deleteRequest(@PathVariable String requestId) {
     return ResponseEntity.ok(requestService.deleteRequestStatus(requestId));
   }
-
 }

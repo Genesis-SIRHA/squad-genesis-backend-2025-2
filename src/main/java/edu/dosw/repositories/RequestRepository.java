@@ -1,11 +1,10 @@
 package edu.dosw.repositories;
 
 import edu.dosw.model.Request;
-import java.util.List;
-import java.util.Optional;
-
 import edu.dosw.model.enums.RequestStatus;
 import edu.dosw.model.enums.RequestType;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
@@ -65,17 +64,17 @@ public interface RequestRepository extends MongoRepository<Request, String> {
     @Query("{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ] }")
     long countByGroupCodes(List<String> groupCodes);
 
-    @Query("{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ], 'status': ?1 }")
-    long countByGroupCodesAndStatus(List<String> groupCodes, RequestStatus status);
+  @Query(
+      "{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ], 'status': ?1 }")
+  long countByGroupCodesAndStatus(List<String> groupCodes, RequestStatus status);
 
-    @Query("{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ], 'type': ?1 }")
-    long countByGroupCodesAndType(List<String> groupCodes, RequestType type);
+  @Query(
+      "{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ], 'type': ?1 }")
+  long countByGroupCodesAndType(List<String> groupCodes, RequestType type);
 
-    @Query("{ 'status': ?0 }")
-    long countByStatus(RequestStatus status);
+  @Query("{ 'status': ?0 }")
+  long countByStatus(RequestStatus status);
 
-    @Query("{ 'type': ?0 }")
-    long countByType(RequestType type);
-
+  @Query("{ 'type': ?0 }")
+  long countByType(RequestType type);
 }
-

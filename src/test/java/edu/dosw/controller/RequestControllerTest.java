@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import edu.dosw.dto.CreateRequestDto;
-import edu.dosw.dto.ReportDTO;
 import edu.dosw.model.Request;
 import edu.dosw.model.enums.RequestStatus;
 import edu.dosw.model.enums.RequestType;
@@ -14,8 +13,6 @@ import edu.dosw.services.RequestService;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,8 +27,6 @@ class RequestControllerTest {
   @Mock private RequestService requestService;
 
   @InjectMocks private RequestController requestController;
-
-
 
   @Test
   void createRequest_WithJoinType_ShouldReturnCreatedRequest() {

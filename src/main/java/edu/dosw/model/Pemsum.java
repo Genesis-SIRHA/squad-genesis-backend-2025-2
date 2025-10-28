@@ -1,7 +1,6 @@
 package edu.dosw.model;
 
 import edu.dosw.model.enums.HistorialStatus;
-
 import java.util.Map;
 
 /**
