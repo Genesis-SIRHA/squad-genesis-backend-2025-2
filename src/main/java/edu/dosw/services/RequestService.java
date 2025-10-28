@@ -7,6 +7,7 @@ import edu.dosw.exception.BusinessException;
 import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Request;
 import edu.dosw.model.enums.RequestStatus;
+import edu.dosw.model.enums.RequestType;
 import edu.dosw.model.enums.Role;
 import edu.dosw.repositories.RequestRepository;
 import edu.dosw.services.UserServices.DeanService;
@@ -179,21 +180,31 @@ public class RequestService {
         List<Request> requests = requestRepository.findAll();
         List<Request> facultyRequest = new ArrayList<>();
 
-        for (Request request : requests) {
-            String requestFaculty = studentService.getFacultyByStudentId(request.getStudentId());
-            if (requestFaculty.equals(facultyName)) {
-                facultyRequest.add(request);
-            }
-        }
-        try {
-            return facultyRequest.stream()
-                    .sorted(Comparator.comparing(Request::getCreatedAt).reversed())
-                    .toList();
-        } catch (Exception e) {
-            logger.error("Failed to fetch requests by faculty name: {}", e.getMessage());
-            throw new BusinessException("Failed to fetch requests by faculty name: " + e.getMessage());
-        }
+    for (Request request : requests) {
+      String requestFaculty = studentService.getFacultyByStudentId(request.getStudentId());
+      if (requestFaculty.equals(facultyName)) {
+        facultyRequest.add(request);
+      }
     }
+    try {
+      return facultyRequest.stream()
+          .sorted(Comparator.comparing(Request::getCreatedAt).reversed())
+          .toList();
+    } catch (Exception e) {
+      logger.error("Failed to fetch requests by faculty name: {}", e.getMessage());
+      throw new BusinessException("Failed to fetch requests by faculty name: " + e.getMessage());
+    }
+  }
+
+  public Integer countByGroupCodes(List<String> groupCodes) {
+    try {
+      return requestRepository.countByGroupCodes(groupCodes);
+    } catch (Exception e) {
+      logger.error("Failed to count requests by group codes: {}", e.getMessage());
+      throw new BusinessException("Failed to count requests by group codes: " + e.getMessage());
+    }
+  }
+
     public List<String> getWaitingListOfGroup(String groupCode) {
         List<Request> waitingListRequests = getRequestsByDestinationGroup(groupCode);
 
@@ -212,4 +223,51 @@ public class RequestService {
         }
         return requests;
     }
+
+  public Integer countByGroupCodesAndStatus(List<String> groupCodes, RequestStatus status) {
+    try {
+      return requestRepository.countByGroupCodesAndStatus(groupCodes, status);
+    } catch (Exception e) {
+      logger.error("Failed to count requests by group codes and status: {}", e.getMessage());
+      throw new BusinessException(
+          "Failed to count requests by group codes and status: " + e.getMessage());
+    }
+  }
+
+  public Integer countByGroupCodesAndType(List<String> groupCodes, RequestType type) {
+    try {
+      return requestRepository.countByGroupCodesAndType(groupCodes, type);
+    } catch (Exception e) {
+      logger.error("Failed to count requests by group codes and type: {}", e.getMessage());
+      throw new BusinessException(
+          "Failed to count requests by group codes and type: " + e.getMessage());
+    }
+  }
+
+  public Integer countByStatus(RequestStatus status) {
+    try {
+      return requestRepository.countByStatus(status);
+    } catch (Exception e) {
+      logger.error("Failed to count requests by status: {}", e.getMessage());
+      throw new BusinessException("Failed to count requests by status: " + e.getMessage());
+    }
+  }
+
+  public Integer countByType(RequestType type) {
+    try {
+      return requestRepository.countByType(type);
+    } catch (Exception e) {
+      logger.error("Failed to count requests by type: {}", e.getMessage());
+      throw new BusinessException("Failed to count requests by type: " + e.getMessage());
+    }
+  }
+
+  public Integer countTotalRequests() {
+    try {
+      return Math.toIntExact(requestRepository.count());
+    } catch (Exception e) {
+      logger.error("Failed to count total requests: {}", e.getMessage());
+      throw new BusinessException("Failed to count total requests: " + e.getMessage());
+    }
+  }
 }

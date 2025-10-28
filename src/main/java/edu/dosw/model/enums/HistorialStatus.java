@@ -5,6 +5,5 @@ public enum HistorialStatus {
   FINISHED,
   SWAPPED,
   CANCELLED,
-  FAILED,
-  PENDING
+  FAILED
 }
