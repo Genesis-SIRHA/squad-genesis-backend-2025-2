@@ -42,6 +42,11 @@ public class GroupController {
   }
 
   @GetMapping("/{groupCode}/course")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT')")
+  @Operation(
+          summary = "Get course by group code",
+          description =
+                  "Retrieves detailed information about a course by its group code")
   public ResponseEntity<Course> getCourseByGroupCode(@PathVariable String groupCode){
     Course course = groupService.getCourseByGroupCode(groupCode);
     return ResponseEntity.ok(course);
