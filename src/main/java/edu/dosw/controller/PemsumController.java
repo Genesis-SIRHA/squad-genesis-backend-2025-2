@@ -1,6 +1,7 @@
 package edu.dosw.controller;
 
 import edu.dosw.model.Pemsum;
+import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.services.PemsumService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -48,13 +49,13 @@ public class PemsumController {
     return ResponseEntity.ok(pemsumService.getCompletedCoursesPercentage(studentId));
   }
 
-  @GetMapping("/{studentId}/courses-status")
-  @Operation(
-      summary = "Get student courses status",
-      description =
-          "Retrieves a map of all courses with their status (including pending courses from faculty)")
-  public ResponseEntity<Map<String, String>> getStudentCoursesStatus(
-      @PathVariable String studentId) {
-    return ResponseEntity.ok(pemsumService.getStudentCoursesStatus(studentId));
-  }
+    @GetMapping("/{studentId}/courses-status")
+    @Operation(
+            summary = "Get student courses status",
+            description =
+                    "Retrieves a map of all courses with their status (including pending courses from faculty)")
+    public ResponseEntity<Map<String, HistorialStatus>> getStudentCoursesStatus(
+            @PathVariable String studentId) {
+        return ResponseEntity.ok(pemsumService.getStudentCoursesStatus(studentId));
+    }
 }

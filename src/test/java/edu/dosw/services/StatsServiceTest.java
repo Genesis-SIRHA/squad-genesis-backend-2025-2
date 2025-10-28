@@ -123,6 +123,7 @@ class StatsServiceTest {
     @Test
     void getFacultyReassignmentStats_ShouldReturnCorrectStats() {
         String facultyName = "Engineering";
+        String plan = "2024";
         List<Course> facultyCourses = List.of(
                 new Course("MATH101", "Mathematics", 3),
                 new Course("PHYS101", "Physics", 4)
@@ -131,7 +132,7 @@ class StatsServiceTest {
         List<Group> physicsGroups = List.of(createGroup("PHYS101-G01", "PHYS101"));
         List<String> facultyGroupCodes = List.of("MATH101-G01", "PHYS101-G01");
 
-        when(facultyService.findCoursesByFacultyNameAndPlan(facultyName, "2024")).thenReturn(facultyCourses);
+        when(facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan)).thenReturn(facultyCourses);
         when(groupService.getAllGroupsByCourseAbbreviation("MATH101")).thenReturn(mathGroups);
         when(groupService.getAllGroupsByCourseAbbreviation("PHYS101")).thenReturn(physicsGroups);
         when(requestService.countByGroupCodes(facultyGroupCodes)).thenReturn(15L);
@@ -142,7 +143,7 @@ class StatsServiceTest {
         when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.SWAP)).thenReturn(5L);
         when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.JOIN)).thenReturn(1L);
 
-        ReportDTO result = statsService.getFacultyReassignmentStats(facultyName);
+        ReportDTO result = statsService.getFacultyReassignmentStats(facultyName, plan);
 
         assertNotNull(result);
         assertEquals(15L, result.total());
@@ -157,9 +158,10 @@ class StatsServiceTest {
     @Test
     void getFacultyReassignmentStats_WhenNoCourses_ShouldReturnZeroStats() {
         String facultyName = "Unknown";
-        when(facultyService.findCoursesByFacultyNameAndPlan(facultyName, "2024")).thenReturn(List.of());
+        String plan = "2024";
+        when(facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan)).thenReturn(List.of());
 
-        ReportDTO result = statsService.getFacultyReassignmentStats(facultyName);
+        ReportDTO result = statsService.getFacultyReassignmentStats(facultyName, plan);
 
         assertNotNull(result);
         assertEquals(0L, result.total());
@@ -169,6 +171,65 @@ class StatsServiceTest {
         assertEquals(0L, result.cancellations());
         assertEquals(0L, result.swaps());
         assertEquals(0L, result.joins());
+    }
+
+    @Test
+    void getFacultyReassignmentStats_WhenNoGroups_ShouldReturnZeroStats() {
+        String facultyName = "Engineering";
+        String plan = "2023";
+        List<Course> facultyCourses = List.of(
+                new Course("MATH101", "Mathematics", 3),
+                new Course("PHYS101", "Physics", 4)
+        );
+
+        when(facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan)).thenReturn(facultyCourses);
+        when(groupService.getAllGroupsByCourseAbbreviation("MATH101")).thenReturn(List.of());
+        when(groupService.getAllGroupsByCourseAbbreviation("PHYS101")).thenReturn(List.of());
+
+        ReportDTO result = statsService.getFacultyReassignmentStats(facultyName, plan);
+
+        assertNotNull(result);
+        assertEquals(0L, result.total());
+        assertEquals(0L, result.pending());
+        assertEquals(0L, result.approved());
+        assertEquals(0L, result.rejected());
+        assertEquals(0L, result.cancellations());
+        assertEquals(0L, result.swaps());
+        assertEquals(0L, result.joins());
+    }
+
+    @Test
+    void getFacultyReassignmentStats_WithDifferentPlan_ShouldUseCorrectPlan() {
+        String facultyName = "Science";
+        String plan = "2025B";
+        List<Course> facultyCourses = List.of(
+                new Course("CHEM101", "Chemistry", 3)
+        );
+        List<Group> chemGroups = List.of(createGroup("CHEM101-G01", "CHEM101"));
+        List<String> facultyGroupCodes = List.of("CHEM101-G01");
+
+        when(facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan)).thenReturn(facultyCourses);
+        when(groupService.getAllGroupsByCourseAbbreviation("CHEM101")).thenReturn(chemGroups);
+        when(requestService.countByGroupCodes(facultyGroupCodes)).thenReturn(8L);
+        when(requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.PENDING)).thenReturn(1L);
+        when(requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.ACCEPTED)).thenReturn(6L);
+        when(requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.REJECTED)).thenReturn(1L);
+        when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.CANCELLATION)).thenReturn(2L);
+        when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.SWAP)).thenReturn(3L);
+        when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.JOIN)).thenReturn(3L);
+
+        ReportDTO result = statsService.getFacultyReassignmentStats(facultyName, plan);
+
+        assertNotNull(result);
+        assertEquals(8L, result.total());
+        assertEquals(1L, result.pending());
+        assertEquals(6L, result.approved());
+        assertEquals(1L, result.rejected());
+        assertEquals(2L, result.cancellations());
+        assertEquals(3L, result.swaps());
+        assertEquals(3L, result.joins());
+
+        verify(facultyService).findCoursesByFacultyNameAndPlan(facultyName, plan);
     }
 
     @Test

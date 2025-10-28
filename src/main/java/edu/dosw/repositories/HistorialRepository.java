@@ -19,5 +19,6 @@ public interface HistorialRepository extends MongoRepository<Historial, String> 
     @Query("{ 'studentId' : ?0, 'groupCode' : ?1 }")
     Historial findByStudentIdAndGroupCode(String studentId, String groupCode);
 
+    @Query("{ 'studentId': ?0, 'status': ?1 }")
     List<Historial> findByStudentIdAndStatus(String studentId, HistorialStatus status);
 }
