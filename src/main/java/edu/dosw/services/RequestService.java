@@ -1,8 +1,6 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.CreateRequestDto;
-import edu.dosw.dto.ReportDTO;
-import edu.dosw.dto.RequestStats;
 import edu.dosw.dto.UpdateRequestDto;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.exception.ResourceNotFoundException;
@@ -142,7 +140,6 @@ public class RequestService {
 
   }
 
-
   public Request deleteRequestStatus(String requestId) {
     Request request = requestRepository.findByRequestId(requestId).orElse(null);
     if (request == null) {
@@ -188,57 +185,59 @@ public class RequestService {
     }
   }
 
-    public long countByGroupCodes(List<String> groupCodes) {
-        try {
-            return requestRepository.countByGroupCodes(groupCodes);
-        } catch (Exception e) {
-            logger.error("Failed to count requests by group codes: {}", e.getMessage());
-            throw new BusinessException("Failed to count requests by group codes: " + e.getMessage());
-        }
+  public long countByGroupCodes(List<String> groupCodes) {
+    try {
+      return requestRepository.countByGroupCodes(groupCodes);
+    } catch (Exception e) {
+      logger.error("Failed to count requests by group codes: {}", e.getMessage());
+      throw new BusinessException("Failed to count requests by group codes: " + e.getMessage());
     }
+  }
 
-    public long countByGroupCodesAndStatus(List<String> groupCodes, RequestStatus status) {
-        try {
-            return requestRepository.countByGroupCodesAndStatus(groupCodes, status);
-        } catch (Exception e) {
-            logger.error("Failed to count requests by group codes and status: {}", e.getMessage());
-            throw new BusinessException("Failed to count requests by group codes and status: " + e.getMessage());
-        }
+  public long countByGroupCodesAndStatus(List<String> groupCodes, RequestStatus status) {
+    try {
+      return requestRepository.countByGroupCodesAndStatus(groupCodes, status);
+    } catch (Exception e) {
+      logger.error("Failed to count requests by group codes and status: {}", e.getMessage());
+      throw new BusinessException(
+          "Failed to count requests by group codes and status: " + e.getMessage());
     }
+  }
 
-    public long countByGroupCodesAndType(List<String> groupCodes, RequestType type) {
-        try {
-            return requestRepository.countByGroupCodesAndType(groupCodes, type);
-        } catch (Exception e) {
-            logger.error("Failed to count requests by group codes and type: {}", e.getMessage());
-            throw new BusinessException("Failed to count requests by group codes and type: " + e.getMessage());
-        }
+  public long countByGroupCodesAndType(List<String> groupCodes, RequestType type) {
+    try {
+      return requestRepository.countByGroupCodesAndType(groupCodes, type);
+    } catch (Exception e) {
+      logger.error("Failed to count requests by group codes and type: {}", e.getMessage());
+      throw new BusinessException(
+          "Failed to count requests by group codes and type: " + e.getMessage());
     }
+  }
 
-    public long countByStatus(RequestStatus status) {
-        try {
-            return requestRepository.countByStatus(status);
-        } catch (Exception e) {
-            logger.error("Failed to count requests by status: {}", e.getMessage());
-            throw new BusinessException("Failed to count requests by status: " + e.getMessage());
-        }
+  public long countByStatus(RequestStatus status) {
+    try {
+      return requestRepository.countByStatus(status);
+    } catch (Exception e) {
+      logger.error("Failed to count requests by status: {}", e.getMessage());
+      throw new BusinessException("Failed to count requests by status: " + e.getMessage());
     }
+  }
 
-    public long countByType(RequestType type) {
-        try {
-            return requestRepository.countByType(type);
-        } catch (Exception e) {
-            logger.error("Failed to count requests by type: {}", e.getMessage());
-            throw new BusinessException("Failed to count requests by type: " + e.getMessage());
-        }
+  public long countByType(RequestType type) {
+    try {
+      return requestRepository.countByType(type);
+    } catch (Exception e) {
+      logger.error("Failed to count requests by type: {}", e.getMessage());
+      throw new BusinessException("Failed to count requests by type: " + e.getMessage());
     }
+  }
 
-    public long countTotalRequests() {
-        try {
-            return requestRepository.count();
-        } catch (Exception e) {
-            logger.error("Failed to count total requests: {}", e.getMessage());
-            throw new BusinessException("Failed to count total requests: " + e.getMessage());
-        }
+  public long countTotalRequests() {
+    try {
+      return requestRepository.count();
+    } catch (Exception e) {
+      logger.error("Failed to count total requests: {}", e.getMessage());
+      throw new BusinessException("Failed to count total requests: " + e.getMessage());
     }
+  }
 }

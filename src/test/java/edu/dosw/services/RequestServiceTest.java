@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import edu.dosw.dto.CreateRequestDto;
-import edu.dosw.dto.ReportDTO;
 import edu.dosw.dto.UpdateRequestDto;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.exception.ResourceNotFoundException;
