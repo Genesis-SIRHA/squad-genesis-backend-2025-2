@@ -6,7 +6,6 @@ import edu.dosw.dto.UpdateCourseDTO;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Faculty;
-import edu.dosw.model.Group;
 import edu.dosw.repositories.FacultyRepository;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -202,5 +201,4 @@ public class FacultyService {
         .removeIf(c -> c.getAbbreviation().equals(courseAbbreviation.toUpperCase()));
     facultyRepository.save(faculty);
   }
-
 }

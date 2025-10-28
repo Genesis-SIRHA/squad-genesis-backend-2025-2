@@ -34,20 +34,19 @@ public class GroupController {
 
   @GetMapping("/{courseAbbreviation}")
   @Operation(
-          summary = "Get group by course abbreviation",
-          description =
-                  "Retrieves detailed information about a all groups by course abbreviation")
-  public ResponseEntity<List<Group>> getGroupByCourseAbbreviation(@PathVariable String courseAbbreviation) {
+      summary = "Get group by course abbreviation",
+      description = "Retrieves detailed information about a all groups by course abbreviation")
+  public ResponseEntity<List<Group>> getGroupByCourseAbbreviation(
+      @PathVariable String courseAbbreviation) {
     return ResponseEntity.ok(groupService.getAllGroupsByCourseAbbreviation(courseAbbreviation));
   }
 
   @GetMapping("/{groupCode}/course")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT')")
   @Operation(
-          summary = "Get course by group code",
-          description =
-                  "Retrieves detailed information about a course by its group code")
-  public ResponseEntity<Course> getCourseByGroupCode(@PathVariable String groupCode){
+      summary = "Get course by group code",
+      description = "Retrieves detailed information about a course by its group code")
+  public ResponseEntity<Course> getCourseByGroupCode(@PathVariable String groupCode) {
     Course course = groupService.getCourseByGroupCode(groupCode);
     return ResponseEntity.ok(course);
   }

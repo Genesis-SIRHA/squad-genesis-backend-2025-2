@@ -205,9 +205,9 @@ public class GroupService {
 
       for (Course course : courses) {
         List<Group> groups = getAllGroupsByCourseAbbreviation(course.getAbbreviation());
-        if (groups!= null) {
-          boolean groupExists = groups.stream()
-                  .anyMatch(group -> groupCode.equalsIgnoreCase(group.getGroupCode()));
+        if (groups != null) {
+          boolean groupExists =
+              groups.stream().anyMatch(group -> groupCode.equalsIgnoreCase(group.getGroupCode()));
 
           if (groupExists) {
             return course;
