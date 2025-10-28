@@ -40,9 +40,6 @@ public interface RequestRepository extends MongoRepository<Request, String> {
   @Query("{ 'studentId': ?0 }")
   List<Request> findByStudentId(String studentId);
 
-
-
-
   @Query("{ 'faculty': ?0, 'isExceptional': true }")
   List<Request> findAvailableByFacultyAndIsExceptional();
 

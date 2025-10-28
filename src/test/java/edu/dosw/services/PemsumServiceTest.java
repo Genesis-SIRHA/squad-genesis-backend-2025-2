@@ -3,7 +3,6 @@ package edu.dosw.services;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import edu.dosw.exception.BusinessException;
 import edu.dosw.model.*;
 import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.services.UserServices.StudentService;
@@ -40,16 +39,16 @@ class PemsumServiceTest {
     student.setFullName("John Doe");
 
     List<Course> courses =
-            Arrays.asList(
-                    new Course("MATH101", "Calculus I", 4),
-                    new Course("PHYS101", "Physics I", 3),
-                    new Course("CHEM101", "Chemistry I", 3));
+        Arrays.asList(
+            new Course("MATH101", "Calculus I", 4),
+            new Course("PHYS101", "Physics I", 3),
+            new Course("CHEM101", "Chemistry I", 3));
 
     List<Historial> historials =
-            Arrays.asList(
-                    createHistorial(studentId, "MATH101", HistorialStatus.FINISHED),
-                    createHistorial(studentId, "PHYS101", HistorialStatus.FINISHED),
-                    createHistorial(studentId, "CHEM101", HistorialStatus.ON_GOING));
+        Arrays.asList(
+            createHistorial(studentId, "MATH101", HistorialStatus.FINISHED),
+            createHistorial(studentId, "PHYS101", HistorialStatus.FINISHED),
+            createHistorial(studentId, "CHEM101", HistorialStatus.ON_GOING));
 
     when(studentService.getStudentById(studentId)).thenReturn(student);
     when(facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024")).thenReturn(courses);
@@ -77,13 +76,13 @@ class PemsumServiceTest {
     student.setFullName("Jane Smith");
 
     List<Course> courses =
-            Arrays.asList(
-                    new Course("BIO101", "Biology I", 3), new Course("CHEM101", "Chemistry I", 3));
+        Arrays.asList(
+            new Course("BIO101", "Biology I", 3), new Course("CHEM101", "Chemistry I", 3));
 
     List<Historial> historials =
-            Arrays.asList(
-                    createHistorial(studentId, "BIO101", HistorialStatus.FAILED),
-                    createHistorial(studentId, "CHEM101", HistorialStatus.CANCELLED));
+        Arrays.asList(
+            createHistorial(studentId, "BIO101", HistorialStatus.FAILED),
+            createHistorial(studentId, "CHEM101", HistorialStatus.CANCELLED));
 
     when(studentService.getStudentById(studentId)).thenReturn(student);
     when(facultyService.findCoursesByFacultyNameAndPlan("Science", "2024")).thenReturn(courses);
@@ -110,18 +109,18 @@ class PemsumServiceTest {
     student.setFullName("Bob Wilson");
 
     List<Course> courses =
-            Arrays.asList(
-                    new Course("MATH101", "Calculus I", 4),
-                    new Course("PHYS101", "Physics I", 3),
-                    new Course("CS101", "Programming", 3),
-                    new Course("ENG101", "English", 2));
+        Arrays.asList(
+            new Course("MATH101", "Calculus I", 4),
+            new Course("PHYS101", "Physics I", 3),
+            new Course("CS101", "Programming", 3),
+            new Course("ENG101", "English", 2));
 
     List<Historial> historials =
-            Arrays.asList(
-                    createHistorial(studentId, "MATH101", HistorialStatus.FINISHED),
-                    createHistorial(studentId, "PHYS101", HistorialStatus.FAILED),
-                    createHistorial(studentId, "CS101", HistorialStatus.FINISHED),
-                    createHistorial(studentId, "ENG101", HistorialStatus.SWAPPED));
+        Arrays.asList(
+            createHistorial(studentId, "MATH101", HistorialStatus.FINISHED),
+            createHistorial(studentId, "PHYS101", HistorialStatus.FAILED),
+            createHistorial(studentId, "CS101", HistorialStatus.FINISHED),
+            createHistorial(studentId, "ENG101", HistorialStatus.SWAPPED));
 
     when(studentService.getStudentById(studentId)).thenReturn(student);
     when(facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024")).thenReturn(courses);
@@ -144,16 +143,16 @@ class PemsumServiceTest {
     student.setFullName("Alice Brown");
 
     List<Course> courses =
-            Arrays.asList(
-                    new Course("MATH101", "Calculus I", 4),
-                    new Course("PHYS101", "Physics I", 3),
-                    new Course("CHEM101", "Chemistry I", 3));
+        Arrays.asList(
+            new Course("MATH101", "Calculus I", 4),
+            new Course("PHYS101", "Physics I", 3),
+            new Course("CHEM101", "Chemistry I", 3));
 
     List<Historial> historials =
-            Arrays.asList(
-                    createHistorial(studentId, "MATH101", HistorialStatus.FINISHED),
-                    createHistorial(studentId, "PHYS101", HistorialStatus.FINISHED),
-                    createHistorial(studentId, "CHEM101", HistorialStatus.FINISHED));
+        Arrays.asList(
+            createHistorial(studentId, "MATH101", HistorialStatus.FINISHED),
+            createHistorial(studentId, "PHYS101", HistorialStatus.FINISHED),
+            createHistorial(studentId, "CHEM101", HistorialStatus.FINISHED));
 
     when(studentService.getStudentById(studentId)).thenReturn(student);
     when(facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024")).thenReturn(courses);
@@ -176,8 +175,8 @@ class PemsumServiceTest {
     student.setFullName("Charlie Davis");
 
     List<Course> courses =
-            Arrays.asList(
-                    new Course("MATH101", "Calculus I", 4), new Course("PHYS101", "Physics I", 3));
+        Arrays.asList(
+            new Course("MATH101", "Calculus I", 4), new Course("PHYS101", "Physics I", 3));
 
     when(studentService.getStudentById(studentId)).thenReturn(student);
     when(facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024")).thenReturn(courses);
@@ -194,7 +193,6 @@ class PemsumServiceTest {
     assertEquals("pending", coursesMap.get(courses.get(1)));
   }
 
-
   @Test
   void getCompletedCoursesPercentage_ShouldCalculateCorrectPercentage() {
     String studentId = "STU006";
@@ -204,24 +202,26 @@ class PemsumServiceTest {
     student.setPlan("2024");
 
     List<Course> allCourses =
-            Arrays.asList(
-                    new Course("MATH101", "Calculus I", 4),
-                    new Course("PHYS101", "Physics I", 3),
-                    new Course("CHEM101", "Chemistry I", 3),
-                    new Course("CS101", "Programming", 3));
+        Arrays.asList(
+            new Course("MATH101", "Calculus I", 4),
+            new Course("PHYS101", "Physics I", 3),
+            new Course("CHEM101", "Chemistry I", 3),
+            new Course("CS101", "Programming", 3));
 
     List<Historial> finishedHistorials =
-            Arrays.asList(
-                    createHistorial(studentId, "MATH101-01", HistorialStatus.FINISHED),
-                    createHistorial(studentId, "PHYS101-02", HistorialStatus.FINISHED));
+        Arrays.asList(
+            createHistorial(studentId, "MATH101-01", HistorialStatus.FINISHED),
+            createHistorial(studentId, "PHYS101-02", HistorialStatus.FINISHED));
 
     when(studentService.getStudentById(studentId)).thenReturn(student);
     when(facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024"))
-            .thenReturn(allCourses);
+        .thenReturn(allCourses);
     when(historialService.getHistorialByStudentIdAndStatus(studentId, HistorialStatus.FINISHED))
-            .thenReturn(finishedHistorials);
-    when(groupService.getGroupByGroupCode("MATH101-01")).thenReturn(createGroup("MATH101-01", "MATH101"));
-    when(groupService.getGroupByGroupCode("PHYS101-02")).thenReturn(createGroup("PHYS101-02", "PHYS101"));
+        .thenReturn(finishedHistorials);
+    when(groupService.getGroupByGroupCode("MATH101-01"))
+        .thenReturn(createGroup("MATH101-01", "MATH101"));
+    when(groupService.getGroupByGroupCode("PHYS101-02"))
+        .thenReturn(createGroup("PHYS101-02", "PHYS101"));
 
     double percentage = pemsumService.getCompletedCoursesPercentage(studentId);
 
@@ -237,15 +237,15 @@ class PemsumServiceTest {
     student.setPlan("2024");
 
     List<Course> allCourses =
-            Arrays.asList(
-                    new Course("BIO101", "Biology I", 3), new Course("CHEM101", "Chemistry I", 3));
+        Arrays.asList(
+            new Course("BIO101", "Biology I", 3), new Course("CHEM101", "Chemistry I", 3));
 
     List<Historial> finishedHistorials = Collections.emptyList();
 
     when(studentService.getStudentById(studentId)).thenReturn(student);
     when(facultyService.findCoursesByFacultyNameAndPlan("Science", "2024")).thenReturn(allCourses);
     when(historialService.getHistorialByStudentIdAndStatus(studentId, HistorialStatus.FINISHED))
-            .thenReturn(finishedHistorials);
+        .thenReturn(finishedHistorials);
 
     double percentage = pemsumService.getCompletedCoursesPercentage(studentId);
 
@@ -261,21 +261,23 @@ class PemsumServiceTest {
     student.setPlan("2024");
 
     List<Course> allCourses =
-            Arrays.asList(
-                    new Course("MATH101", "Calculus I", 4), new Course("PHYS101", "Physics I", 3));
+        Arrays.asList(
+            new Course("MATH101", "Calculus I", 4), new Course("PHYS101", "Physics I", 3));
 
     List<Historial> finishedHistorials =
-            Arrays.asList(
-                    createHistorial(studentId, "MATH101-01", HistorialStatus.FINISHED),
-                    createHistorial(studentId, "PHYS101-02", HistorialStatus.FINISHED));
+        Arrays.asList(
+            createHistorial(studentId, "MATH101-01", HistorialStatus.FINISHED),
+            createHistorial(studentId, "PHYS101-02", HistorialStatus.FINISHED));
 
     when(studentService.getStudentById(studentId)).thenReturn(student);
     when(facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024"))
-            .thenReturn(allCourses);
+        .thenReturn(allCourses);
     when(historialService.getHistorialByStudentIdAndStatus(studentId, HistorialStatus.FINISHED))
-            .thenReturn(finishedHistorials);
-    when(groupService.getGroupByGroupCode("MATH101-01")).thenReturn(createGroup("MATH101-01", "MATH101"));
-    when(groupService.getGroupByGroupCode("PHYS101-02")).thenReturn(createGroup("PHYS101-02", "PHYS101"));
+        .thenReturn(finishedHistorials);
+    when(groupService.getGroupByGroupCode("MATH101-01"))
+        .thenReturn(createGroup("MATH101-01", "MATH101"));
+    when(groupService.getGroupByGroupCode("PHYS101-02"))
+        .thenReturn(createGroup("PHYS101-02", "PHYS101"));
 
     double percentage = pemsumService.getCompletedCoursesPercentage(studentId);
 
@@ -291,22 +293,21 @@ class PemsumServiceTest {
     student.setPlan("2024");
 
     List<Course> allCourses =
-            Arrays.asList(
-                    new Course("MATH101", "Calculus I", 4), new Course("PHYS101", "Physics I", 3));
+        Arrays.asList(
+            new Course("MATH101", "Calculus I", 4), new Course("PHYS101", "Physics I", 3));
 
     List<Historial> finishedHistorials = Collections.emptyList();
 
     when(studentService.getStudentById(studentId)).thenReturn(student);
     when(facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024"))
-            .thenReturn(allCourses);
+        .thenReturn(allCourses);
     when(historialService.getHistorialByStudentIdAndStatus(studentId, HistorialStatus.FINISHED))
-            .thenReturn(finishedHistorials);
+        .thenReturn(finishedHistorials);
 
     double percentage = pemsumService.getCompletedCoursesPercentage(studentId);
 
     assertEquals(0.0, percentage, 0.0);
   }
-
 
   @Test
   void getStudentCoursesStatus_ShouldCombineHistorialAndPendingCourses() {
@@ -317,21 +318,21 @@ class PemsumServiceTest {
     student.setPlan("2024");
 
     List<Course> facultyCourses =
-            Arrays.asList(
-                    new Course("MATH101", "Calculus I", 4),
-                    new Course("PHYS101", "Physics I", 3),
-                    new Course("CHEM101", "Chemistry I", 3),
-                    new Course("CS101", "Programming", 3));
+        Arrays.asList(
+            new Course("MATH101", "Calculus I", 4),
+            new Course("PHYS101", "Physics I", 3),
+            new Course("CHEM101", "Chemistry I", 3),
+            new Course("CS101", "Programming", 3));
 
     List<Historial> studentHistorial =
-            Arrays.asList(
-                    createHistorial(studentId, "MATH101", HistorialStatus.FINISHED),
-                    createHistorial(studentId, "PHYS101", HistorialStatus.ON_GOING),
-                    createHistorial(studentId, "CHEM101", HistorialStatus.FAILED));
+        Arrays.asList(
+            createHistorial(studentId, "MATH101", HistorialStatus.FINISHED),
+            createHistorial(studentId, "PHYS101", HistorialStatus.ON_GOING),
+            createHistorial(studentId, "CHEM101", HistorialStatus.FAILED));
 
     when(studentService.getStudentById(studentId)).thenReturn(student);
     when(facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024"))
-            .thenReturn(facultyCourses);
+        .thenReturn(facultyCourses);
     when(historialService.getHistorialByStudentId(studentId)).thenReturn(studentHistorial);
 
     Map<String, String> result = pemsumService.getStudentCoursesStatus(studentId);
@@ -355,13 +356,13 @@ class PemsumServiceTest {
     List<Course> facultyCourses = Arrays.asList(new Course("BIO101", "Biology I", 3));
 
     List<Historial> studentHistorial =
-            Arrays.asList(
-                    createHistorial(studentId, "BIO101", HistorialStatus.FAILED),
-                    createHistorial(studentId, "BIO101", HistorialStatus.ON_GOING));
+        Arrays.asList(
+            createHistorial(studentId, "BIO101", HistorialStatus.FAILED),
+            createHistorial(studentId, "BIO101", HistorialStatus.ON_GOING));
 
     when(studentService.getStudentById(studentId)).thenReturn(student);
     when(facultyService.findCoursesByFacultyNameAndPlan("Science", "2024"))
-            .thenReturn(facultyCourses);
+        .thenReturn(facultyCourses);
     when(historialService.getHistorialByStudentId(studentId)).thenReturn(studentHistorial);
 
     Map<String, String> result = pemsumService.getStudentCoursesStatus(studentId);
@@ -382,13 +383,13 @@ class PemsumServiceTest {
     List<Course> facultyCourses = Arrays.asList(new Course("MATH101", "Calculus I", 4));
 
     List<Historial> studentHistorial =
-            Arrays.asList(
-                    createHistorial(studentId, "MATH101", HistorialStatus.FINISHED),
-                    createHistorial(studentId, "MATH101", HistorialStatus.FAILED));
+        Arrays.asList(
+            createHistorial(studentId, "MATH101", HistorialStatus.FINISHED),
+            createHistorial(studentId, "MATH101", HistorialStatus.FAILED));
 
     when(studentService.getStudentById(studentId)).thenReturn(student);
     when(facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024"))
-            .thenReturn(facultyCourses);
+        .thenReturn(facultyCourses);
     when(historialService.getHistorialByStudentId(studentId)).thenReturn(studentHistorial);
 
     Map<String, String> result = pemsumService.getStudentCoursesStatus(studentId);
@@ -409,13 +410,13 @@ class PemsumServiceTest {
     List<Course> facultyCourses = Arrays.asList(new Course("MATH101", "Calculus I", 4));
 
     List<Historial> studentHistorial =
-            Arrays.asList(
-                    createHistorial(studentId, "MATH101", HistorialStatus.ON_GOING),
-                    createHistorial(studentId, "MATH101", HistorialStatus.FINISHED));
+        Arrays.asList(
+            createHistorial(studentId, "MATH101", HistorialStatus.ON_GOING),
+            createHistorial(studentId, "MATH101", HistorialStatus.FINISHED));
 
     when(studentService.getStudentById(studentId)).thenReturn(student);
     when(facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024"))
-            .thenReturn(facultyCourses);
+        .thenReturn(facultyCourses);
     when(historialService.getHistorialByStudentId(studentId)).thenReturn(studentHistorial);
 
     Map<String, String> result = pemsumService.getStudentCoursesStatus(studentId);
@@ -434,12 +435,12 @@ class PemsumServiceTest {
     student.setPlan("2024");
 
     List<Course> facultyCourses =
-            Arrays.asList(
-                    new Course("BIO101", "Biology I", 3), new Course("CHEM101", "Chemistry I", 3));
+        Arrays.asList(
+            new Course("BIO101", "Biology I", 3), new Course("CHEM101", "Chemistry I", 3));
 
     when(studentService.getStudentById(studentId)).thenReturn(student);
     when(facultyService.findCoursesByFacultyNameAndPlan("Science", "2024"))
-            .thenReturn(facultyCourses);
+        .thenReturn(facultyCourses);
     when(historialService.getHistorialByStudentId(studentId)).thenReturn(List.of());
 
     Map<String, String> result = pemsumService.getStudentCoursesStatus(studentId);
@@ -452,12 +453,12 @@ class PemsumServiceTest {
 
   private Historial createHistorial(String studentId, String groupCode, HistorialStatus status) {
     return new Historial.HistorialBuilder()
-            .studentId(studentId)
-            .groupCode(groupCode)
-            .status(status)
-            .year("2024")
-            .period("1")
-            .build();
+        .studentId(studentId)
+        .groupCode(groupCode)
+        .status(status)
+        .year("2024")
+        .period("1")
+        .build();
   }
 
   private Group createGroup(String groupCode, String abbreviation) {

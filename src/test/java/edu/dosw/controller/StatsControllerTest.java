@@ -54,10 +54,10 @@ class StatsControllerTest {
   void getFacultyReassignmentStats_ShouldReturnReportDTO() {
     ReportDTO expectedReport = new ReportDTO(15, 3, 10, 2, 4, 5, 1);
     when(statsService.getFacultyReassignmentStats("Engineering", "2024"))
-            .thenReturn(expectedReport);
+        .thenReturn(expectedReport);
 
     ResponseEntity<ReportDTO> response =
-            statsController.getFacultyReassignmentStats("Engineering", "2024");
+        statsController.getFacultyReassignmentStats("Engineering", "2024");
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(expectedReport, response.getBody());
@@ -136,10 +136,10 @@ class StatsControllerTest {
   @Test
   void getCourseReassignmentStats_WhenServiceThrowsException_ShouldPropagateException() {
     when(statsService.getCourseReassignmentStats("MATH101"))
-            .thenThrow(new RuntimeException("Service error"));
+        .thenThrow(new RuntimeException("Service error"));
 
     assertThrows(
-            RuntimeException.class, () -> statsController.getCourseReassignmentStats("MATH101"));
+        RuntimeException.class, () -> statsController.getCourseReassignmentStats("MATH101"));
     verify(statsService, times(1)).getCourseReassignmentStats("MATH101");
   }
 
@@ -149,7 +149,7 @@ class StatsControllerTest {
     when(statsService.getFacultyReassignmentStats("Science", "2025B")).thenReturn(expectedReport);
 
     ResponseEntity<ReportDTO> response =
-            statsController.getFacultyReassignmentStats("Science", "2025B");
+        statsController.getFacultyReassignmentStats("Science", "2025B");
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(expectedReport, response.getBody());

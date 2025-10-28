@@ -47,19 +47,19 @@ class StatsServiceTest {
   void getCourseReassignmentStats_ShouldReturnCorrectStats() {
     String courseAbbreviation = "MATH101";
     List<Group> groups =
-            List.of(createGroup("MATH101-G01", "MATH101"), createGroup("MATH101-G02", "MATH101"));
+        List.of(createGroup("MATH101-G01", "MATH101"), createGroup("MATH101-G02", "MATH101"));
     List<String> groupCodes = List.of("MATH101-G01", "MATH101-G02");
 
     when(groupService.getAllGroupsByCourseAbbreviation(courseAbbreviation)).thenReturn(groups);
     when(requestService.countByGroupCodes(groupCodes)).thenReturn(50);
     when(requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.PENDING))
-            .thenReturn(10);
+        .thenReturn(10);
     when(requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.ACCEPTED))
-            .thenReturn(30);
+        .thenReturn(30);
     when(requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.REJECTED))
-            .thenReturn(10);
+        .thenReturn(10);
     when(requestService.countByGroupCodesAndType(groupCodes, RequestType.CANCELLATION))
-            .thenReturn(20);
+        .thenReturn(20);
     when(requestService.countByGroupCodesAndType(groupCodes, RequestType.SWAP)).thenReturn(25);
     when(requestService.countByGroupCodesAndType(groupCodes, RequestType.JOIN)).thenReturn(25);
 
@@ -99,13 +99,13 @@ class StatsServiceTest {
 
     when(requestService.countByGroupCodes(singleGroup)).thenReturn(40);
     when(requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.PENDING))
-            .thenReturn(5);
+        .thenReturn(5);
     when(requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.ACCEPTED))
-            .thenReturn(30);
+        .thenReturn(30);
     when(requestService.countByGroupCodesAndStatus(singleGroup, RequestStatus.REJECTED))
-            .thenReturn(5);
+        .thenReturn(5);
     when(requestService.countByGroupCodesAndType(singleGroup, RequestType.CANCELLATION))
-            .thenReturn(10);
+        .thenReturn(10);
     when(requestService.countByGroupCodesAndType(singleGroup, RequestType.SWAP)).thenReturn(15);
     when(requestService.countByGroupCodesAndType(singleGroup, RequestType.JOIN)).thenReturn(5);
 
@@ -126,28 +126,28 @@ class StatsServiceTest {
     String facultyName = "Engineering";
     String plan = "2024";
     List<Course> facultyCourses =
-            List.of(new Course("MATH101", "Mathematics", 3), new Course("PHYS101", "Physics", 4));
+        List.of(new Course("MATH101", "Mathematics", 3), new Course("PHYS101", "Physics", 4));
     List<Group> mathGroups = List.of(createGroup("MATH101-G01", "MATH101"));
     List<Group> physicsGroups = List.of(createGroup("PHYS101-G01", "PHYS101"));
     List<String> facultyGroupCodes = List.of("MATH101-G01", "PHYS101-G01");
 
     when(facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan))
-            .thenReturn(facultyCourses);
+        .thenReturn(facultyCourses);
     when(groupService.getAllGroupsByCourseAbbreviation("MATH101")).thenReturn(mathGroups);
     when(groupService.getAllGroupsByCourseAbbreviation("PHYS101")).thenReturn(physicsGroups);
     when(requestService.countByGroupCodes(facultyGroupCodes)).thenReturn(15);
     when(requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.PENDING))
-            .thenReturn(3);
+        .thenReturn(3);
     when(requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.ACCEPTED))
-            .thenReturn(10);
+        .thenReturn(10);
     when(requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.REJECTED))
-            .thenReturn(2);
+        .thenReturn(2);
     when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.CANCELLATION))
-            .thenReturn(4);
+        .thenReturn(4);
     when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.SWAP))
-            .thenReturn(5);
+        .thenReturn(5);
     when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.JOIN))
-            .thenReturn(1);
+        .thenReturn(1);
 
     ReportDTO result = statsService.getFacultyReassignmentStats(facultyName, plan);
 
@@ -184,10 +184,10 @@ class StatsServiceTest {
     String facultyName = "Engineering";
     String plan = "2023";
     List<Course> facultyCourses =
-            List.of(new Course("MATH101", "Mathematics", 3), new Course("PHYS101", "Physics", 4));
+        List.of(new Course("MATH101", "Mathematics", 3), new Course("PHYS101", "Physics", 4));
 
     when(facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan))
-            .thenReturn(facultyCourses);
+        .thenReturn(facultyCourses);
     when(groupService.getAllGroupsByCourseAbbreviation("MATH101")).thenReturn(List.of());
     when(groupService.getAllGroupsByCourseAbbreviation("PHYS101")).thenReturn(List.of());
 
@@ -212,21 +212,21 @@ class StatsServiceTest {
     List<String> facultyGroupCodes = List.of("CHEM101-G01");
 
     when(facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan))
-            .thenReturn(facultyCourses);
+        .thenReturn(facultyCourses);
     when(groupService.getAllGroupsByCourseAbbreviation("CHEM101")).thenReturn(chemGroups);
     when(requestService.countByGroupCodes(facultyGroupCodes)).thenReturn(8);
     when(requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.PENDING))
-            .thenReturn(1);
+        .thenReturn(1);
     when(requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.ACCEPTED))
-            .thenReturn(6);
+        .thenReturn(6);
     when(requestService.countByGroupCodesAndStatus(facultyGroupCodes, RequestStatus.REJECTED))
-            .thenReturn(1);
+        .thenReturn(1);
     when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.CANCELLATION))
-            .thenReturn(2);
+        .thenReturn(2);
     when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.SWAP))
-            .thenReturn(3);
+        .thenReturn(3);
     when(requestService.countByGroupCodesAndType(facultyGroupCodes, RequestType.JOIN))
-            .thenReturn(3);
+        .thenReturn(3);
 
     ReportDTO result = statsService.getFacultyReassignmentStats(facultyName, plan);
 
