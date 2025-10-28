@@ -21,10 +21,10 @@ public class HistorialService {
   private final PeriodService periodService;
   private final Logger logger = LoggerFactory.getLogger(HistorialService.class);
 
-  public List<String> getCurrentSessionsByStudentIdAndPeriod(
+  public List<String> getGroupCodesByStudentIdAndPeriod(
       String studentId, String year, String period) {
     ArrayList<Historial> historial =
-        historialRepository.findCurrentSessionsByStudentIdAndYearAndPeriod(studentId, year, period);
+        historialRepository.findHistorialByStudentIdAndYearAndPeriod(studentId, year, period);
     ArrayList<String> groupCodes = new ArrayList<>();
     for (Historial h : historial) {
       groupCodes.add(h.getGroupCode());
@@ -40,12 +40,6 @@ public class HistorialService {
           "historial not found with studentId " + studentId + " and groupCode " + groupCode);
     }
     return historial;
-  }
-
-  public List<Historial> getSessionsByStudentIdYearAndPeriod(
-      String studentId, String year, String period) {
-    return historialRepository.findCurrentSessionsByStudentIdAndYearAndPeriod(
-        studentId, year, period);
   }
 
   public List<Historial> getSessionsByCourses(String studentId, List<Course> courses) {

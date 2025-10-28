@@ -88,7 +88,7 @@ class SchedulerServiceTest {
     String period = "1";
     List<String> groupCodes = Arrays.asList("MAT101");
 
-    when(historialService.getCurrentSessionsByStudentIdAndPeriod(studentId, year, period))
+    when(historialService.getGroupCodesByStudentIdAndPeriod(studentId, year, period))
         .thenReturn(groupCodes);
     when(sessionService.getSessionsByGroupCode("MAT101")).thenReturn(Arrays.asList(session1));
 
@@ -104,7 +104,7 @@ class SchedulerServiceTest {
     assertEquals("1", returnedSession.getPeriod());
 
     verify(historialService, times(1))
-        .getCurrentSessionsByStudentIdAndPeriod(studentId, year, period);
+        .getGroupCodesByStudentIdAndPeriod(studentId, year, period);
     verify(sessionService, times(1)).getSessionsByGroupCode("MAT101");
   }
 
@@ -120,9 +120,9 @@ class SchedulerServiceTest {
     when(periodService.getPeriod()).thenReturn(currentPeriod);
     when(historialService.getAllHistorialsByStudentId(studentId)).thenReturn(allHistorials);
 
-    when(historialService.getCurrentSessionsByStudentIdAndPeriod(studentId, "2023", "2"))
+    when(historialService.getGroupCodesByStudentIdAndPeriod(studentId, "2023", "2"))
         .thenReturn(Arrays.asList("FIS201"));
-    when(historialService.getCurrentSessionsByStudentIdAndPeriod(studentId, "2023", "1"))
+    when(historialService.getGroupCodesByStudentIdAndPeriod(studentId, "2023", "1"))
         .thenReturn(Arrays.asList("QUI101"));
     when(sessionService.getSessionsByGroupCode("FIS201")).thenReturn(Arrays.asList(session2));
     when(sessionService.getSessionsByGroupCode("QUI101")).thenReturn(Arrays.asList(session3));
@@ -164,7 +164,7 @@ class SchedulerServiceTest {
   }
 
   @Test
-  void getScheduleById_ShouldReturnCurrentScheduleWithCurrentPeriod() {
+  void getScheduleById_ShouldReturnCurrentActualScheduleWithCurrentPeriodStudent() {
 
     String studentId = "123";
     String currentYear = "2024";
@@ -173,12 +173,12 @@ class SchedulerServiceTest {
 
     when(periodService.getYear()).thenReturn(currentYear);
     when(periodService.getPeriod()).thenReturn(currentPeriod);
-    when(historialService.getCurrentSessionsByStudentIdAndPeriod(
+    when(historialService.getGroupCodesByStudentIdAndPeriod(
             studentId, currentYear, currentPeriod))
         .thenReturn(groupCodes);
     when(sessionService.getSessionsByGroupCode("MAT101")).thenReturn(Arrays.asList(session1));
 
-    Schedule result = schedulerService.getScheduleById(studentId);
+    Schedule result = schedulerService.getActualScheduleByStudentId(studentId);
 
     assertNotNull(result);
     assertEquals(studentId, result.getStudentId());
@@ -223,7 +223,7 @@ class SchedulerServiceTest {
 
     List<Session> allSessions = Arrays.asList(correctSession, wrongYearSession, wrongPeriodSession);
 
-    when(historialService.getCurrentSessionsByStudentIdAndPeriod(studentId, year, period))
+    when(historialService.getGroupCodesByStudentIdAndPeriod(studentId, year, period))
         .thenReturn(groupCodes);
     when(sessionService.getSessionsByGroupCode("MAT101")).thenReturn(allSessions);
 
@@ -282,9 +282,9 @@ class SchedulerServiceTest {
     sessionQUI101.setDay(DayOfWeek.TUESDAY);
     sessionQUI101.setSlot(2);
 
-    when(historialService.getCurrentSessionsByStudentIdAndPeriod(studentId, "2023", "2"))
+    when(historialService.getGroupCodesByStudentIdAndPeriod(studentId, "2023", "2"))
         .thenReturn(Arrays.asList("FIS201"));
-    when(historialService.getCurrentSessionsByStudentIdAndPeriod(studentId, "2023", "1"))
+    when(historialService.getGroupCodesByStudentIdAndPeriod(studentId, "2023", "1"))
         .thenReturn(Arrays.asList("QUI101"));
     when(sessionService.getSessionsByGroupCode("FIS201")).thenReturn(Arrays.asList(sessionFIS201));
     when(sessionService.getSessionsByGroupCode("QUI101")).thenReturn(Arrays.asList(sessionQUI101));
@@ -330,7 +330,7 @@ class SchedulerServiceTest {
     sessionFIS201.setDay(DayOfWeek.MONDAY);
     sessionFIS201.setSlot(1);
 
-    when(historialService.getCurrentSessionsByStudentIdAndPeriod(studentId, "2024", "1"))
+    when(historialService.getGroupCodesByStudentIdAndPeriod(studentId, "2024", "1"))
         .thenReturn(Arrays.asList("FIS201"));
     when(sessionService.getSessionsByGroupCode("FIS201")).thenReturn(Arrays.asList(sessionFIS201));
 
@@ -391,9 +391,9 @@ class SchedulerServiceTest {
     sessionQUI101.setDay(DayOfWeek.TUESDAY);
     sessionQUI101.setSlot(2);
 
-    when(historialService.getCurrentSessionsByStudentIdAndPeriod(studentId, "2023", "2"))
+    when(historialService.getGroupCodesByStudentIdAndPeriod(studentId, "2023", "2"))
         .thenReturn(Arrays.asList("FIS201"));
-    when(historialService.getCurrentSessionsByStudentIdAndPeriod(studentId, "2022", "1"))
+    when(historialService.getGroupCodesByStudentIdAndPeriod(studentId, "2022", "1"))
         .thenReturn(Arrays.asList("QUI101"));
     when(sessionService.getSessionsByGroupCode("FIS201")).thenReturn(Arrays.asList(sessionFIS201));
     when(sessionService.getSessionsByGroupCode("QUI101")).thenReturn(Arrays.asList(sessionQUI101));
