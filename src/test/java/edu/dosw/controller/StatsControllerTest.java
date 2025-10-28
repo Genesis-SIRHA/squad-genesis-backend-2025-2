@@ -55,15 +55,15 @@ class StatsControllerTest {
     @Test
     void getFacultyReassignmentStats_ShouldReturnReportDTO() {
         ReportDTO expectedReport = new ReportDTO(15L, 3L, 10L, 2L, 4L, 5L, 1L);
-        when(statsService.getFacultyReassignmentStats("Engineering")).thenReturn(expectedReport);
+        when(statsService.getFacultyReassignmentStats("Engineering", "2024")).thenReturn(expectedReport);
 
-        ResponseEntity<ReportDTO> response = statsController.getFacultyReassignmentStats("Engineering");
+        ResponseEntity<ReportDTO> response = statsController.getFacultyReassignmentStats("Engineering", "2024");
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(expectedReport, response.getBody());
         assertEquals(15L, response.getBody().total());
         assertEquals(10L, response.getBody().approved());
-        verify(statsService, times(1)).getFacultyReassignmentStats("Engineering");
+        verify(statsService, times(1)).getFacultyReassignmentStats("Engineering", "2024");
     }
 
     @Test
@@ -115,19 +115,19 @@ class StatsControllerTest {
 
         when(statsService.getCourseReassignmentStats("MATH101")).thenReturn(report);
         when(statsService.getGroupReassignmentStats("GROUP001")).thenReturn(report);
-        when(statsService.getFacultyReassignmentStats("Engineering")).thenReturn(report);
+        when(statsService.getFacultyReassignmentStats("Engineering", "2024")).thenReturn(report);
         when(statsService.getGlobalReassignmentStats()).thenReturn(report);
         when(statsService.getRequestStats()).thenReturn(stats);
 
         statsController.getCourseReassignmentStats("MATH101");
         statsController.getGroupReassignmentStats("GROUP001");
-        statsController.getFacultyReassignmentStats("Engineering");
+        statsController.getFacultyReassignmentStats("Engineering", "2024");
         statsController.getGlobalReassignmentStats();
         statsController.getRequestStats();
 
         verify(statsService, times(1)).getCourseReassignmentStats("MATH101");
         verify(statsService, times(1)).getGroupReassignmentStats("GROUP001");
-        verify(statsService, times(1)).getFacultyReassignmentStats("Engineering");
+        verify(statsService, times(1)).getFacultyReassignmentStats("Engineering", "2024");
         verify(statsService, times(1)).getGlobalReassignmentStats();
         verify(statsService, times(1)).getRequestStats();
         verifyNoMoreInteractions(statsService);
@@ -140,5 +140,19 @@ class StatsControllerTest {
 
         assertThrows(RuntimeException.class, () -> statsController.getCourseReassignmentStats("MATH101"));
         verify(statsService, times(1)).getCourseReassignmentStats("MATH101");
+    }
+
+    @Test
+    void getFacultyReassignmentStats_WithDifferentPlan_ShouldUseCorrectPlan() {
+        ReportDTO expectedReport = new ReportDTO(25L, 5L, 15L, 5L, 8L, 10L, 7L);
+        when(statsService.getFacultyReassignmentStats("Science", "2025B")).thenReturn(expectedReport);
+
+        ResponseEntity<ReportDTO> response = statsController.getFacultyReassignmentStats("Science", "2025B");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(expectedReport, response.getBody());
+        assertEquals(25L, response.getBody().total());
+        assertEquals(15L, response.getBody().approved());
+        verify(statsService, times(1)).getFacultyReassignmentStats("Science", "2025B");
     }
 }

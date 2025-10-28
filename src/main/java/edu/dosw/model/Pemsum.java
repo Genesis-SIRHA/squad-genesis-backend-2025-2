@@ -1,5 +1,7 @@
 package edu.dosw.model;
 
+import edu.dosw.model.enums.HistorialStatus;
+
 import java.util.Map;
 
 /**
@@ -13,7 +15,7 @@ public class Pemsum {
   private final String facultyPlan;
   private final int approvedCredits;
   private final int totalCredits;
-  private final Map<Course, String> courses;
+  private final Map<Course, HistorialStatus> courses;
 
   /**
    * Private constructor used by the Builder pattern.
@@ -75,7 +77,7 @@ public class Pemsum {
   /**
    * @return A map of courses and their current status for the student.
    */
-  public Map<Course, String> getCourses() {
+  public Map<Course, HistorialStatus> getCourses() {
     return courses;
   }
 
@@ -90,7 +92,7 @@ public class Pemsum {
     private String facultyPlan;
     private int approvedCredits;
     private int totalCredits;
-    private Map<Course, String> courses;
+    private Map<Course, HistorialStatus> courses;
 
     /**
      * Sets the student's unique identifier.
@@ -164,7 +166,7 @@ public class Pemsum {
      * @param courses A map of Course objects to status strings.
      * @return This builder instance for method chaining.
      */
-    public Builder courses(Map<Course, String> courses) {
+    public Builder courses(Map<Course, HistorialStatus> courses) {
       this.courses = courses;
       return this;
     }

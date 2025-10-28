@@ -76,9 +76,11 @@ public interface RequestRepository extends MongoRepository<Request, String> {
     @Query("{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ], 'type': ?1 }")
     long countByGroupCodesAndType(List<String> groupCodes, RequestType type);
 
+    @Query("{ 'status': ?0 }")
     long countByStatus(RequestStatus status);
-    long countByType(RequestType type);
 
+    @Query("{ 'type': ?0 }")
+    long countByType(RequestType type);
 
 }
 

@@ -84,7 +84,7 @@ public class PemsumService {
 
         List<Historial> historials = historialService.getSessionsByCourses(studentId, courses);
 
-        Map<Course, String> coursesMap = getCoursesMap(courses, historials);
+        Map<Course, HistorialStatus> coursesMap = getCoursesMap(courses, historials);
 
         int totalCredits = courses.stream().mapToInt(Course::getCredits).sum();
         int approvedCredits = getApprovedCredits(coursesMap);
@@ -106,10 +106,10 @@ public class PemsumService {
      * @param coursesMap Map of courses with their status
      * @return The sum of credits for all approved courses
      */
-    private int getApprovedCredits(Map<Course, String> coursesMap) {
+    private int getApprovedCredits(Map<Course, HistorialStatus> coursesMap) {
         int approvedCredits = 0;
         for (Course course : coursesMap.keySet()) {
-            if (HistorialStatus.FINISHED.toString().equals(coursesMap.get(course))) {
+            if (HistorialStatus.FINISHED.equals(coursesMap.get(course))) {
                 approvedCredits += course.getCredits();
             }
         }
@@ -123,15 +123,15 @@ public class PemsumService {
      * @param historials List of the student's academic history records
      * @return A map of courses with their current status
      */
-    private Map<Course, String> getCoursesMap(List<Course> courses, List<Historial> historials) {
-        Map<Course, String> coursesMap = new HashMap<>();
+    private Map<Course, HistorialStatus> getCoursesMap(List<Course> courses, List<Historial> historials) {
+        Map<Course, HistorialStatus> coursesMap = new HashMap<>();
         for (Course course : courses) {
             historials.stream()
                     .filter(h -> h.getGroupCode().equals(course.getAbbreviation()))
                     .findFirst()
                     .ifPresentOrElse(
-                            h -> coursesMap.put(course, h.getStatus().toString()),
-                            () -> coursesMap.put(course, "pending"));
+                            h -> coursesMap.put(course, h.getStatus()),
+                            () -> coursesMap.put(course, HistorialStatus.PENDING));
         }
         return coursesMap;
     }
@@ -182,7 +182,7 @@ public class PemsumService {
      * @param studentId The unique identifier of the student
      * @return A map of course abbreviations to their status
      */
-    public Map<String, String> getStudentCoursesStatus(String studentId) {
+    public Map<String, HistorialStatus> getStudentCoursesStatus(String studentId) {
         Student student = studentService.getStudentById(studentId);
         String facultyName = student.getFacultyName();
         String plan = student.getPlan();
@@ -195,22 +195,22 @@ public class PemsumService {
                     "Invalid faculty name or plan: " + facultyName + " - " + plan);
         }
 
-        Map<String, String> courseStatusMap = new HashMap<>();
+        Map<String, HistorialStatus> courseStatusMap = new HashMap<>();
 
         List<Historial> studentHistorial = historialService.getHistorialByStudentId(studentId);
 
         for (Historial historial : studentHistorial) {
             String courseAbbreviation = historial.getGroupCode();
-            String newStatus = historial.getStatus().toString();
-            String currentStatus = courseStatusMap.get(courseAbbreviation);
+            HistorialStatus newStatus = historial.getStatus();
+            HistorialStatus currentStatus = courseStatusMap.get(courseAbbreviation);
 
-            if (currentStatus == null || !HistorialStatus.FINISHED.toString().equals(currentStatus)) {
+            if (currentStatus == null || currentStatus != HistorialStatus.FINISHED) {
                 courseStatusMap.put(courseAbbreviation, newStatus);
             }
         }
 
         for (Course course : facultyCourses) {
-            courseStatusMap.putIfAbsent(course.getAbbreviation(), "PENDING");
+            courseStatusMap.putIfAbsent(course.getAbbreviation(), HistorialStatus.PENDING);
         }
 
         return courseStatusMap;
