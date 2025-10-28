@@ -3,6 +3,7 @@ package edu.dosw.controller;
 import edu.dosw.dto.CreationGroupRequest;
 import edu.dosw.dto.SessionDTO;
 import edu.dosw.dto.UpdateGroupRequest;
+import edu.dosw.model.Course;
 import edu.dosw.model.Group;
 import edu.dosw.model.Session;
 import edu.dosw.services.GroupService;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/group")
+@RequestMapping("/groups")
 @Tag(name = "Group Controller", description = "APIs for group management")
 public class GroupController {
   private final GroupService groupService;
@@ -29,6 +30,21 @@ public class GroupController {
           "Retrieves detailed information about a specific group using its unique group code")
   public ResponseEntity<Group> getGroupByCode(@PathVariable String groupCode) {
     return ResponseEntity.ok(groupService.getGroupByGroupCode(groupCode));
+  }
+
+  @GetMapping("/{courseAbbreviation}")
+  @Operation(
+          summary = "Get group by course abbreviation",
+          description =
+                  "Retrieves detailed information about a all groups by course abbreviation")
+  public ResponseEntity<List<Group>> getGroupByCourseAbbreviation(@PathVariable String courseAbbreviation) {
+    return ResponseEntity.ok(groupService.getAllGroupsByCourseAbbreviation(courseAbbreviation));
+  }
+
+  @GetMapping("/{groupCode}/course")
+  public ResponseEntity<Course> getCourseByGroupCode(@PathVariable String groupCode){
+    Course course = groupService.getCourseByGroupCode(groupCode);
+    return ResponseEntity.ok(course);
   }
 
   @PostMapping("/{facultyName}")

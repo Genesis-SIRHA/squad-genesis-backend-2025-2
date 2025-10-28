@@ -31,7 +31,7 @@ public class Group {
     this.isLab = builder.isLab;
     this.groupNum = builder.groupNum;
     this.enrolled = builder.enrolled;
-    this.maxCapacity = builder.maxCapacity;
+      this.maxCapacity = builder.maxCapacity;
   }
 
   public static class GroupBuilder {
