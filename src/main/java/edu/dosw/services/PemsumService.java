@@ -9,7 +9,6 @@ import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,17 +30,17 @@ public class PemsumService {
   /**
    * Constructs a new PemsumService with required dependencies.
    *
-   * @param facultyService   Service for faculty-related operations
-   * @param studentService   Service for student-related operations
+   * @param facultyService Service for faculty-related operations
+   * @param studentService Service for student-related operations
    * @param historialService Service for academic history operations
-   * @param groupService     Service for group-related operations
+   * @param groupService Service for group-related operations
    */
   @Autowired
   public PemsumService(
-          FacultyService facultyService,
-          StudentService studentService,
-          HistorialService historialService,
-          GroupService groupService) {
+      FacultyService facultyService,
+      StudentService studentService,
+      HistorialService historialService,
+      GroupService groupService) {
     this.facultyService = facultyService;
     this.historialService = historialService;
     this.studentService = studentService;
@@ -76,7 +75,7 @@ public class PemsumService {
     if (courses.isEmpty()) {
       logger.error("Invalid faculty fullName or plan: " + facultyName + " - " + plan);
       throw new ResourceNotFoundException(
-              "Invalid faculty fullName or plan: " + facultyName + " - " + plan);
+          "Invalid faculty fullName or plan: " + facultyName + " - " + plan);
     }
 
     String year = periodService.getYear();
@@ -90,14 +89,14 @@ public class PemsumService {
     int approvedCredits = getApprovedCredits(coursesMap);
 
     return new Pemsum.Builder()
-            .studentId(studentId)
-            .studentName(student.getFullName())
-            .facultyName(facultyName)
-            .facultyPlan(plan)
-            .totalCredits(totalCredits)
-            .approvedCredits(approvedCredits)
-            .courses(coursesMap)
-            .build();
+        .studentId(studentId)
+        .studentName(student.getFullName())
+        .facultyName(facultyName)
+        .facultyPlan(plan)
+        .totalCredits(totalCredits)
+        .approvedCredits(approvedCredits)
+        .courses(coursesMap)
+        .build();
   }
 
   /**
@@ -127,11 +126,11 @@ public class PemsumService {
     Map<Course, String> coursesMap = new HashMap<>();
     for (Course course : courses) {
       historials.stream()
-              .filter(h -> h.getGroupCode().equals(course.getAbbreviation()))
-              .findFirst()
-              .ifPresentOrElse(
-                      h -> coursesMap.put(course, h.getStatus().toString()),
-                      () -> coursesMap.put(course, "pending"));
+          .filter(h -> h.getGroupCode().equals(course.getAbbreviation()))
+          .findFirst()
+          .ifPresentOrElse(
+              h -> coursesMap.put(course, h.getStatus().toString()),
+              () -> coursesMap.put(course, "pending"));
     }
     return coursesMap;
   }
@@ -150,23 +149,24 @@ public class PemsumService {
     if (facultyCourses.isEmpty()) {
       logger.error("Invalid faculty fullName or plan: " + facultyName + " - " + plan);
       throw new ResourceNotFoundException(
-              "Invalid faculty fullName or plan: " + facultyName + " - " + plan);
+          "Invalid faculty fullName or plan: " + facultyName + " - " + plan);
     }
 
-    List<Historial> finishedHistorial = historialService.getHistorialByStudentIdAndStatus(studentId, HistorialStatus.FINISHED);
+    List<Historial> finishedHistorial =
+        historialService.getHistorialByStudentIdAndStatus(studentId, HistorialStatus.FINISHED);
 
     int approvedCredits =
-            finishedHistorial.stream()
-                    .mapToInt(
-                            historial -> {
-                              Group group = groupService.getGroupByGroupCode(historial.getGroupCode());
-                              return facultyCourses.stream()
-                                      .filter(course -> course.getAbbreviation().equals(group.getAbbreviation()))
-                                      .findFirst()
-                                      .map(Course::getCredits)
-                                      .orElse(0);
-                            })
-                    .sum();
+        finishedHistorial.stream()
+            .mapToInt(
+                historial -> {
+                  Group group = groupService.getGroupByGroupCode(historial.getGroupCode());
+                  return facultyCourses.stream()
+                      .filter(course -> course.getAbbreviation().equals(group.getAbbreviation()))
+                      .findFirst()
+                      .map(Course::getCredits)
+                      .orElse(0);
+                })
+            .sum();
 
     int totalCredits = facultyCourses.stream().mapToInt(Course::getCredits).sum();
 
@@ -192,7 +192,7 @@ public class PemsumService {
     if (facultyCourses.isEmpty()) {
       logger.error("Invalid faculty name or plan: " + facultyName + " - " + plan);
       throw new ResourceNotFoundException(
-              "Invalid faculty name or plan: " + facultyName + " - " + plan);
+          "Invalid faculty name or plan: " + facultyName + " - " + plan);
     }
 
     Map<String, String> courseStatusMap = new HashMap<>();

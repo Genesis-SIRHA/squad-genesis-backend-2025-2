@@ -41,20 +41,20 @@ public class PemsumController {
 
   @GetMapping("/{studentId}/completed-courses")
   @Operation(
-          summary = "Get completed courses percentage",
-          description =
-                  "Retrieves the percentage of completed courses based on approved credits vs total credits in the study plan")
+      summary = "Get completed courses percentage",
+      description =
+          "Retrieves the percentage of completed courses based on approved credits vs total credits in the study plan")
   public ResponseEntity<Double> getCompletedCoursesPercentage(@PathVariable String studentId) {
     return ResponseEntity.ok(pemsumService.getCompletedCoursesPercentage(studentId));
   }
 
   @GetMapping("/{studentId}/courses-status")
   @Operation(
-          summary = "Get student courses status",
-          description =
-                  "Retrieves a map of all courses with their status (including pending courses from faculty)")
+      summary = "Get student courses status",
+      description =
+          "Retrieves a map of all courses with their status (including pending courses from faculty)")
   public ResponseEntity<Map<String, String>> getStudentCoursesStatus(
-          @PathVariable String studentId) {
+      @PathVariable String studentId) {
     return ResponseEntity.ok(pemsumService.getStudentCoursesStatus(studentId));
   }
 }
