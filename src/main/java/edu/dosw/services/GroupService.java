@@ -10,6 +10,8 @@ import edu.dosw.model.Course;
 import edu.dosw.model.Group;
 import edu.dosw.model.Session;
 import edu.dosw.model.enums.HistorialStatus;
+import edu.dosw.observer.GroupCapacityNotifier;
+import edu.dosw.observer.MessageGroupObserver;
 import edu.dosw.repositories.GroupRepository;
 import edu.dosw.services.Validators.GroupValidator;
 import java.util.List;
@@ -32,6 +34,8 @@ public class GroupService {
   private final SessionService sessionService;
   private final HistorialService historialService;
   private final GroupValidator groupValidator;
+  private final GroupCapacityNotifier groupCapacityNotifier;
+  private final MessageGroupObserver messageGroupObserver;
 
   /**
    * Retrieves all groups associated with a specific course abbreviation.
@@ -81,11 +85,16 @@ public class GroupService {
             .professorId(groupRequest.teacherId())
             .isLab(groupRequest.isLab())
             .groupNum(groupRequest.groupNum())
-            .enrolled(groupRequest.enrolled())
+            .enrolled(0)
             .maxCapacity(groupRequest.maxCapacity())
             .build();
 
-    return groupRepository.save(group);
+    Group savedGroup = groupRepository.save(group);
+
+    logger.info("Checking notifications for newly created group: {}", groupRequest.groupCode());
+    groupCapacityNotifier.checkAndNotify(savedGroup);
+
+    return savedGroup;
   }
 
   public Group updateGroup(String groupCode, UpdateGroupRequest groupRequest) {
@@ -94,13 +103,28 @@ public class GroupService {
       logger.error("Group not found: {}", groupCode);
       throw new ResourceNotFoundException("Group not found: " + groupCode);
     }
+    Integer oldEnrolled = group.getEnrolled();
+    Integer oldMaxCapacity = group.getMaxCapacity();
+
     if (groupRequest.professorId() != null) group.setProfessorId(groupRequest.professorId());
     if (groupRequest.isLab() != null) group.setLab(groupRequest.isLab());
     if (groupRequest.groupNum() != null) group.setGroupNum(groupRequest.groupNum());
     if (groupRequest.maxCapacity() != null) group.setMaxCapacity(groupRequest.maxCapacity());
     if (groupRequest.enrolled() != null) group.setEnrolled(groupRequest.enrolled());
 
-    return groupRepository.save(group);
+    Group updatedGroup = groupRepository.save(group);
+
+    boolean capacityChanged =
+        (groupRequest.enrolled() != null && !groupRequest.enrolled().equals(oldEnrolled))
+            || (groupRequest.maxCapacity() != null
+                && !groupRequest.maxCapacity().equals(oldMaxCapacity));
+
+    if (capacityChanged) {
+      logger.info("Capacity changed for group {} - checking notifications", groupCode);
+      groupCapacityNotifier.checkAndNotify(updatedGroup);
+    }
+
+    return updatedGroup;
   }
 
   public Group deleteGroup(String groupCode) {
@@ -148,7 +172,8 @@ public class GroupService {
     groupValidator.validateAddStudentToGroup(group, studentId);
     try {
       group.setEnrolled(group.getEnrolled() + 1);
-      groupRepository.save(group);
+      Group updatedGroup = groupRepository.save(group);
+      groupCapacityNotifier.checkAndNotify(updatedGroup);
 
       HistorialDTO historialDTO = new HistorialDTO(studentId, groupCode, HistorialStatus.ON_GOING);
       historialService.addHistorial(historialDTO);
@@ -175,8 +200,8 @@ public class GroupService {
     }
 
     group.setEnrolled(group.getEnrolled() - 1);
-    groupRepository.save(group);
-
+    Group updatedGroup = groupRepository.save(group);
+    groupCapacityNotifier.checkAndNotify(updatedGroup);
     try {
       historialService.updateHistorial(studentId, groupCode, HistorialStatus.CANCELLED);
     } catch (Exception e) {
@@ -184,5 +209,19 @@ public class GroupService {
       throw new BusinessException("Failed to update historial" + e.getMessage());
     }
     return group;
+  }
+
+  /**
+   * Retrieves all capacity notifications
+   *
+   * @return a list of notification messages
+   */
+  public List<String> getCapacityNotifications() {
+    return messageGroupObserver.getNotifications();
+  }
+
+  /** Clears all capacity notifications */
+  public void clearCapacityNotifications() {
+    messageGroupObserver.clearNotifications();
   }
 }
