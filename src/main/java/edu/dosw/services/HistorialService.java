@@ -1,6 +1,7 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.HistorialDTO;
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Historial;
@@ -21,10 +22,10 @@ public class HistorialService {
   private final PeriodService periodService;
   private final Logger logger = LoggerFactory.getLogger(HistorialService.class);
 
-  public List<String> getCurrentSessionsByStudentIdAndPeriod(
+  public List<String> getGroupCodesByStudentIdAndPeriod(
       String studentId, String year, String period) {
     ArrayList<Historial> historial =
-        historialRepository.findCurrentSessionsByStudentIdAndYearAndPeriod(studentId, year, period);
+        historialRepository.findHistorialByStudentIdAndYearAndPeriod(studentId, year, period);
     ArrayList<String> groupCodes = new ArrayList<>();
     for (Historial h : historial) {
       groupCodes.add(h.getGroupCode());
@@ -36,16 +37,10 @@ public class HistorialService {
     Historial historial = historialRepository.findByStudentIdAndGroupCode(studentId, groupCode);
     if (historial == null) {
       logger.error("historial does not exist");
-      throw new IllegalArgumentException(
+      throw new ResourceNotFoundException(
           "historial not found with studentId " + studentId + " and groupCode " + groupCode);
     }
     return historial;
-  }
-
-  public List<Historial> getSessionsByStudentIdYearAndPeriod(
-      String studentId, String year, String period) {
-    return historialRepository.findCurrentSessionsByStudentIdAndYearAndPeriod(
-        studentId, year, period);
   }
 
   public List<Historial> getSessionsByCourses(String studentId, List<Course> courses) {
@@ -129,6 +124,32 @@ public class HistorialService {
     return historialRepository.findAll();
   }
 
+    /**
+     * Retrieves all historical records for a student
+     *
+     * @param studentId The unique identifier of the student
+     * @return List of all historical records
+     */
+  public List<Historial> getHistorialByStudentId(String studentId) {
+      try {
+          List<Historial> historials = historialRepository.findByStudentId(studentId);
+
+          if (historials == null || historials.isEmpty()) {
+              throw new BusinessException(
+                      "No se encontraron historiales para el estudiante " + studentId);
+          }
+
+          return historials;
+      } catch (Exception e) {
+          throw new BusinessException(
+                  "Error al obtener los historiales del estudiante " + studentId, e);
+      }
+  }
+
+  public List<Historial> getHistorialByStudentIdAndStatus(
+      String studentId, HistorialStatus status) {
+    return historialRepository.findByStudentIdAndStatus(studentId, status);
+  }
   /**
    * Retrieves all historical records for a student
    *

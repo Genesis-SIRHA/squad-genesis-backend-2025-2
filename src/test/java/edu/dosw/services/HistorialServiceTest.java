@@ -3,14 +3,16 @@ package edu.dosw.services;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import edu.dosw.exception.BusinessException;
+import edu.dosw.dto.HistorialDTO;
+import edu.dosw.exception.ResourceNotFoundException;
+import edu.dosw.model.Course;
 import edu.dosw.model.Historial;
 import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.repositories.HistorialRepository;
+import edu.dosw.exception.BusinessException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,9 +22,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class HistorialServiceTest {
 
+  @Mock private HistorialValidator historialValidator;
+
   @Mock private HistorialRepository historialRepository;
 
-  @InjectMocks private HistorialService historialService;
+  @Mock private PeriodService periodService;
 
   private Historial historial1;
   private Historial historial2;
