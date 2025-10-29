@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CourseStatus {
-    private Course course;
-    private String status;
+  private Course course;
+  private String status;
 }

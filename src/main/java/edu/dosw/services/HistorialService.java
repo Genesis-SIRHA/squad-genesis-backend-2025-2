@@ -49,7 +49,8 @@ public class HistorialService {
     List<Historial> lastCourseState = new ArrayList<>();
 
     for (Course course : courses) {
-      List<Historial> historialByCourse = completeHistorial.stream()
+      List<Historial> historialByCourse =
+          completeHistorial.stream()
               .filter(h -> h.getGroupCode().equals(course.getAbbreviation()))
               .toList();
 

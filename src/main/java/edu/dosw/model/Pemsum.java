@@ -1,9 +1,7 @@
 package edu.dosw.model;
 
 import edu.dosw.dto.CourseStatus;
-
 import java.util.List;
-import java.util.Map;
 
 /**
  * Represents a student's academic record summary, including courses and credits. This class is

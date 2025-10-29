@@ -73,14 +73,16 @@ public class PemsumService {
     String facultyName = student.getFacultyName();
     String plan = student.getPlan();
 
-    List<Course> courses = new ArrayList<>(facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan));
+    List<Course> courses =
+        new ArrayList<>(facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan));
     if (courses.isEmpty()) {
       logger.error("Invalid faculty fullName or plan: " + facultyName + " - " + plan);
       throw new ResourceNotFoundException(
           "Invalid faculty fullName or plan: " + facultyName + " - " + plan);
     }
 
-    List<Historial> historials = new ArrayList<>(historialService.getSessionsByCourses(studentId, courses));
+    List<Historial> historials =
+        new ArrayList<>(historialService.getSessionsByCourses(studentId, courses));
 
     List<CourseStatus> coursesList = getCoursesList(courses, historials);
 
@@ -124,7 +126,8 @@ public class PemsumService {
   private List<CourseStatus> getCoursesList(List<Course> courses, List<Historial> historials) {
     List<CourseStatus> coursesList = new ArrayList<>();
     for (Course course : courses) {
-      String status = historials.stream()
+      String status =
+          historials.stream()
               .filter(h -> h.getGroupCode().equals(course.getAbbreviation()))
               .findFirst()
               .map(h -> h.getStatus().toString())

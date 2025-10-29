@@ -1,23 +1,23 @@
-//package edu.dosw.services;
+// package edu.dosw.services;
 //
-//import static org.junit.jupiter.api.Assertions.*;
-//import static org.mockito.Mockito.*;
+// import static org.junit.jupiter.api.Assertions.*;
+// import static org.mockito.Mockito.*;
 //
-//import edu.dosw.model.*;
-//import edu.dosw.model.enums.HistorialStatus;
-//import edu.dosw.services.UserServices.StudentService;
-//import java.util.Arrays;
-//import java.util.Collections;
-//import java.util.List;
-//import java.util.Map;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
+// import edu.dosw.model.*;
+// import edu.dosw.model.enums.HistorialStatus;
+// import edu.dosw.services.UserServices.StudentService;
+// import java.util.Arrays;
+// import java.util.Collections;
+// import java.util.List;
+// import java.util.Map;
+// import org.junit.jupiter.api.Test;
+// import org.junit.jupiter.api.extension.ExtendWith;
+// import org.mockito.InjectMocks;
+// import org.mockito.Mock;
+// import org.mockito.junit.jupiter.MockitoExtension;
 //
-//@ExtendWith(MockitoExtension.class)
-//class PemsumServiceTest {
+// @ExtendWith(MockitoExtension.class)
+// class PemsumServiceTest {
 //
 //  @Mock private FacultyService facultyService;
 //
@@ -51,7 +51,8 @@
 //            createHistorial(studentId, "CHEM101", HistorialStatus.ON_GOING));
 //
 //    when(studentService.getStudentById(studentId)).thenReturn(student);
-//    when(facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024")).thenReturn(courses);
+//    when(facultyService.findCoursesByFacultyNameAndPlan("Engineering",
+// "2024")).thenReturn(courses);
 //    when(historialService.getSessionsByCourses(studentId, courses)).thenReturn(historials);
 //
 //    Pemsum result = pemsumService.getPemsum(studentId);
@@ -124,7 +125,8 @@
 //            createHistorial(studentId, "ENG101", HistorialStatus.SWAPPED));
 //
 //    when(studentService.getStudentById(studentId)).thenReturn(student);
-//    when(facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024")).thenReturn(courses);
+//    when(facultyService.findCoursesByFacultyNameAndPlan("Engineering",
+// "2024")).thenReturn(courses);
 //    when(historialService.getSessionsByCourses(studentId, courses)).thenReturn(historials);
 //
 //    Pemsum result = pemsumService.getPemsum(studentId);
@@ -156,7 +158,8 @@
 //            createHistorial(studentId, "CHEM101", HistorialStatus.FINISHED));
 //
 //    when(studentService.getStudentById(studentId)).thenReturn(student);
-//    when(facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024")).thenReturn(courses);
+//    when(facultyService.findCoursesByFacultyNameAndPlan("Engineering",
+// "2024")).thenReturn(courses);
 //    when(historialService.getSessionsByCourses(studentId, courses)).thenReturn(historials);
 //
 //    Pemsum result = pemsumService.getPemsum(studentId);
@@ -181,7 +184,8 @@
 //            new Course("PHYS101", "Physics I", 3, "1", List.of()));
 //
 //    when(studentService.getStudentById(studentId)).thenReturn(student);
-//    when(facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024")).thenReturn(courses);
+//    when(facultyService.findCoursesByFacultyNameAndPlan("Engineering",
+// "2024")).thenReturn(courses);
 //    when(historialService.getSessionsByCourses(studentId, courses)).thenReturn(List.of());
 //
 //    Pemsum result = pemsumService.getPemsum(studentId);
@@ -246,7 +250,8 @@
 //    List<Historial> finishedHistorials = Collections.emptyList();
 //
 //    when(studentService.getStudentById(studentId)).thenReturn(student);
-//    when(facultyService.findCoursesByFacultyNameAndPlan("Science", "2024")).thenReturn(allCourses);
+//    when(facultyService.findCoursesByFacultyNameAndPlan("Science",
+// "2024")).thenReturn(allCourses);
 //    when(historialService.getHistorialByStudentIdAndStatus(studentId, HistorialStatus.FINISHED))
 //        .thenReturn(finishedHistorials);
 //
@@ -476,4 +481,4 @@
 //    group.setAbbreviation(abbreviation);
 //    return group;
 //  }
-//}
+// }
