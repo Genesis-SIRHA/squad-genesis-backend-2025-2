@@ -48,7 +48,7 @@ public class AuthenticationService {
     }
     String token = jwtUtil.generateToken(userCredentials.get().userId(), email);
     UserCredentialsDto user = userCredentials.get();
-    UserInfoDto userInfo = new UserInfoDto(user.userId(), user.email(), user.role());
+    UserInfoDto userInfo = new UserInfoDto(user.userId(), user.email(), user.role(), user.pfpURL());
     return new AuthResponseDto(token, userInfo);
   }
 
@@ -89,14 +89,15 @@ public class AuthenticationService {
             userInfoDto.userId(),
             userInfoDto.email(),
             encryptPassword(userInfoDto.userId()),
-            userInfoDto.role());
+            userInfoDto.role(),
+            "pfpURL");
     userCredentialsRepository.save(userCredentialsDto);
   }
 
   public UserInfoDto getUserInfo(String email) {
     Optional<UserCredentialsDto> userCredentials = this.getByEmail(email);
     UserCredentialsDto user = userCredentials.get();
-    return new UserInfoDto(user.userId(), user.email(), user.role());
+    return new UserInfoDto(user.userId(), user.email(), user.role(), user.pfpURL());
   }
 
   public void deleteAuthentication(User user) {

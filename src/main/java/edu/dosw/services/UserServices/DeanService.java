@@ -75,7 +75,7 @@ public class DeanService {
             .build();
     try {
       authenticationService.createAuthentication(
-          new UserInfoDto(dean.getUserId(), dean.getEmail(), Role.DEAN));
+          new UserInfoDto(dean.getUserId(), dean.getEmail(), Role.DEAN, "pfpURL"));
       return deanRepository.save(dean);
     } catch (Exception e) {
       throw new BusinessException(

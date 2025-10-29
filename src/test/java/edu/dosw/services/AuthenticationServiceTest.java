@@ -29,7 +29,8 @@ class AuthenticationServiceTest {
   @Test
   void logIn_WithInvalidEmailFormat_ShouldThrowAuthenticationException() {
     UserCredentialsDto loginRequest =
-        new UserCredentialsDto(null, "user123", "invalid@gmail.com", "password123", Role.STUDENT);
+        new UserCredentialsDto(
+            null, "user123", "invalid@gmail.com", "password123", Role.STUDENT, "");
 
     AuthenticationException exception =
         assertThrows(
@@ -46,7 +47,7 @@ class AuthenticationServiceTest {
   void logIn_WithNonExistentEmail_ShouldThrowBusinessException() {
     UserCredentialsDto loginRequest =
         new UserCredentialsDto(
-            null, "user123", "nonexistent@mail.escuelaing.edu.co", "password123", Role.STUDENT);
+            null, "user123", "nonexistent@mail.escuelaing.edu.co", "password123", Role.STUDENT, "");
 
     when(userCredentialsRepository.findByEmail("nonexistent@mail.escuelaing.edu.co"))
         .thenReturn(Optional.empty());
@@ -67,14 +68,15 @@ class AuthenticationServiceTest {
 
     UserCredentialsDto loginRequest =
         new UserCredentialsDto(
-            null, "user123", "test@mail.escuelaing.edu.co", "wrongPassword", Role.STUDENT);
+            null, "user123", "test@mail.escuelaing.edu.co", "wrongPassword", Role.STUDENT, "");
     UserCredentialsDto storedUser =
         new UserCredentialsDto(
             "id123",
             "user123",
             "test@mail.escuelaing.edu.co",
             "$2a$10$correctEncodedPassword",
-            Role.STUDENT);
+            Role.STUDENT,
+            "");
 
     when(userCredentialsRepository.findByEmail("test@mail.escuelaing.edu.co"))
         .thenReturn(Optional.of(storedUser));
@@ -96,7 +98,7 @@ class AuthenticationServiceTest {
     String userId = "user123";
     UserCredentialsDto expectedCredentials =
         new UserCredentialsDto(
-            "id123", userId, "test@mail.escuelaing.edu.co", "encodedPassword", Role.STUDENT);
+            "id123", userId, "test@mail.escuelaing.edu.co", "encodedPassword", Role.STUDENT, "");
 
     when(userCredentialsRepository.findByUserId(userId))
         .thenReturn(Optional.of(expectedCredentials));
@@ -133,7 +135,7 @@ class AuthenticationServiceTest {
     when(userCredentialsRepository.save(any(UserCredentialsDto.class))).thenReturn(null);
 
     authenticationService.createAuthentication(
-        new UserInfoDto(user.getUserId(), user.getEmail(), Role.STUDENT));
+        new UserInfoDto(user.getUserId(), user.getEmail(), Role.STUDENT, ""));
 
     verify(userCredentialsRepository).save(any(UserCredentialsDto.class));
   }
@@ -145,7 +147,7 @@ class AuthenticationServiceTest {
     user.setEmail("test@mail.escuelaing.edu.co");
     UserCredentialsDto existingCredentials =
         new UserCredentialsDto(
-            "id123", "user123", "test@mail.escuelaing.edu.co", "encodedPassword", Role.STUDENT);
+            "id123", "user123", "test@mail.escuelaing.edu.co", "encodedPassword", Role.STUDENT, "");
 
     when(userCredentialsRepository.findByEmail("test@mail.escuelaing.edu.co"))
         .thenReturn(Optional.of(existingCredentials));
