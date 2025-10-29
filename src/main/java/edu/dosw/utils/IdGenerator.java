@@ -19,7 +19,7 @@ public class IdGenerator {
     long n = Math.floorMod(SR.nextLong(), 10_000_000_000L);
     String id = String.format("%010d", n);
     try {
-      if (authenticationService.findByUserId(id).isPresent()) {
+      if (authenticationService.getByUserId(id).isPresent()) {
         return generateUniqueId();
       }
     } catch (Exception e) {

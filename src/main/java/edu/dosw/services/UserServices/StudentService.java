@@ -1,9 +1,11 @@
 package edu.dosw.services.UserServices;
 
 import edu.dosw.dto.StudentDto;
+import edu.dosw.dto.UserInfoDto;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Student;
+import edu.dosw.model.enums.Role;
 import edu.dosw.repositories.StudentRepository;
 import edu.dosw.services.AuthenticationService;
 import edu.dosw.utils.IdGenerator;
@@ -60,7 +62,8 @@ public class StudentService {
             .facultyName(studentCreationRequest.facultyName())
             .build();
     try {
-      authenticationService.createAuthentication(student);
+      authenticationService.createAuthentication(
+          new UserInfoDto(student.getUserId(), student.getEmail(), Role.STUDENT));
       return studentRepository.save(student);
     } catch (Exception e) {
       throw new BusinessException(

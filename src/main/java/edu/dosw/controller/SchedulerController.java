@@ -7,12 +7,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * REST controller for managing class schedules. Provides endpoints for accessing and managing
- * student schedules.
- */
 @RestController
 @RequestMapping("/schedules")
 @AllArgsConstructor
@@ -20,13 +17,9 @@ import org.springframework.web.bind.annotation.*;
 public class SchedulerController {
   private final SchedulerService schedulerService;
 
-  /**
-   * Retrieves a student's schedule by their ID.
-   *
-   * @param studentId The unique identifier of the student
-   * @return ResponseEntity containing the student's schedule
-   */
   @GetMapping("/{studentId}")
+  @PreAuthorize(
+      "hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT') and @authenticationService.canAccessStudentData(authentication, #studentId)")
   @Operation(
       summary = "Get schedule by ID",
       description = "Retrieves a schedule by its unique identifier")

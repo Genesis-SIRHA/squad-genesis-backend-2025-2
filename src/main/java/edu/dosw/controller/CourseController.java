@@ -1,7 +1,6 @@
 package edu.dosw.controller;
 
 import edu.dosw.dto.CourseRequest;
-import edu.dosw.dto.FacultyDto;
 import edu.dosw.dto.UpdateCourseDTO;
 import edu.dosw.model.Course;
 import edu.dosw.model.Faculty;
@@ -10,12 +9,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Controller that handles all course-related HTTP requests. Provides endpoints for CRUD operations
- * on courses and their groups.
- */
 @RestController
 @RequestMapping("/courses")
 @Tag(name = "Course Controller", description = "APIs for managing courses and groups")
@@ -23,24 +19,12 @@ public class CourseController {
 
   private final FacultyService facultyService;
 
-  /**
-   * Constructs a new CourseController with the provided FacultyService.
-   *
-   * @param facultyService The service to handle course operations
-   */
   public CourseController(FacultyService facultyService) {
     this.facultyService = facultyService;
   }
 
-  /**
-   * Retrieves a specific course by its ID.
-   *
-   * @param courseAbbreviation The course abbreviation
-   * @param facultyName The faculty name of the faculty
-   * @param plan The plan of the faculty
-   * @return The course details if found, 404 otherwise
-   */
   @GetMapping("/{courseAbbreviation}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT')")
   @Operation(
       summary = "Get course by courseAbbreviation",
       description = "Retrieve course details by its courseAbbreviation")
@@ -52,35 +36,16 @@ public class CourseController {
     return ResponseEntity.ok(course);
   }
 
-  /**
-   * Creates a new course.
-   *
-   * @param courseRequest The course details to create
-   * @return The created course with its generated ID
-   */
-  @PostMapping("/addCourse")
+  @PostMapping
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(summary = "Create a new course", description = "Registers a new course")
   @ApiResponse(responseCode = "200", description = "Course created successfully")
   public ResponseEntity<Faculty> createCourse(@RequestBody CourseRequest courseRequest) {
     return ResponseEntity.ok(facultyService.addCourse(courseRequest));
   }
 
-  @PatchMapping("/addCourses")
-  @Operation(summary = "Add courses to faculty")
-  public ResponseEntity<Faculty> addCoursesToFaculty(@RequestBody FacultyDto facultyDto) {
-    return ResponseEntity.ok(facultyService.addCoursesToPlan(facultyDto));
-  }
-
-  /**
-   * Updates an existing course.
-   *
-   * @param courseAbbreviation The courseAbbreviation of the course to update
-   * @param facultyName the Faculty name of the faculty that contains the course
-   * @param plan the plan that contains the course
-   * @param updateCourseDTO The updated course details
-   * @return The updated course if found, 404 otherwise
-   */
   @PatchMapping("/{courseAbbreviation}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(summary = "Update course", description = "Updates course")
   public ResponseEntity<Course> updateCourse(
       @PathVariable String courseAbbreviation,
@@ -92,15 +57,8 @@ public class CourseController {
     return ResponseEntity.ok((course));
   }
 
-  /**
-   * Deletes a course by its ID.
-   *
-   * @param courseAbbreviation The course abbreviation
-   * @param facultyName The faculty name of the faculty
-   * @param plan The plan of the faculty
-   * @return 204 No Content if successful
-   */
   @DeleteMapping("/{courseAbbreviation}")
+  @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(
       summary = "Delete course by it's courseAbbreviation",
       description = "Deletes a course by its courseAbbreviation")

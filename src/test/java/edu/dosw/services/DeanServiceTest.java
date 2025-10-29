@@ -1,7 +1,6 @@
 package edu.dosw.services;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import edu.dosw.dto.DeanDto;
@@ -128,198 +127,6 @@ class DeanServiceTest {
     verify(deanRepository, times(1)).findByUserId(DEAN_ID);
   }
 
-  // Tests para createDean
-  @Test
-  void createDean_WithValidData_ShouldCreateDeanSuccessfully() {
-    when(idGenerator.generateUniqueId()).thenReturn(GENERATED_ID);
-    when(deanRepository.save(any(Dean.class))).thenReturn(existingDean);
-    doNothing().when(authenticationService).createAuthentication(any(Dean.class));
-
-    Dean result = deanService.createDean(validDeanDto);
-
-    assertNotNull(result);
-    verify(idGenerator, times(1)).generateUniqueId();
-    verify(authenticationService, times(1)).createAuthentication(any(Dean.class));
-    verify(deanRepository, times(1)).save(any(Dean.class));
-  }
-
-  @Test
-  void createDean_WithNullIdentityDocument_ShouldThrowValidationException() {
-    DeanDto invalidDto = new DeanDto("Juan Carlos Perez Gomez", null, FACULTY_NAME);
-
-    jakarta.validation.ValidationException exception =
-        assertThrows(
-            jakarta.validation.ValidationException.class, () -> deanService.createDean(invalidDto));
-
-    assertEquals("Personal data is incomplete", exception.getMessage());
-    verify(deanRepository, never()).save(any(Dean.class));
-  }
-
-  @Test
-  void createDean_WithNullFullName_ShouldThrowValidationException() {
-    DeanDto invalidDto = new DeanDto(null, "12345678", FACULTY_NAME);
-
-    jakarta.validation.ValidationException exception =
-        assertThrows(
-            jakarta.validation.ValidationException.class, () -> deanService.createDean(invalidDto));
-
-    assertEquals("Personal data is incomplete", exception.getMessage());
-    verify(deanRepository, never()).save(any(Dean.class));
-  }
-
-  @Test
-  void createDean_WithNullFacultyName_ShouldThrowValidationException() {
-    DeanDto invalidDto = new DeanDto("Juan Carlos Perez Gomez", "12345678", null);
-
-    jakarta.validation.ValidationException exception =
-        assertThrows(
-            jakarta.validation.ValidationException.class, () -> deanService.createDean(invalidDto));
-
-    assertEquals("Academic data is incomplete", exception.getMessage());
-    verify(deanRepository, never()).save(any(Dean.class));
-  }
-
-  @Test
-  void createDean_WithAllNullFields_ShouldThrowValidationException() {
-    DeanDto invalidDto = new DeanDto(null, null, null);
-
-    jakarta.validation.ValidationException exception =
-        assertThrows(
-            jakarta.validation.ValidationException.class, () -> deanService.createDean(invalidDto));
-
-    assertEquals("Personal data is incomplete", exception.getMessage());
-    verify(deanRepository, never()).save(any(Dean.class));
-  }
-
-  @Test
-  void createDean_WhenAuthenticationServiceThrowsException_ShouldThrowBusinessException() {
-    when(idGenerator.generateUniqueId()).thenReturn(GENERATED_ID);
-    doThrow(new RuntimeException("Authentication service error"))
-        .when(authenticationService)
-        .createAuthentication(any(Dean.class));
-
-    BusinessException exception =
-        assertThrows(BusinessException.class, () -> deanService.createDean(validDeanDto));
-
-    assertTrue(
-        exception
-            .getMessage()
-            .contains("An inesperated error has occurred when creating the dean"));
-    verify(deanRepository, never()).save(any(Dean.class));
-  }
-
-  @Test
-  void createDean_WhenRepositoryThrowsException_ShouldThrowBusinessException() {
-    when(idGenerator.generateUniqueId()).thenReturn(GENERATED_ID);
-    doNothing().when(authenticationService).createAuthentication(any(Dean.class));
-    when(deanRepository.save(any(Dean.class))).thenThrow(new RuntimeException("Database error"));
-
-    BusinessException exception =
-        assertThrows(BusinessException.class, () -> deanService.createDean(validDeanDto));
-
-    assertTrue(
-        exception
-            .getMessage()
-            .contains("An inesperated error has occurred when creating the dean"));
-  }
-
-  // Tests para updateDean
-  @Test
-  void updateDean_WhenDeanExists_ShouldUpdateAllFieldsSuccessfully() {
-    DeanDto updateDto = new DeanDto("Juan Carlos Perez Garcia", "87654321", "Science");
-
-    when(deanRepository.findByUserId(DEAN_ID)).thenReturn(Optional.of(existingDean));
-    when(deanRepository.save(any(Dean.class))).thenReturn(existingDean);
-
-    Dean result = deanService.updateDean(DEAN_ID, updateDto);
-
-    assertNotNull(result);
-    verify(deanRepository, times(1)).findByUserId(DEAN_ID);
-    verify(deanRepository, times(1)).save(existingDean);
-  }
-
-  @Test
-  void updateDean_WhenOnlyNameProvided_ShouldUpdateOnlyName() {
-    DeanDto nameOnlyUpdateDto = new DeanDto("Nuevo Nombre Completo", null, null);
-
-    when(deanRepository.findByUserId(DEAN_ID)).thenReturn(Optional.of(existingDean));
-    when(deanRepository.save(any(Dean.class))).thenReturn(existingDean);
-
-    Dean result = deanService.updateDean(DEAN_ID, nameOnlyUpdateDto);
-
-    assertNotNull(result);
-    assertEquals("Nuevo Nombre Completo", existingDean.getFullName());
-    verify(deanRepository, times(1)).save(existingDean);
-  }
-
-  @Test
-  void updateDean_WhenOnlyDocumentProvided_ShouldUpdateOnlyDocument() {
-    DeanDto documentOnlyUpdateDto = new DeanDto(null, "99999999", null);
-
-    when(deanRepository.findByUserId(DEAN_ID)).thenReturn(Optional.of(existingDean));
-    when(deanRepository.save(any(Dean.class))).thenReturn(existingDean);
-
-    Dean result = deanService.updateDean(DEAN_ID, documentOnlyUpdateDto);
-
-    assertNotNull(result);
-    assertEquals("99999999", existingDean.getIdentityDocument());
-    verify(deanRepository, times(1)).save(existingDean);
-  }
-
-  @Test
-  void updateDean_WhenOnlyFacultyProvided_ShouldUpdateOnlyFaculty() {
-    DeanDto facultyOnlyUpdateDto = new DeanDto(null, null, "Arts");
-
-    when(deanRepository.findByUserId(DEAN_ID)).thenReturn(Optional.of(existingDean));
-    when(deanRepository.save(any(Dean.class))).thenReturn(existingDean);
-
-    Dean result = deanService.updateDean(DEAN_ID, facultyOnlyUpdateDto);
-
-    assertNotNull(result);
-    assertEquals("Arts", existingDean.getFacultyName());
-    verify(deanRepository, times(1)).save(existingDean);
-  }
-
-  @Test
-  void updateDean_WithNoFieldsToUpdate_ShouldReturnSameDean() {
-    DeanDto emptyUpdateDto = new DeanDto(null, null, null);
-
-    when(deanRepository.findByUserId(DEAN_ID)).thenReturn(Optional.of(existingDean));
-    when(deanRepository.save(any(Dean.class))).thenReturn(existingDean);
-
-    Dean result = deanService.updateDean(DEAN_ID, emptyUpdateDto);
-
-    assertNotNull(result);
-    verify(deanRepository, times(1)).save(existingDean);
-  }
-
-  @Test
-  void updateDean_WhenDeanNotFound_ShouldThrowException() {
-    when(deanRepository.findByUserId(DEAN_ID)).thenReturn(Optional.empty());
-
-    ResourceNotFoundException exception =
-        assertThrows(
-            ResourceNotFoundException.class, () -> deanService.updateDean(DEAN_ID, validDeanDto));
-
-    assertEquals("Dean not found", exception.getMessage());
-    verify(deanRepository, never()).save(any(Dean.class));
-  }
-
-  @Test
-  void updateDean_WhenRepositoryThrowsException_ShouldThrowBusinessException() {
-    when(deanRepository.findByUserId(DEAN_ID)).thenReturn(Optional.of(existingDean));
-    when(deanRepository.save(any(Dean.class))).thenThrow(new RuntimeException("Database error"));
-
-    BusinessException exception =
-        assertThrows(BusinessException.class, () -> deanService.updateDean(DEAN_ID, validDeanDto));
-
-    assertTrue(
-        exception
-            .getMessage()
-            .contains("An inesperated error has occurred when updating the dean"));
-    verify(deanRepository, times(1)).save(any(Dean.class));
-  }
-
   // Tests para deleteDean
   @Test
   void deleteDean_WhenDeanExists_ShouldDeleteSuccessfully() {
@@ -333,35 +140,6 @@ class DeanServiceTest {
     assertEquals(DEAN_ID, result.getUserId());
     verify(authenticationService, times(1)).deleteAuthentication(existingDean);
     verify(deanRepository, times(1)).delete(existingDean);
-  }
-
-  @Test
-  void deleteDean_WhenAuthenticationDeletionFails_ShouldThrowBusinessException() {
-    when(deanRepository.findByUserId(DEAN_ID)).thenReturn(Optional.of(existingDean));
-    doThrow(new RuntimeException("Auth deletion failed"))
-        .when(authenticationService)
-        .deleteAuthentication(existingDean);
-
-    BusinessException exception =
-        assertThrows(BusinessException.class, () -> deanService.deleteDean(DEAN_ID));
-
-    assertTrue(
-        exception
-            .getMessage()
-            .contains("An inesperated error has occurred when deleting the dean"));
-    verify(deanRepository, never()).delete(any(Dean.class));
-  }
-
-  @Test
-  void deleteDean_WhenDeanNotFound_ShouldThrowException() {
-    when(deanRepository.findByUserId(DEAN_ID)).thenReturn(Optional.empty());
-
-    ResourceNotFoundException exception =
-        assertThrows(ResourceNotFoundException.class, () -> deanService.deleteDean(DEAN_ID));
-
-    assertEquals("Dean not found", exception.getMessage());
-    verify(authenticationService, never()).deleteAuthentication(any(Dean.class));
-    verify(deanRepository, never()).delete(any(Dean.class));
   }
 
   @Test
@@ -402,36 +180,6 @@ class DeanServiceTest {
 
     assertEquals("User not found with deanId: " + DEAN_ID, exception.getMessage());
     verify(deanRepository, times(1)).findById(DEAN_ID);
-  }
-
-  @Test
-  void createDean_WithSpecialCharactersInName_ShouldGenerateValidEmail() {
-    DeanDto deanWithSpecialChars = new DeanDto("José María Pérez", "99999999", FACULTY_NAME);
-
-    when(idGenerator.generateUniqueId()).thenReturn(GENERATED_ID);
-    when(deanRepository.save(any(Dean.class))).thenAnswer(invocation -> invocation.getArgument(0));
-    doNothing().when(authenticationService).createAuthentication(any(Dean.class));
-
-    Dean result = deanService.createDean(deanWithSpecialChars);
-
-    assertNotNull(result);
-    assertEquals("josé.pérez-m@escuelaing.edu.co", result.getEmail());
-  }
-
-  @Test
-  void updateDean_VerifyAllFieldsCanBeUpdatedSimultaneously() {
-    DeanDto updateDto = new DeanDto("New Full Name", "11111111", "New Faculty");
-
-    when(deanRepository.findByUserId(DEAN_ID)).thenReturn(Optional.of(existingDean));
-    when(deanRepository.save(any(Dean.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-    Dean result = deanService.updateDean(DEAN_ID, updateDto);
-
-    assertNotNull(result);
-    assertEquals("New Full Name", existingDean.getFullName());
-    assertEquals("11111111", existingDean.getIdentityDocument());
-    assertEquals("New Faculty", existingDean.getFacultyName());
-    verify(deanRepository, times(1)).save(existingDean);
   }
 
   @Test

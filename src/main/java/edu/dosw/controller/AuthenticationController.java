@@ -1,11 +1,17 @@
 package edu.dosw.controller;
 
-import edu.dosw.dto.UserCredentialsDto;
+import edu.dosw.dto.AuthResponseDto;
+import edu.dosw.dto.LogInDTO;
+import edu.dosw.dto.UserInfoDto;
 import edu.dosw.services.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,9 +26,21 @@ public class AuthenticationController {
   private final AuthenticationService authenticationService;
 
   @PostMapping("/login")
-  @Operation(summary = "Log in")
-  public ResponseEntity<String> login(@RequestBody UserCredentialsDto userCredentialsDto) {
-    String isAuthenticated = String.valueOf(authenticationService.logIn(userCredentialsDto));
-    return ResponseEntity.ok(isAuthenticated);
+  @PreAuthorize("permitAll()")
+  @Operation(
+      summary = "Log in",
+      security = {})
+  public ResponseEntity<AuthResponseDto> login(@RequestBody @Valid LogInDTO logInDTO) {
+    AuthResponseDto response = authenticationService.logIn(logInDTO);
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/me")
+  @PreAuthorize("isAuthenticated()")
+  @Operation(summary = "Get current user info")
+  public ResponseEntity<UserInfoDto> getCurrentUser(Authentication authentication) {
+    String email = authentication.getName();
+    UserInfoDto userInfo = authenticationService.getUserInfo(email);
+    return ResponseEntity.ok(userInfo);
   }
 }

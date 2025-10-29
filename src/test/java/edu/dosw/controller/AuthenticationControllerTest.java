@@ -1,9 +1,13 @@
 package edu.dosw.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import edu.dosw.dto.UserCredentialsDto;
+import edu.dosw.dto.AuthResponseDto;
+import edu.dosw.dto.LogInDTO;
+import edu.dosw.dto.UserInfoDto;
+import edu.dosw.model.enums.Role;
 import edu.dosw.services.AuthenticationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,115 +25,118 @@ class AuthenticationControllerTest {
   @InjectMocks private AuthenticationController authenticationController;
 
   @Test
-  void login_WithValidCredentials_ShouldReturnTrue() {
-    UserCredentialsDto credentials =
-        new UserCredentialsDto("1", "user123", "user@mail.escuelaing.edu.co", "password123");
-    when(authenticationService.logIn(credentials)).thenReturn(true);
+  void login_WithValidCredentials_ShouldReturnTokenAndUserInfo() {
+    // Arrange
+    LogInDTO loginDto = new LogInDTO("user@mail.escuelaing.edu.co", "password123");
+    UserInfoDto userInfo = new UserInfoDto("1", "user@mail.escuelaing.edu.co", Role.STUDENT);
+    AuthResponseDto expectedResponse = new AuthResponseDto("testToken123", userInfo);
 
-    ResponseEntity<String> response = authenticationController.login(credentials);
+    when(authenticationService.logIn(any(LogInDTO.class))).thenReturn(expectedResponse);
 
+    // Act
+    ResponseEntity<AuthResponseDto> response = authenticationController.login(loginDto);
+
+    // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals("true", response.getBody());
-    verify(authenticationService, times(1)).logIn(credentials);
-  }
-
-  @Test
-  void login_WithInvalidCredentials_ShouldReturnFalse() {
-    UserCredentialsDto credentials =
-        new UserCredentialsDto("1", "user123", "user@mail.escuelaing.edu.co", "wrongpassword");
-    when(authenticationService.logIn(credentials)).thenReturn(false);
-
-    ResponseEntity<String> response = authenticationController.login(credentials);
-
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals("false", response.getBody());
-    verify(authenticationService, times(1)).logIn(credentials);
+    assertNotNull(response.getBody());
+    assertEquals("testToken123", response.getBody().token());
+    assertEquals("1", response.getBody().user().userId());
+    assertEquals("user@mail.escuelaing.edu.co", response.getBody().user().email());
+    assertEquals(Role.STUDENT, response.getBody().user().role());
+    verify(authenticationService, times(1)).logIn(any(LogInDTO.class));
   }
 
   @Test
   void login_WithInvalidEmailFormat_ShouldThrowException() {
-    UserCredentialsDto credentials =
-        new UserCredentialsDto("1", "user123", "invalid-email", "password123");
-    when(authenticationService.logIn(credentials)).thenThrow(new RuntimeException("Invalid email"));
+    // Arrange
+    LogInDTO loginDto = new LogInDTO("invalid-email", "password123");
+    when(authenticationService.logIn(any(LogInDTO.class)))
+        .thenThrow(new RuntimeException("Invalid email"));
 
-    assertThrows(RuntimeException.class, () -> authenticationController.login(credentials));
-    verify(authenticationService, times(1)).logIn(credentials);
+    // Act & Assert
+    assertThrows(RuntimeException.class, () -> authenticationController.login(loginDto));
+    verify(authenticationService, times(1)).logIn(any(LogInDTO.class));
   }
 
   @Test
   void login_WithNonExistentUser_ShouldThrowException() {
-    UserCredentialsDto credentials =
-        new UserCredentialsDto(
-            "1", "nonExistent", "nonexistent@mail.escuelaing.edu.co", "password123");
-    when(authenticationService.logIn(credentials))
+    // Arrange
+    LogInDTO loginDto = new LogInDTO("nonexistent@mail.escuelaing.edu.co", "password123");
+    when(authenticationService.logIn(any(LogInDTO.class)))
         .thenThrow(new RuntimeException("User not found"));
 
-    assertThrows(RuntimeException.class, () -> authenticationController.login(credentials));
-    verify(authenticationService, times(1)).logIn(credentials);
+    // Act & Assert
+    assertThrows(RuntimeException.class, () -> authenticationController.login(loginDto));
+    verify(authenticationService, times(1)).logIn(any(LogInDTO.class));
   }
 
   @Test
   void login_WithWrongPassword_ShouldThrowException() {
-    UserCredentialsDto credentials =
-        new UserCredentialsDto("1", "user123", "user@mail.escuelaing.edu.co", "wrongpass");
-    when(authenticationService.logIn(credentials))
+    // Arrange
+    LogInDTO loginDto = new LogInDTO("user@mail.escuelaing.edu.co", "wrongpass");
+    when(authenticationService.logIn(any(LogInDTO.class)))
         .thenThrow(new RuntimeException("Invalid password"));
 
-    assertThrows(RuntimeException.class, () -> authenticationController.login(credentials));
-    verify(authenticationService, times(1)).logIn(credentials);
-  }
-
-  @Test
-  void login_WithNullCredentials_ShouldThrowException() {
-    when(authenticationService.logIn(null))
-        .thenThrow(new RuntimeException("Credentials cannot be null"));
-
-    assertThrows(RuntimeException.class, () -> authenticationController.login(null));
-    verify(authenticationService, times(1)).logIn(null);
+    // Act & Assert
+    assertThrows(RuntimeException.class, () -> authenticationController.login(loginDto));
+    verify(authenticationService, times(1)).logIn(any(LogInDTO.class));
   }
 
   @Test
   void login_WithNullEmail_ShouldThrowException() {
-    UserCredentialsDto credentials = new UserCredentialsDto("1", "user123", null, "password123");
-    when(authenticationService.logIn(credentials))
+    // Arrange
+    LogInDTO loginDto = new LogInDTO(null, "password123");
+    when(authenticationService.logIn(any(LogInDTO.class)))
         .thenThrow(new RuntimeException("Email cannot be null"));
 
-    assertThrows(RuntimeException.class, () -> authenticationController.login(credentials));
-    verify(authenticationService, times(1)).logIn(credentials);
+    // Act & Assert
+    assertThrows(RuntimeException.class, () -> authenticationController.login(loginDto));
+    verify(authenticationService, times(1)).logIn(any(LogInDTO.class));
   }
 
   @Test
   void login_WithNullPassword_ShouldThrowException() {
-    UserCredentialsDto credentials =
-        new UserCredentialsDto("1", "user123", "user@mail.escuelaing.edu.co", null);
-    when(authenticationService.logIn(credentials))
+    // Arrange
+    LogInDTO loginDto = new LogInDTO("user@mail.escuelaing.edu.co", null);
+    when(authenticationService.logIn(any(LogInDTO.class)))
         .thenThrow(new RuntimeException("Password cannot be null"));
 
-    assertThrows(RuntimeException.class, () -> authenticationController.login(credentials));
-    verify(authenticationService, times(1)).logIn(credentials);
+    // Act & Assert
+    assertThrows(RuntimeException.class, () -> authenticationController.login(loginDto));
+    verify(authenticationService, times(1)).logIn(any(LogInDTO.class));
   }
 
   @Test
   void login_WithEmptyPassword_ShouldThrowException() {
-    UserCredentialsDto credentials =
-        new UserCredentialsDto("1", "user123", "user@mail.escuelaing.edu.co", "");
-    when(authenticationService.logIn(credentials))
+    // Arrange
+    LogInDTO loginDto = new LogInDTO("user@mail.escuelaing.edu.co", "");
+    when(authenticationService.logIn(any(LogInDTO.class)))
         .thenThrow(new RuntimeException("Password cannot be empty"));
 
-    assertThrows(RuntimeException.class, () -> authenticationController.login(credentials));
-    verify(authenticationService, times(1)).logIn(credentials);
+    // Act & Assert
+    assertThrows(RuntimeException.class, () -> authenticationController.login(loginDto));
+    verify(authenticationService, times(1)).logIn(any(LogInDTO.class));
   }
 
   @Test
-  void login_WithValidCredentialsDifferentCaseEmail_ShouldReturnTrue() {
-    UserCredentialsDto credentials =
-        new UserCredentialsDto("1", "user123", "USER@MAIL.ESCUELAING.EDU.CO", "password123");
-    when(authenticationService.logIn(credentials)).thenReturn(true);
+  void login_WithValidCredentialsDifferentCaseEmail_ShouldReturnToken() {
+    // Arrange
+    LogInDTO loginDto = new LogInDTO("USER@MAIL.ESCUELAING.EDU.CO", "password123");
+    UserInfoDto userInfo = new UserInfoDto("1", "user@mail.escuelaing.edu.co", Role.STUDENT);
+    AuthResponseDto expectedResponse = new AuthResponseDto("testToken123", userInfo);
 
-    ResponseEntity<String> response = authenticationController.login(credentials);
+    when(authenticationService.logIn(any(LogInDTO.class))).thenReturn(expectedResponse);
 
+    // Act
+    ResponseEntity<AuthResponseDto> response = authenticationController.login(loginDto);
+
+    // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals("true", response.getBody());
-    verify(authenticationService, times(1)).logIn(credentials);
+    assertNotNull(response.getBody());
+    assertEquals("testToken123", response.getBody().token());
+    assertEquals("1", response.getBody().user().userId());
+    assertEquals("user@mail.escuelaing.edu.co", response.getBody().user().email());
+    assertEquals(Role.STUDENT, response.getBody().user().role());
+    verify(authenticationService, times(1)).logIn(any(LogInDTO.class));
   }
 }

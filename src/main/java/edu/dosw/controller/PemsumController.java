@@ -6,12 +6,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Controller that handles all course-related HTTP requests. Provides endpoints for CRUD operations
- * on courses and their groups.
- */
 @RestController
 @RequestMapping("/pemsum")
 @Tag(name = "Pemsum Controller", description = "APIs for managing courses and groups")
@@ -19,21 +16,13 @@ public class PemsumController {
 
   private final PemsumService pemsumService;
 
-  /**
-   * Constructs a new PemsumController with the provided FacultyService.
-   *
-   * @param pemsumService The service to handle course operations
-   */
   public PemsumController(PemsumService pemsumService) {
     this.pemsumService = pemsumService;
   }
 
-  /**
-   * Retrieves the Pemsum of a student.
-   *
-   * @return List of all courses with their details
-   */
   @GetMapping("/{studentId}/respond")
+  @PreAuthorize(
+      "hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT') and @authenticationService.canAccessStudentData(authentication, #studentId)")
   @Operation(summary = "Get Pemsum", description = "Retrieves the Pemsum of a student")
   public ResponseEntity<Pemsum> getPemsum(@PathVariable String studentId) {
     return ResponseEntity.ok(pemsumService.getPemsum(studentId));

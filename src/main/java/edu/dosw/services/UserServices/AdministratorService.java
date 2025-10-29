@@ -1,10 +1,12 @@
 package edu.dosw.services.UserServices;
 
 import edu.dosw.dto.AdministratorDto;
+import edu.dosw.dto.UserInfoDto;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.exception.ResourceAlreadyExistsException;
 import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Administrator;
+import edu.dosw.model.enums.Role;
 import edu.dosw.repositories.AdministratorRepository;
 import edu.dosw.services.AuthenticationService;
 import edu.dosw.utils.IdGenerator;
@@ -68,7 +70,8 @@ public class AdministratorService {
             .identityDocument(administratorCreationRequest.identityDocument())
             .build();
     try {
-      authenticationService.createAuthentication(administrator);
+      authenticationService.createAuthentication(
+          new UserInfoDto(administrator.getUserId(), administrator.getEmail(), Role.ADMINISTRATOR));
       return administratorRepository.save(administrator);
     } catch (DataIntegrityViolationException e) {
       throw new ResourceAlreadyExistsException("Data integrity violation: " + e.getMessage());

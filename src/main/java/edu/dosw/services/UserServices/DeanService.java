@@ -1,9 +1,11 @@
 package edu.dosw.services.UserServices;
 
 import edu.dosw.dto.DeanDto;
+import edu.dosw.dto.UserInfoDto;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Dean;
+import edu.dosw.model.enums.Role;
 import edu.dosw.repositories.DeanRepository;
 import edu.dosw.services.AuthenticationService;
 import edu.dosw.utils.IdGenerator;
@@ -72,7 +74,8 @@ public class DeanService {
             .facultyName(deanCreationRequest.facultyName())
             .build();
     try {
-      authenticationService.createAuthentication(dean);
+      authenticationService.createAuthentication(
+          new UserInfoDto(dean.getUserId(), dean.getEmail(), Role.DEAN));
       return deanRepository.save(dean);
     } catch (Exception e) {
       throw new BusinessException(

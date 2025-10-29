@@ -3,6 +3,7 @@ package edu.dosw.controller;
 import edu.dosw.dto.CreationGroupRequest;
 import edu.dosw.dto.SessionDTO;
 import edu.dosw.dto.UpdateGroupRequest;
+import edu.dosw.model.Course;
 import edu.dosw.model.Group;
 import edu.dosw.model.Session;
 import edu.dosw.services.GroupService;
@@ -11,16 +12,18 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/group")
+@RequestMapping("/groups")
 @Tag(name = "Group Controller", description = "APIs for group management")
 public class GroupController {
   private final GroupService groupService;
 
   @GetMapping("/{groupCode}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT')")
   @Operation(
       summary = "Get group by code",
       description =
@@ -29,7 +32,27 @@ public class GroupController {
     return ResponseEntity.ok(groupService.getGroupByGroupCode(groupCode));
   }
 
+  @GetMapping("/{courseAbbreviation}")
+  @Operation(
+      summary = "Get group by course abbreviation",
+      description = "Retrieves detailed information about a all groups by course abbreviation")
+  public ResponseEntity<List<Group>> getGroupByCourseAbbreviation(
+      @PathVariable String courseAbbreviation) {
+    return ResponseEntity.ok(groupService.getAllGroupsByCourseAbbreviation(courseAbbreviation));
+  }
+
+  @GetMapping("/{groupCode}/course")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT')")
+  @Operation(
+      summary = "Get course by group code",
+      description = "Retrieves detailed information about a course by its group code")
+  public ResponseEntity<Course> getCourseByGroupCode(@PathVariable String groupCode) {
+    Course course = groupService.getCourseByGroupCode(groupCode);
+    return ResponseEntity.ok(course);
+  }
+
   @PostMapping("/{facultyName}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(
       summary = "Create a new group",
       description =
@@ -42,6 +65,7 @@ public class GroupController {
   }
 
   @PutMapping("/{groupCode}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(
       summary = "Update group information",
       description = "Updates the details of an existing group identified by its group code")
@@ -51,6 +75,7 @@ public class GroupController {
   }
 
   @DeleteMapping("/{groupCode}")
+  @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(
       summary = "Delete a group",
       description = "Deletes a group and all its associated data using the group code")
@@ -58,9 +83,9 @@ public class GroupController {
     return ResponseEntity.ok(groupService.deleteGroup(groupCode));
   }
 
-  // Endpoints de sessiones :3
-
+  // Sessions endpoints
   @GetMapping("/sessions/{groupCode}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT')")
   @Operation(
       summary = "Get all sessions for a group",
       description = "Retrieves a list of all sessions associated with the specified group code")
@@ -70,6 +95,7 @@ public class GroupController {
   }
 
   @GetMapping("/session/{sessionId}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT')")
   @Operation(
       summary = "Get session by ID",
       description =
@@ -79,6 +105,7 @@ public class GroupController {
   }
 
   @PostMapping("/session")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(
       summary = "Create a new session",
       description =
@@ -88,6 +115,7 @@ public class GroupController {
   }
 
   @PatchMapping("/sessions/{sessionId}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(
       summary = "Update session details",
       description = "Updates the details of an existing session identified by its session ID")
@@ -97,6 +125,7 @@ public class GroupController {
   }
 
   @DeleteMapping("/sessions/{sessionId}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(
       summary = "Delete a session",
       description = "Deletes a specific session using its session ID")
@@ -105,6 +134,7 @@ public class GroupController {
   }
 
   @DeleteMapping("/sessions/{groupId}")
+  @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(
       summary = "Delete all sessions for a group",
       description = "Removes all sessions associated with the specified group ID")
@@ -112,9 +142,9 @@ public class GroupController {
     return ResponseEntity.ok(groupService.deleteSessionsFromGroup(groupId));
   }
 
-  // Endpoints de funcionalidades extra :D (De historial)
-
+  // Student enrollment endpoints
   @PostMapping("/student/{groupCode}/{studentId}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR')")
   @Operation(
       summary = "Add a student to a group",
       description = "Enrolls a student in the specified group and creates a new enrollment record")
@@ -124,6 +154,7 @@ public class GroupController {
   }
 
   @DeleteMapping("/student/{groupCode}/{studentId}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR')")
   @Operation(
       summary = "Remove a student from a group",
       description =
