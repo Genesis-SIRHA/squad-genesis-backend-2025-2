@@ -1,6 +1,7 @@
 package edu.dosw.model;
 
-import java.util.Map;
+import edu.dosw.dto.CourseStatus;
+import java.util.List;
 
 /**
  * Represents a student's academic record summary, including courses and credits. This class is
@@ -13,7 +14,7 @@ public class Pemsum {
   private final String facultyPlan;
   private final int approvedCredits;
   private final int totalCredits;
-  private final Map<Course, String> courses;
+  private final List<CourseStatus> courses;
 
   /**
    * Private constructor used by the Builder pattern.
@@ -75,7 +76,7 @@ public class Pemsum {
   /**
    * @return A map of courses and their current status for the student.
    */
-  public Map<Course, String> getCourses() {
+  public List<CourseStatus> getCourses() {
     return courses;
   }
 
@@ -90,7 +91,7 @@ public class Pemsum {
     private String facultyPlan;
     private int approvedCredits;
     private int totalCredits;
-    private Map<Course, String> courses;
+    private List<CourseStatus> courses;
 
     /**
      * Sets the student's unique identifier.
@@ -164,7 +165,7 @@ public class Pemsum {
      * @param courses A map of Course objects to status strings.
      * @return This builder instance for method chaining.
      */
-    public Builder courses(Map<Course, String> courses) {
+    public Builder courses(List<CourseStatus> courses) {
       this.courses = courses;
       return this;
     }
