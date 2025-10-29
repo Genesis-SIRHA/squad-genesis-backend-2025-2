@@ -6,7 +6,7 @@ import edu.dosw.dto.UserCredentialsDto;
 import edu.dosw.dto.UserInfoDto;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.model.User;
-import edu.dosw.model.enums.Role; // Make sure to import this
+import edu.dosw.model.enums.Role;
 import edu.dosw.repositories.UserCredentialsRepository;
 import edu.dosw.utils.JwtUtil;
 import java.util.Optional;
@@ -14,7 +14,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication; // Add this import
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
