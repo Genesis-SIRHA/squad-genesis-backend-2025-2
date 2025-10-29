@@ -46,14 +46,16 @@ public class HistorialService {
 
   public List<Historial> getSessionsByCourses(String studentId, List<Course> courses) {
     List<Historial> completeHistorial = historialRepository.findByStudentId(studentId);
-    ArrayList<Historial> lastCourseState = new ArrayList<>();
+    List<Historial> lastCourseState = new ArrayList<>();
+
     for (Course course : courses) {
-      ArrayList<Historial> historialByCourse =
-          (ArrayList<Historial>)
-              completeHistorial.stream()
-                  .filter(h -> h.getGroupCode().equals(course.getAbbreviation()))
-                  .toList();
-      lastCourseState.add(historialByCourse.get(historialByCourse.size() - 1));
+      List<Historial> historialByCourse = completeHistorial.stream()
+              .filter(h -> h.getGroupCode().equals(course.getAbbreviation()))
+              .toList();
+
+      if (!historialByCourse.isEmpty()) {
+        lastCourseState.add(historialByCourse.get(historialByCourse.size() - 1));
+      }
     }
     return lastCourseState;
   }
