@@ -10,6 +10,7 @@ import edu.dosw.model.Faculty;
 import edu.dosw.model.Group;
 import edu.dosw.model.Student;
 import edu.dosw.services.UserServices.StudentService;
+import edu.dosw.services.Validators.GroupValidator;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

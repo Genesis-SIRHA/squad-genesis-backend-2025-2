@@ -15,6 +15,7 @@ import edu.dosw.model.Group;
 import edu.dosw.model.Session;
 import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.repositories.GroupRepository;
+import edu.dosw.services.Validators.GroupValidator;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;

@@ -7,6 +7,7 @@ import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Pemsum;
 import edu.dosw.services.PemsumService;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,8 +27,8 @@ class PemsumControllerTest {
   @Test
   void getPemsum_WhenStudentExists_ShouldReturnPemsum() {
     String studentId = "STU001";
-    Course course1 = new Course("MATH101", "Calculus I", 4);
-    Course course2 = new Course("PHYS101", "Physics I", 3);
+    Course course1 = new Course("MATH101", "Calculus I", 4, "1", List.of());
+    Course course2 = new Course("PHYS101", "Physics I", 3, "1", List.of());
     Map<Course, String> courses = Map.of(course1, "Approved", course2, "In Progress");
 
     Pemsum expectedPemsum =
@@ -91,8 +92,8 @@ class PemsumControllerTest {
   @Test
   void getPemsum_WithCompleteCredits_ShouldReturnCompletedPemsum() {
     String studentId = "STU002";
-    Course course1 = new Course("MATH101", "Calculus I", 4);
-    Course course2 = new Course("CS101", "Programming", 3);
+    Course course1 = new Course("MATH101", "Calculus I", 4, "1", List.of());
+    Course course2 = new Course("CS101", "Programming", 3, "1", List.of());
     Map<Course, String> courses = Map.of(course1, "Approved", course2, "Approved");
 
     Pemsum completedPemsum =
@@ -120,10 +121,10 @@ class PemsumControllerTest {
   @Test
   void getPemsum_WithMultipleCourses_ShouldReturnAllCourses() {
     String studentId = "STU003";
-    Course course1 = new Course("MATH101", "Calculus I", 4);
-    Course course2 = new Course("PHYS101", "Physics I", 3);
-    Course course3 = new Course("CHEM101", "Chemistry", 3);
-    Course course4 = new Course("BIO101", "Biology", 3);
+    Course course1 = new Course("MATH101", "Calculus I", 4, "1", List.of());
+    Course course2 = new Course("PHYS101", "Physics I", 3, "1", List.of());
+    Course course3 = new Course("CHEM101", "Chemistry", 3, "1", List.of());
+    Course course4 = new Course("BIO101", "Biology", 3, "1", List.of());
     Map<Course, String> courses =
         Map.of(
             course1, "Approved",
@@ -181,7 +182,7 @@ class PemsumControllerTest {
   @Test
   void getPemsum_VerifyResponseStructure() {
     String studentId = "STU006";
-    Course course = new Course("INTRO101", "Introduction", 2);
+    Course course = new Course("INTRO101", "Introduction", 2, "1", List.of());
     Map<Course, String> courses = Map.of(course, "Approved");
 
     Pemsum pemsum =
