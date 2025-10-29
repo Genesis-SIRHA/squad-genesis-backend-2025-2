@@ -42,7 +42,12 @@ class StudentServiceTest {
   void setUp() {
     validStudentDto =
         new StudentDto(
-            "12345678", "Juan Carlos Perez Gomez", PLAN, FACULTY_NAME, AcademicGrade.UNDERGRADUATE);
+            "12345678",
+            "Juan Carlos Perez Gomez",
+            PLAN,
+            FACULTY_NAME,
+            AcademicGrade.UNDERGRADUATE,
+            1);
 
     existingStudent =
         new Student.StudentBuilder()

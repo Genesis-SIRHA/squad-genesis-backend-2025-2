@@ -38,7 +38,8 @@ class StudentControllerTest {
             "Juan Pérez",
             "Engineering Plan",
             "Faculty of Engineering",
-            AcademicGrade.UNDERGRADUATE);
+            AcademicGrade.UNDERGRADUATE,
+            1);
 
     // Usando el Builder pattern de Student
     student =
@@ -123,7 +124,8 @@ class StudentControllerTest {
             "Juan Pérez Updated",
             "Updated Engineering Plan",
             "Updated Faculty of Engineering",
-            AcademicGrade.GRADUATED);
+            AcademicGrade.GRADUATED,
+            1);
 
     Student updatedStudent =
         new Student.StudentBuilder()
@@ -210,7 +212,8 @@ class StudentControllerTest {
             "Dr. Ana Martínez",
             "Doctoral Research Plan",
             "Faculty of Philosophy",
-            AcademicGrade.DOCTORS_DEGREE);
+            AcademicGrade.DOCTORS_DEGREE,
+            1);
 
     Student doctorStudent =
         new Student.StudentBuilder()
@@ -264,7 +267,8 @@ class StudentControllerTest {
             "Juan Pérez",
             "Engineering Plan",
             "Faculty of Engineering",
-            AcademicGrade.UNDERGRADUATE);
+            AcademicGrade.UNDERGRADUATE,
+            1);
 
     Student updatedStudent =
         new Student.StudentBuilder()
