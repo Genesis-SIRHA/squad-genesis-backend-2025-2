@@ -55,7 +55,7 @@ public class RequestValidator {
               .getAbbreviation()
           == null) {
         logger.error("The destination group is not in your plan");
-        throw new IllegalArgumentException("The origin group is not in your plan");
+        throw new BusinessException("The origin group is not in your plan");
       }
     }
 

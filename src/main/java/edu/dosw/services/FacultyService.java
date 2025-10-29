@@ -81,7 +81,7 @@ public class FacultyService {
             .orElse(null);
     if (faculty == null) {
       logger.error("Faculty not found: {}", facultyDto.facultyName());
-      throw new BusinessException("Faculty not found: " + facultyDto.facultyName());
+      throw new ResourceNotFoundException("Faculty not found: " + facultyDto.facultyName());
     }
     facultyValidator.validateAddCourses(
         new CoursesDto(
