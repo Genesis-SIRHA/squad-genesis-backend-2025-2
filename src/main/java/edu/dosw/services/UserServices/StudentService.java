@@ -59,6 +59,7 @@ public class StudentService {
             .academicGrade(studentCreationRequest.academicGrade())
             .identityDocument(studentCreationRequest.identityDocument())
             .plan(studentCreationRequest.plan())
+            .semester(studentCreationRequest.semester())
             .facultyName(studentCreationRequest.facultyName())
             .build();
     try {
@@ -98,6 +99,8 @@ public class StudentService {
     if (studentUpdateRequest.plan() != null) student.setPlan(studentUpdateRequest.plan());
     if (studentUpdateRequest.academicGrade() != null)
       student.setAcademicGrade(studentUpdateRequest.academicGrade());
+    if (studentUpdateRequest.semester() != null)
+      student.setSemester(studentUpdateRequest.semester());
 
     try {
       return studentRepository.save(student);

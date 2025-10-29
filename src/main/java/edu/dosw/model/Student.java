@@ -13,7 +13,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Student extends User {
   private String plan;
   private String facultyName;
-  private int generalAverage;
+  private Integer generalAverage;
+  private Integer semester;
   private AcademicGrade academicGrade;
 
   public Student(StudentBuilder builder) {
@@ -22,9 +23,11 @@ public class Student extends User {
     this.facultyName = builder.facultyName;
     this.academicGrade = builder.academicGrade;
     this.generalAverage = builder.generalAverage;
+    this.semester = builder.semester;
   }
 
   public static class StudentBuilder {
+    public Integer semester;
     private String userId;
     private String fullName;
     private String email;
@@ -64,8 +67,13 @@ public class Student extends User {
       return this;
     }
 
-    public StudentBuilder generalAverage(int generalAverage) {
+    public StudentBuilder generalAverage(Integer generalAverage) {
       this.generalAverage = generalAverage;
+      return this;
+    }
+
+    public StudentBuilder semester(Integer semester) {
+      this.semester = semester;
       return this;
     }
 
