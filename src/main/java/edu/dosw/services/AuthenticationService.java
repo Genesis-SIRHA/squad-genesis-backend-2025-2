@@ -1,7 +1,8 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.UserCredentialsDto;
-import edu.dosw.exception.BusinessException;
+import edu.dosw.exception.AuthenticationException;
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.User;
 import edu.dosw.repositories.UserCredentialsRepository;
 import java.util.Optional;
@@ -28,16 +29,16 @@ public class AuthenticationService {
     String email = userCredentialsDto.email().toLowerCase();
     if (validateUserEmail(email)) {
       logger.error("Invalid email");
-      throw new BusinessException("Invalid email");
+      throw new AuthenticationException("Invalid email");
     }
     Optional<UserCredentialsDto> userCredentials = userCredentialsRepository.findByEmail(email);
     if (userCredentials.isEmpty()) {
       logger.error("User not found");
-      throw new BusinessException("User not found");
+      throw new AuthenticationException("User not found");
     }
     if (!verifyPassword(userCredentialsDto.password(), userCredentials.get().password())) {
       logger.error("Invalid password");
-      throw new BusinessException("Invalid password");
+      throw new AuthenticationException("Invalid password");
     }
     return true;
   }
@@ -58,7 +59,7 @@ public class AuthenticationService {
     Optional<UserCredentialsDto> userCredentials = userCredentialsRepository.findByUserId(id);
     if (userCredentials.isEmpty()) {
       logger.error("User not found");
-      throw new BusinessException("User not found");
+      throw new ResourceNotFoundException("User not found");
     }
     return userCredentials;
   }
@@ -76,7 +77,7 @@ public class AuthenticationService {
         userCredentialsRepository.findByEmail(user.getEmail());
     if (userCredentialsDto.isEmpty()) {
       logger.error("User not found");
-      throw new BusinessException("User not found");
+      throw new ResourceNotFoundException("User not found");
     }
     userCredentialsRepository.delete(userCredentialsDto.get());
   }

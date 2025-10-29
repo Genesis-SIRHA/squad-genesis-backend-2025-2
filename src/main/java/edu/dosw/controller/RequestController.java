@@ -1,7 +1,6 @@
 package edu.dosw.controller;
 
 import edu.dosw.dto.CreateRequestDto;
-import edu.dosw.dto.RequestStats;
 import edu.dosw.dto.UpdateRequestDto;
 import edu.dosw.model.Request;
 import edu.dosw.model.enums.Role;
@@ -82,14 +81,6 @@ public class RequestController {
   public ResponseEntity<List<Request>> getRequestByFacultyName(@PathVariable String facultyName) {
     List<Request> requests = requestService.fetchRequestsByFacultyName(facultyName.toLowerCase());
     return ResponseEntity.ok(requests);
-  }
-
-  @GetMapping("/stats")
-  @Operation(
-      summary = "Get request statistics",
-      description = "Retrieves statistics about requests")
-  public ResponseEntity<RequestStats> getRequestStats() {
-    return ResponseEntity.ok(requestService.getRequestStats());
   }
 
   @PatchMapping("/status/{userId}")

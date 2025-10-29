@@ -4,6 +4,8 @@ import edu.dosw.dto.CourseRequest;
 import edu.dosw.dto.FacultyDto;
 import edu.dosw.dto.UpdateCourseDTO;
 import edu.dosw.exception.BusinessException;
+import edu.dosw.exception.ResourceAlreadyExistsException;
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Faculty;
 import edu.dosw.repositories.FacultyRepository;
@@ -58,7 +60,7 @@ public class FacultyService {
     Faculty faculty = facultyRepository.findByNameAndPlan(name, plan).orElse(null);
     if (faculty == null) {
       logger.error("Faculty not found: " + name);
-      throw new BusinessException("Faculty not found: " + name);
+      throw new ResourceNotFoundException("Faculty not found: " + name);
     }
     return faculty;
   }
@@ -70,7 +72,7 @@ public class FacultyService {
             .orElse(null);
     if (faculty == null) {
       logger.error("Faculty not found: {}", facultyDto.facultyName());
-      throw new BusinessException("Faculty not found: " + facultyDto.facultyName());
+      throw new ResourceNotFoundException("Faculty not found: " + facultyDto.facultyName());
     }
     if (facultyDto.courses() != null) faculty.setCourses(facultyDto.courses());
     try {
@@ -130,7 +132,7 @@ public class FacultyService {
     Faculty faculty = getFacultyByNameAndPlan(facultyName, plan);
     if (faculty == null) {
       logger.error("Faculty not found: " + facultyName);
-      throw new BusinessException("Faculty not found: " + facultyName);
+      throw new ResourceNotFoundException("Faculty not found: " + facultyName);
     }
     return new ArrayList<>(faculty.getCourses());
   }
@@ -147,12 +149,12 @@ public class FacultyService {
         facultyRepository
             .findByNameAndPlan(request.facultyName().toLowerCase(), request.plan())
             .orElseThrow(
-                () -> new BusinessException("Faculty not found: " + request.facultyName()));
+                () -> new ResourceNotFoundException("Faculty not found: " + request.facultyName()));
 
     if (faculty.getCourses().stream()
         .anyMatch(c -> c.getAbbreviation().equals(request.abbreviation().toUpperCase()))) {
       logger.error("Course already exists: " + request.abbreviation());
-      throw new BusinessException("Course already exists: " + request.abbreviation());
+      throw new ResourceAlreadyExistsException("Course already exists: " + request.abbreviation());
     }
 
     Course course = request.toEntity();
@@ -175,13 +177,14 @@ public class FacultyService {
     Faculty faculty =
         facultyRepository
             .findByNameAndPlan(facultyName.toLowerCase(), plan)
-            .orElseThrow(() -> new BusinessException("Faculty not found: " + facultyName));
+            .orElseThrow(() -> new ResourceNotFoundException("Faculty not found: " + facultyName));
 
     Course existingCourse =
         faculty.getCourses().stream()
             .filter(c -> c.getAbbreviation().equals(courseAbbreviation.toUpperCase()))
             .findFirst()
-            .orElseThrow(() -> new BusinessException("Course not found: " + courseAbbreviation));
+            .orElseThrow(
+                () -> new ResourceNotFoundException("Course not found: " + courseAbbreviation));
 
     if (updateCourseDTO.courseName() != null)
       existingCourse.setCourseName(updateCourseDTO.courseName().toLowerCase());
@@ -207,13 +210,13 @@ public class FacultyService {
 
     if (faculty == null) {
       logger.error("Course not found: {} ", courseAbbreviation);
-      throw new BusinessException("Course not found: " + courseAbbreviation);
+      throw new ResourceNotFoundException("Course not found: " + courseAbbreviation);
     }
 
     List<Course> courses = faculty.getCourses();
     if (courses == null || courses.isEmpty()) {
       logger.error("No courses found for code: {}", courseAbbreviation);
-      throw new BusinessException("Course data is corrupted for: " + courseAbbreviation);
+      throw new ResourceNotFoundException("Course data is corrupted for: " + courseAbbreviation);
     }
 
     return courses.stream()
@@ -234,7 +237,7 @@ public class FacultyService {
         facultyRepository.findByNameAndPlan(facultyName.toLowerCase(), plan).orElse(null);
     if (faculty == null) {
       logger.error("Faculty not found: " + facultyName);
-      throw new BusinessException("Faculty not found: " + facultyName);
+      throw new ResourceNotFoundException("Faculty not found: " + facultyName);
     }
     faculty
         .getCourses()

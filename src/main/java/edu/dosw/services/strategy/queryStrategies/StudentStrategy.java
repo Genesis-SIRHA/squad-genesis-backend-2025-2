@@ -1,5 +1,6 @@
 package edu.dosw.services.strategy.queryStrategies;
 
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Request;
 import edu.dosw.model.Student;
 import edu.dosw.repositories.RequestRepository;
@@ -38,7 +39,7 @@ public class StudentStrategy implements QueryStrategy {
     Student student = studentService.getStudentById(userId);
     if (student == null) {
       logger.error("Student not found with id: {}", userId);
-      throw new IllegalArgumentException("Student not found with id: " + userId);
+      throw new ResourceNotFoundException("Student not found with id: " + userId);
     }
     return requestRepository.findByStudentId(userId);
   }
