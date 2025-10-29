@@ -37,10 +37,10 @@ public class RequestService {
   private static final Logger logger = LoggerFactory.getLogger(RequestService.class);
   private final RequestRepository requestRepository;
   private final RequestValidator requestValidator;
-  private final AuthenticationService authenticationService;
   private final StudentService studentService;
   private final Map<Role, QueryStrategy> strategyMap;
   private final AnswerStrategyFactory answerStrategyFactory;
+  private final RequestPeriodService requestPeriodService;
 
   @Autowired
   public RequestService(
@@ -49,13 +49,13 @@ public class RequestService {
       DeanService deanService,
       ProfessorService professorService,
       StudentService studentService,
-      AuthenticationService authenticationService,
-      AnswerStrategyFactory answerStrategyFactory) {
+      AnswerStrategyFactory answerStrategyFactory,
+      RequestPeriodService requestPeriodService) {
     this.requestRepository = requestRepository;
     this.requestValidator = requestValidator;
-    this.authenticationService = authenticationService;
     this.studentService = studentService;
     this.answerStrategyFactory = answerStrategyFactory;
+    this.requestPeriodService = requestPeriodService;
     this.strategyMap =
         Map.of(
             Role.STUDENT, new StudentStrategy(requestRepository, studentService),
@@ -89,8 +89,13 @@ public class RequestService {
   }
 
   public Request createRequest(CreateRequestDto requestDTO) {
+    try {
+      requestPeriodService.getActivePeriod();
+    } catch (ResourceNotFoundException e) {
+      logger.error("Request creation period is over");
+      throw new BusinessException("Request creation period is over");
+    }
     requestValidator.validateCreateRequest(requestDTO);
-
     Request request =
         new Request.RequestBuilder()
             .studentId(requestDTO.studentId())
@@ -108,6 +113,12 @@ public class RequestService {
   }
 
   public Request updateRequest(String userId, UpdateRequestDto updateRequestDto) {
+    try {
+      requestPeriodService.getActivePeriod();
+    } catch (ResourceNotFoundException e) {
+      logger.error("Request creation period is over");
+      throw new BusinessException("Request creation period is over");
+    }
     Request request = requestRepository.findByRequestId(updateRequestDto.requestId()).orElse(null);
     requestValidator.validateUpdateRequest(userId, request, updateRequestDto);
 

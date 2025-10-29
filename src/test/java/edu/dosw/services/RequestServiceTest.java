@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import edu.dosw.dto.CreateRequestDto;
+import edu.dosw.dto.RequestPeriodDTO;
 import edu.dosw.dto.UpdateRequestDto;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.exception.ResourceNotFoundException;
@@ -49,6 +50,8 @@ class RequestServiceTest {
 
   @Mock private AnswerStrategy answerStrategy;
 
+  @Mock private RequestPeriodService requestPeriodService;
+
   @InjectMocks private RequestService requestService;
 
   private Request mockRequest1;
@@ -56,8 +59,21 @@ class RequestServiceTest {
   private CreateRequestDto createRequestDto;
   private UpdateRequestDto updateRequestDto;
 
+  private RequestPeriodDTO activePeriod;
+
   @BeforeEach
   void setUp() {
+    // Setup mock request period with dates that will pass the validation
+    LocalDate now = LocalDate.now();
+    activePeriod =
+        new RequestPeriodDTO(
+            "PERIOD001",
+            now.minusDays(1), // Start date is yesterday
+            now.plusDays(30), // End date is 30 days from now
+            "2024",
+            "1",
+            true);
+
     mockRequest1 =
         new Request.RequestBuilder()
             .studentId("STU001")
@@ -68,7 +84,7 @@ class RequestServiceTest {
             .build();
     mockRequest1.setRequestId("REQ001");
     mockRequest1.setStatus(RequestStatus.PENDING);
-    mockRequest1.setCreatedAt(LocalDate.of(2024, 1, 15));
+    mockRequest1.setCreatedAt(now);
 
     mockRequest2 =
         new Request.RequestBuilder()
@@ -79,7 +95,7 @@ class RequestServiceTest {
             .build();
     mockRequest2.setRequestId("REQ002");
     mockRequest2.setStatus(RequestStatus.ACCEPTED);
-    mockRequest2.setCreatedAt(LocalDate.of(2024, 1, 10));
+    mockRequest2.setCreatedAt(now.minusDays(5));
 
     createRequestDto =
         new CreateRequestDto(
@@ -97,26 +113,37 @@ class RequestServiceTest {
 
   @Test
   void createRequest_ShouldSaveAndReturnRequest_WhenValidDto() {
+    // Arrange
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
     doNothing().when(requestValidator).validateCreateRequest(createRequestDto);
     when(requestRepository.save(any(Request.class))).thenReturn(mockRequest1);
 
+    // Act
     Request result = requestService.createRequest(createRequestDto);
 
+    // Assert
     assertNotNull(result);
     verify(requestValidator).validateCreateRequest(createRequestDto);
     verify(requestRepository).save(any(Request.class));
+    verify(requestPeriodService).getActivePeriod();
   }
 
   @Test
   void createRequest_ShouldThrowBusinessException_WhenRepositoryFails() {
+    // Arrange
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
     doNothing().when(requestValidator).validateCreateRequest(createRequestDto);
     when(requestRepository.save(any(Request.class))).thenThrow(new RuntimeException("Save failed"));
 
+    // Act & Assert
     assertThrows(BusinessException.class, () -> requestService.createRequest(createRequestDto));
+    verify(requestPeriodService).getActivePeriod();
   }
 
   @Test
   void updateRequest_ShouldUpdateAndReturnRequest_WhenValid() {
+    // Arrange
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
     when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(mockRequest1));
     doNothing()
         .when(requestValidator)
@@ -125,31 +152,39 @@ class RequestServiceTest {
     doNothing().when(answerStrategy).answerRequest(any(Request.class));
     when(requestRepository.save(any(Request.class))).thenReturn(mockRequest1);
 
+    // Act
     Request result = requestService.updateRequest("USER001", updateRequestDto);
 
+    // Assert
     assertNotNull(result);
     assertEquals(RequestStatus.ACCEPTED, result.getStatus());
     verify(requestRepository).findByRequestId("REQ001");
     verify(answerStrategy).answerRequest(any(Request.class));
     verify(requestRepository).save(any(Request.class));
+    verify(requestPeriodService).getActivePeriod();
   }
 
   @Test
   void updateRequest_ShouldNotCallAnswerStrategy_WhenStatusNotAccepted() {
+    // Arrange
     UpdateRequestDto rejectedDto =
         new UpdateRequestDto("REQ001", RequestStatus.REJECTED, "Request rejected", "DEAN001");
 
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
     when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(mockRequest1));
     doNothing()
         .when(requestValidator)
         .validateUpdateRequest(anyString(), any(Request.class), any(UpdateRequestDto.class));
     when(requestRepository.save(any(Request.class))).thenReturn(mockRequest1);
 
+    // Act
     Request result = requestService.updateRequest("USER001", rejectedDto);
 
+    // Assert
     assertNotNull(result);
     verify(answerStrategyFactory, never()).getStrategy(any(RequestType.class));
     verify(requestRepository).save(any(Request.class));
+    verify(requestPeriodService).getActivePeriod();
   }
 
   @Test
@@ -221,6 +256,8 @@ class RequestServiceTest {
 
   @Test
   void updateRequest_ShouldUpdateManagedBy_WhenProvided() {
+    // Arrange
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
     when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(mockRequest1));
     doNothing()
         .when(requestValidator)
@@ -228,13 +265,18 @@ class RequestServiceTest {
     when(answerStrategyFactory.getStrategy(RequestType.SWAP)).thenReturn(answerStrategy);
     when(requestRepository.save(any(Request.class))).thenReturn(mockRequest1);
 
+    // Act
     requestService.updateRequest("USER001", updateRequestDto);
 
+    // Assert
     verify(requestRepository).save(argThat(request -> request.getGestedBy().equals("DEAN001")));
+    verify(requestPeriodService).getActivePeriod();
   }
 
   @Test
   void updateRequest_ShouldUpdateAnswer_WhenProvided() {
+    // Arrange
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
     when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(mockRequest1));
     doNothing()
         .when(requestValidator)
@@ -242,14 +284,19 @@ class RequestServiceTest {
     when(answerStrategyFactory.getStrategy(RequestType.SWAP)).thenReturn(answerStrategy);
     when(requestRepository.save(any(Request.class))).thenReturn(mockRequest1);
 
+    // Act
     requestService.updateRequest("USER001", updateRequestDto);
 
+    // Assert
     verify(requestRepository)
         .save(argThat(request -> request.getAnswer().equals("Request approved")));
+    verify(requestPeriodService).getActivePeriod();
   }
 
   @Test
   void createRequest_ShouldBuildRequestWithCorrectFields() {
+    // Arrange
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
     doNothing().when(requestValidator).validateCreateRequest(createRequestDto);
     when(requestRepository.save(any(Request.class)))
         .thenAnswer(
@@ -266,13 +313,17 @@ class RequestServiceTest {
               return saved;
             });
 
+    // Act
     requestService.createRequest(createRequestDto);
 
+    // Assert
     verify(requestRepository).save(any(Request.class));
+    verify(requestPeriodService).getActivePeriod();
   }
 
   @Test
   void updateRequest_ShouldHandleJoinRequestType() {
+    // Arrange
     Request joinRequest =
         new Request.RequestBuilder()
             .studentId("STU003")
@@ -286,6 +337,7 @@ class RequestServiceTest {
     UpdateRequestDto joinUpdateDto =
         new UpdateRequestDto("REQ003", RequestStatus.ACCEPTED, "Join request approved", "PROF001");
 
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
     when(requestRepository.findByRequestId("REQ003")).thenReturn(Optional.of(joinRequest));
     doNothing()
         .when(requestValidator)
@@ -294,15 +346,19 @@ class RequestServiceTest {
     doNothing().when(answerStrategy).answerRequest(any(Request.class));
     when(requestRepository.save(any(Request.class))).thenReturn(joinRequest);
 
+    // Act
     Request result = requestService.updateRequest("USER001", joinUpdateDto);
 
+    // Assert
     assertNotNull(result);
     verify(answerStrategyFactory).getStrategy(RequestType.JOIN);
     verify(answerStrategy).answerRequest(any(Request.class));
+    verify(requestPeriodService).getActivePeriod();
   }
 
   @Test
   void updateRequest_ShouldHandleCancellationRequestType() {
+    // Arrange
     Request cancellationRequest =
         new Request.RequestBuilder()
             .studentId("STU004")
@@ -316,6 +372,7 @@ class RequestServiceTest {
     UpdateRequestDto cancellationUpdateDto =
         new UpdateRequestDto("REQ004", RequestStatus.ACCEPTED, "Cancellation approved", "DEAN002");
 
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
     when(requestRepository.findByRequestId("REQ004")).thenReturn(Optional.of(cancellationRequest));
     doNothing()
         .when(requestValidator)
@@ -324,42 +381,55 @@ class RequestServiceTest {
     doNothing().when(answerStrategy).answerRequest(any(Request.class));
     when(requestRepository.save(any(Request.class))).thenReturn(cancellationRequest);
 
+    // Act
     Request result = requestService.updateRequest("USER001", cancellationUpdateDto);
 
+    // Assert
     assertNotNull(result);
     verify(answerStrategyFactory).getStrategy(RequestType.CANCELLATION);
     verify(answerStrategy).answerRequest(any(Request.class));
+    verify(requestPeriodService).getActivePeriod();
   }
 
   @Test
   void createRequest_ShouldHandleJoinRequestType() {
+    // Arrange
     CreateRequestDto joinRequestDto =
         new CreateRequestDto("STU005", RequestType.JOIN, "Request to join group", "GROUP003", null);
 
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
     doNothing().when(requestValidator).validateCreateRequest(joinRequestDto);
     when(requestRepository.save(any(Request.class))).thenReturn(mockRequest1);
 
+    // Act
     Request result = requestService.createRequest(joinRequestDto);
 
+    // Assert
     assertNotNull(result);
     verify(requestValidator).validateCreateRequest(joinRequestDto);
     verify(requestRepository).save(any(Request.class));
+    verify(requestPeriodService).getActivePeriod();
   }
 
   @Test
   void createRequest_ShouldHandleCancellationRequestType() {
+    // Arrange
     CreateRequestDto cancellationRequestDto =
         new CreateRequestDto(
             "STU006", RequestType.CANCELLATION, "Request to cancel enrollment", null, "GROUP004");
 
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
     doNothing().when(requestValidator).validateCreateRequest(cancellationRequestDto);
-    when(requestRepository.save(any(Request.class))).thenReturn(mockRequest1);
+    when(requestRepository.save(any(Request.class))).thenReturn(mockRequest2);
 
+    // Act
     Request result = requestService.createRequest(cancellationRequestDto);
 
+    // Assert
     assertNotNull(result);
     verify(requestValidator).validateCreateRequest(cancellationRequestDto);
     verify(requestRepository).save(any(Request.class));
+    verify(requestPeriodService).getActivePeriod();
   }
 
   @Test
