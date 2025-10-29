@@ -10,8 +10,12 @@ import edu.dosw.model.Historial;
 import edu.dosw.services.Validators.HistorialValidator;
 import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.repositories.HistorialRepository;
+import edu.dosw.exception.BusinessException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
