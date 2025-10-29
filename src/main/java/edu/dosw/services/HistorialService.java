@@ -23,6 +23,16 @@ public class HistorialService {
   private final PeriodService periodService;
   private final Logger logger = LoggerFactory.getLogger(HistorialService.class);
 
+/* <<<<<<<<<<<<<<  ✨ Windsurf Command ⭐ >>>>>>>>>>>>>>>> */
+  /**
+   * Retrieves all group codes of a student for a specific academic period.
+   *
+   * @param studentId The unique identifier of the student
+   * @param year The academic year
+   * @param period The academic period (e.g., '1', 'I', '2')
+   * @return A list of group codes
+   */
+/* <<<<<<<<<<  97e01358-8443-4f22-81f9-0bc19adaa53e  >>>>>>>>>>> */
   public List<String> getGroupCodesByStudentIdAndPeriod(
       String studentId, String year, String period) {
     ArrayList<Historial> historial =

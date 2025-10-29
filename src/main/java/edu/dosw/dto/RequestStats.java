@@ -9,4 +9,4 @@ package edu.dosw.dto;
  * @param approved Number of requests with ACCEPTED status
  * @param rejected Number of requests with REJECTED status
  */
-public record RequestStats(long total, long pending, long approved, long rejected) {}
+public record RequestStats(Integer total, Integer pending, Integer approved, Integer rejected) {}
