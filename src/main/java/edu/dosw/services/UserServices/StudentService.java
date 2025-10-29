@@ -63,7 +63,7 @@ public class StudentService {
             .build();
     try {
       authenticationService.createAuthentication(
-          new UserInfoDto(student.getUserId(), student.getEmail(), Role.STUDENT,"pfpURL"));
+          new UserInfoDto(student.getUserId(), student.getEmail(), Role.STUDENT, "pfpURL"));
       return studentRepository.save(student);
     } catch (Exception e) {
       throw new BusinessException(

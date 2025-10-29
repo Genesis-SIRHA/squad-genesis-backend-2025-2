@@ -90,7 +90,7 @@ public class AuthenticationService {
             userInfoDto.email(),
             encryptPassword(userInfoDto.userId()),
             userInfoDto.role(),
-                "pfpURL");
+            "pfpURL");
     userCredentialsRepository.save(userCredentialsDto);
   }
 
