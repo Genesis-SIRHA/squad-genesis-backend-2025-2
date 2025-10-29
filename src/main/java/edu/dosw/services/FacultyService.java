@@ -1,16 +1,22 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.CourseRequest;
+import edu.dosw.dto.CoursesDto;
 import edu.dosw.dto.FacultyDto;
 import edu.dosw.dto.UpdateCourseDTO;
 import edu.dosw.exception.BusinessException;
+import edu.dosw.exception.ResourceAlreadyExistsException;
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Faculty;
 import edu.dosw.repositories.FacultyRepository;
+import edu.dosw.services.Validators.FacultyValidator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +31,15 @@ import org.springframework.stereotype.Service;
 public class FacultyService {
   private static final Logger logger = LoggerFactory.getLogger(FacultyService.class);
   private final FacultyRepository facultyRepository;
+  private final FacultyValidator facultyValidator;
 
   public Faculty createFaculty(FacultyDto facultyDto) {
     Faculty faculty = new Faculty();
     faculty.setFacultyName(facultyDto.facultyName());
     faculty.setPlan(facultyDto.plan());
+    facultyValidator.validateAddCourses(
+        new CoursesDto(
+            facultyDto.courses().stream().collect(Collectors.groupingBy(Course::getSemester))));
     if (facultyDto.courses() != null) faculty.setCourses(facultyDto.courses());
     return facultyRepository.save(faculty);
   }
@@ -59,7 +69,7 @@ public class FacultyService {
     Faculty faculty = facultyRepository.findByNameAndPlan(name, plan).orElse(null);
     if (faculty == null) {
       logger.error("Faculty not found: " + name);
-      throw new BusinessException("Faculty not found: " + name);
+      throw new ResourceNotFoundException("Faculty not found: " + name);
     }
     return faculty;
   }
@@ -71,11 +81,56 @@ public class FacultyService {
             .orElse(null);
     if (faculty == null) {
       logger.error("Faculty not found: {}", facultyDto.facultyName());
+      throw new ResourceNotFoundException("Faculty not found: " + facultyDto.facultyName());
+    }
+    facultyValidator.validateAddCourses(
+        new CoursesDto(
+            facultyDto.courses().stream().collect(Collectors.groupingBy(Course::getSemester))));
+
+    if (facultyDto.courses() != null) faculty.setCourses(facultyDto.courses());
+    try {
+      return facultyRepository.save(faculty);
+    } catch (Exception e) {
+      logger.error(
+          "An inesperated error has occurred when updating the faculty: {}", e.getMessage());
+      throw new BusinessException(
+          "An inesperated error has occurred when updating the faculty: " + e.getMessage());
+    }
+  }
+
+  public Faculty addCoursesToPlan(FacultyDto facultyDto) {
+    Faculty faculty =
+        facultyRepository
+            .findByNameAndPlan(facultyDto.facultyName(), facultyDto.plan())
+            .orElse(null);
+    if (faculty == null) {
+      logger.error("Faculty not found: {}", facultyDto.facultyName());
       throw new BusinessException("Faculty not found: " + facultyDto.facultyName());
     }
-    faculty.setFacultyName(facultyDto.facultyName());
-    faculty.setPlan(facultyDto.plan());
-    if (facultyDto.courses() != null) faculty.setCourses(facultyDto.courses());
+    if (facultyDto.courses() != null) {
+
+      Map<String, Course> courseDtoMap =
+          facultyDto.courses().stream()
+              .collect(Collectors.toMap(Course::getAbbreviation, Function.identity()));
+
+      Map<String, Course> courseMap =
+          faculty.getCourses().stream()
+              .collect(Collectors.toMap(Course::getAbbreviation, Function.identity()));
+
+      for (String facultyAbbreviation : courseMap.keySet()) {
+        if (courseDtoMap.containsKey(facultyAbbreviation)) {
+          Course courseDTO = courseDtoMap.get(facultyAbbreviation);
+          Course course = courseMap.get(facultyAbbreviation);
+          course.setCourseName(courseDTO.getCourseName());
+          course.setCredits(courseDTO.getCredits());
+          courseDtoMap.remove(facultyAbbreviation);
+        }
+      }
+
+      List<Course> newCourses = new ArrayList<>(courseDtoMap.values());
+      newCourses.addAll(courseMap.values());
+      faculty.setCourses(newCourses);
+    }
     try {
       return facultyRepository.save(faculty);
     } catch (Exception e) {
@@ -90,7 +145,7 @@ public class FacultyService {
     Faculty faculty = getFacultyByNameAndPlan(facultyName, plan);
     if (faculty == null) {
       logger.error("Faculty not found: " + facultyName);
-      throw new BusinessException("Faculty not found: " + facultyName);
+      throw new ResourceNotFoundException("Faculty not found: " + facultyName);
     }
     return new ArrayList<>(faculty.getCourses());
   }
@@ -107,12 +162,12 @@ public class FacultyService {
         facultyRepository
             .findByNameAndPlan(request.facultyName().toLowerCase(), request.plan())
             .orElseThrow(
-                () -> new BusinessException("Faculty not found: " + request.facultyName()));
+                () -> new ResourceNotFoundException("Faculty not found: " + request.facultyName()));
 
     if (faculty.getCourses().stream()
         .anyMatch(c -> c.getAbbreviation().equals(request.abbreviation().toUpperCase()))) {
       logger.error("Course already exists: " + request.abbreviation());
-      throw new BusinessException("Course already exists: " + request.abbreviation());
+      throw new ResourceAlreadyExistsException("Course already exists: " + request.abbreviation());
     }
 
     Course course = request.toEntity();
@@ -135,13 +190,14 @@ public class FacultyService {
     Faculty faculty =
         facultyRepository
             .findByNameAndPlan(facultyName.toLowerCase(), plan)
-            .orElseThrow(() -> new BusinessException("Faculty not found: " + facultyName));
+            .orElseThrow(() -> new ResourceNotFoundException("Faculty not found: " + facultyName));
 
     Course existingCourse =
         faculty.getCourses().stream()
             .filter(c -> c.getAbbreviation().equals(courseAbbreviation.toUpperCase()))
             .findFirst()
-            .orElseThrow(() -> new BusinessException("Course not found: " + courseAbbreviation));
+            .orElseThrow(
+                () -> new ResourceNotFoundException("Course not found: " + courseAbbreviation));
 
     if (updateCourseDTO.courseName() != null)
       existingCourse.setCourseName(updateCourseDTO.courseName().toLowerCase());
@@ -167,13 +223,13 @@ public class FacultyService {
 
     if (faculty == null) {
       logger.error("Course not found: {} ", courseAbbreviation);
-      throw new BusinessException("Course not found: " + courseAbbreviation);
+      throw new ResourceNotFoundException("Course not found: " + courseAbbreviation);
     }
 
     List<Course> courses = faculty.getCourses();
     if (courses == null || courses.isEmpty()) {
       logger.error("No courses found for code: {}", courseAbbreviation);
-      throw new BusinessException("Course data is corrupted for: " + courseAbbreviation);
+      throw new ResourceNotFoundException("Course data is corrupted for: " + courseAbbreviation);
     }
 
     return courses.stream()
@@ -194,7 +250,7 @@ public class FacultyService {
         facultyRepository.findByNameAndPlan(facultyName.toLowerCase(), plan).orElse(null);
     if (faculty == null) {
       logger.error("Faculty not found: " + facultyName);
-      throw new BusinessException("Faculty not found: " + facultyName);
+      throw new ResourceNotFoundException("Faculty not found: " + facultyName);
     }
     faculty
         .getCourses()

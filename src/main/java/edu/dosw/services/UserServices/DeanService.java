@@ -3,11 +3,13 @@ package edu.dosw.services.UserServices;
 import edu.dosw.dto.DeanDto;
 import edu.dosw.dto.UserInfoDto;
 import edu.dosw.exception.BusinessException;
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Dean;
 import edu.dosw.model.enums.Role;
 import edu.dosw.repositories.DeanRepository;
 import edu.dosw.services.AuthenticationService;
 import edu.dosw.utils.IdGenerator;
+import jakarta.validation.ValidationException;
 import java.util.Arrays;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -37,7 +39,7 @@ public class DeanService {
   public Dean getDeanById(String deanId) {
     Dean dean = deanRepository.findByUserId(deanId).orElse(null);
     if (dean == null) {
-      throw new BusinessException("Dean not found by id: " + deanId);
+      throw new ResourceNotFoundException("Dean not found by id: " + deanId);
     }
     return dean;
   }
@@ -53,12 +55,12 @@ public class DeanService {
   public Dean createDean(DeanDto deanCreationRequest) {
     if (deanCreationRequest.identityDocument() == null || deanCreationRequest.fullName() == null) {
       logger.error("Personal data is incomplete");
-      throw new BusinessException("Personal data is incomplete");
+      throw new ValidationException("Personal data is incomplete");
     }
 
     if (deanCreationRequest.facultyName() == null) {
       logger.error("Academic data is incomplete");
-      throw new BusinessException("Academic data is incomplete");
+      throw new ValidationException("Academic data is incomplete");
     }
 
     String email = generateDeanEmail(deanCreationRequest.fullName());
@@ -92,7 +94,7 @@ public class DeanService {
     String[] names = fullName.toLowerCase().split(" ");
     if (names.length < 3) {
       logger.error("Invalid full name");
-      throw new BusinessException("Invalid full name: " + Arrays.toString(names));
+      throw new ValidationException("Invalid full name: " + Arrays.toString(names));
     }
     String firstName = names[0];
     String lastName = names[names.length - 1];
@@ -112,7 +114,7 @@ public class DeanService {
     Dean dean = deanRepository.findByUserId(deanId).orElse(null);
     if (dean == null) {
       logger.error("Dean not found");
-      throw new BusinessException("Dean not found");
+      throw new ResourceNotFoundException("Dean not found");
     }
 
     if (deanUpdateRequest.fullName() != null) dean.setFullName(deanUpdateRequest.fullName());
@@ -141,7 +143,7 @@ public class DeanService {
     Dean dean = deanRepository.findByUserId(deanId).orElse(null);
     if (dean == null) {
       logger.error("Dean not found");
-      throw new BusinessException("Dean not found");
+      throw new ResourceNotFoundException("Dean not found");
     }
     try {
       authenticationService.deleteAuthentication(dean);
@@ -164,7 +166,7 @@ public class DeanService {
     Optional<Dean> user = deanRepository.findById(deanId);
     if (user.isEmpty()) {
       logger.error("User not found with deanId: " + deanId);
-      throw new BusinessException("User not found with deanId: " + deanId);
+      throw new ResourceNotFoundException("User not found with deanId: " + deanId);
     }
     return user.get().getFacultyName();
   }

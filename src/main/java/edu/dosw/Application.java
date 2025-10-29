@@ -13,7 +13,6 @@ public class Application {
     context = SpringApplication.run(Application.class, args);
   }
 
-  // Package-private getter for testing purposes
   static ConfigurableApplicationContext getContext() {
     return context;
   }

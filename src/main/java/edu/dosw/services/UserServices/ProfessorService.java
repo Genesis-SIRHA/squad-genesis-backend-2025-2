@@ -3,11 +3,13 @@ package edu.dosw.services.UserServices;
 import edu.dosw.dto.ProfessorDto;
 import edu.dosw.dto.UserInfoDto;
 import edu.dosw.exception.BusinessException;
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Professor;
 import edu.dosw.model.enums.Role;
 import edu.dosw.repositories.ProfessorRepository;
 import edu.dosw.services.AuthenticationService;
 import edu.dosw.utils.IdGenerator;
+import jakarta.validation.ValidationException;
 import java.util.Arrays;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -32,7 +34,7 @@ public class ProfessorService {
   public Professor getProfessorById(String professorId) {
     Professor professor = professorRepository.findByUserId(professorId).orElse(null);
     if (professor == null) {
-      throw new BusinessException("Professor not found by id: " + professorId);
+      throw new ResourceNotFoundException("Professor not found by id: " + professorId);
     }
     return professor;
   }
@@ -49,12 +51,12 @@ public class ProfessorService {
     if (professorCreationRequest.identityDocument() == null
         || professorCreationRequest.fullName() == null) {
       logger.error("Personal data is incomplete");
-      throw new BusinessException("Personal data is incomplete");
+      throw new ValidationException("Personal data is incomplete");
     }
 
     if (professorCreationRequest.facultyName() == null) {
       logger.error("Academic data is incomplete");
-      throw new BusinessException("Academic data is incomplete");
+      throw new ValidationException("Academic data is incomplete");
     }
 
     String email = generateProfessorEmail(professorCreationRequest.fullName());
@@ -88,7 +90,7 @@ public class ProfessorService {
     String[] names = fullName.toLowerCase().split(" ");
     if (names.length < 3) {
       logger.error("Invalid full name");
-      throw new BusinessException("Invalid full name: " + Arrays.toString(names));
+      throw new ValidationException("Invalid full name: " + Arrays.toString(names));
     }
     String firstName = names[0];
     String lastName = names[names.length - 2];
@@ -108,7 +110,7 @@ public class ProfessorService {
     Professor professor = professorRepository.findByUserId(professorId).orElse(null);
     if (professor == null) {
       logger.error("Professor not found");
-      throw new BusinessException("Professor not found");
+      throw new ResourceNotFoundException("Professor not found");
     }
     if (professorUpdateRequest.fullName() != null)
       professor.setFullName(professorUpdateRequest.fullName());
@@ -136,7 +138,7 @@ public class ProfessorService {
     Professor professor = professorRepository.findByUserId(professorId).orElse(null);
     if (professor == null) {
       logger.error("Professor not found");
-      throw new BusinessException("Professor not found");
+      throw new ResourceNotFoundException("Professor not found");
     }
     try {
       authenticationService.deleteAuthentication(professor);
@@ -159,7 +161,7 @@ public class ProfessorService {
     Optional<Professor> user = professorRepository.findById(professorId);
     if (user.isEmpty()) {
       logger.error("User not found with professorId: " + professorId);
-      throw new BusinessException("User not found with professorId: " + professorId);
+      throw new ResourceNotFoundException("User not found with professorId: " + professorId);
     }
     return user.get().getFacultyName();
   }

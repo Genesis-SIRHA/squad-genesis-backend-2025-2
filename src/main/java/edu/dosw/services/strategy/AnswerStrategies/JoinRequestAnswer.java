@@ -2,6 +2,7 @@ package edu.dosw.services.strategy.AnswerStrategies;
 
 import edu.dosw.dto.HistorialDTO;
 import edu.dosw.dto.UpdateGroupRequest;
+import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Group;
 import edu.dosw.model.Request;
 import edu.dosw.model.enums.HistorialStatus;
@@ -23,7 +24,7 @@ public class JoinRequestAnswer implements AnswerStrategy {
     Group group = groupService.getGroupByGroupCode(request.getDestinationGroupId());
     if (group.getEnrolled() >= group.getMaxCapacity()) {
       logger.error("Destination group {} is full", group.getGroupCode());
-      throw new IllegalArgumentException("Destination" + group.getGroupCode() + "group is full");
+      throw new BusinessException("Destination" + group.getGroupCode() + "group is full");
     }
 
     try {
@@ -49,7 +50,7 @@ public class JoinRequestAnswer implements AnswerStrategy {
 
     } catch (Exception e) {
       logger.error("Failed to answer request: {}", e.getMessage());
-      throw new RuntimeException("Failed to answer request: " + e.getMessage());
+      throw new BusinessException("Failed to answer request: " + e.getMessage());
     }
   }
 }

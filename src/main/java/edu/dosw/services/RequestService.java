@@ -3,13 +3,17 @@ package edu.dosw.services;
 import edu.dosw.dto.CreateRequestDto;
 import edu.dosw.dto.RequestStats;
 import edu.dosw.dto.UpdateRequestDto;
+import edu.dosw.exception.BusinessException;
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Request;
 import edu.dosw.model.enums.RequestStatus;
+import edu.dosw.model.enums.RequestType;
 import edu.dosw.model.enums.Role;
 import edu.dosw.repositories.RequestRepository;
 import edu.dosw.services.UserServices.DeanService;
 import edu.dosw.services.UserServices.ProfessorService;
 import edu.dosw.services.UserServices.StudentService;
+import edu.dosw.services.Validators.RequestValidator;
 import edu.dosw.services.strategy.AnswerStrategies.AnswerStrategy;
 import edu.dosw.services.strategy.AnswerStrategies.AnswerStrategyFactory;
 import edu.dosw.services.strategy.queryStrategies.DeanStrategy;
@@ -21,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +36,7 @@ public class RequestService {
 
   private static final Logger logger = LoggerFactory.getLogger(RequestService.class);
   private final RequestRepository requestRepository;
-  private final ValidatorService validatorService;
+  private final RequestValidator requestValidator;
   private final AuthenticationService authenticationService;
   private final StudentService studentService;
   private final Map<Role, QueryStrategy> strategyMap;
@@ -40,14 +45,14 @@ public class RequestService {
   @Autowired
   public RequestService(
       RequestRepository requestRepository,
-      ValidatorService validatorService,
+      RequestValidator requestValidator,
       DeanService deanService,
       ProfessorService professorService,
       StudentService studentService,
       AuthenticationService authenticationService,
       AnswerStrategyFactory answerStrategyFactory) {
     this.requestRepository = requestRepository;
-    this.validatorService = validatorService;
+    this.requestValidator = requestValidator;
     this.authenticationService = authenticationService;
     this.studentService = studentService;
     this.answerStrategyFactory = answerStrategyFactory;
@@ -65,7 +70,7 @@ public class RequestService {
 
     if (strategy == null) {
       logger.error("Unsupported role: {}", role);
-      throw new IllegalArgumentException("Unsupported role: " + role);
+      throw new BusinessException("Unsupported role: " + role);
     }
     return strategy.queryRequests(userId).stream()
         .sorted(Comparator.comparing(Request::getCreatedAt))
@@ -79,12 +84,12 @@ public class RequestService {
           .toList();
     } catch (Exception e) {
       logger.error("Failed to fetch all requests: {}", e.getMessage());
-      throw new RuntimeException("Failed to fetch all requests: " + e.getMessage());
+      throw new BusinessException("Failed to fetch all requests: " + e.getMessage());
     }
   }
 
   public Request createRequest(CreateRequestDto requestDTO) {
-    validatorService.validateCreateRequest(requestDTO);
+    requestValidator.validateCreateRequest(requestDTO);
 
     Request request =
         new Request.RequestBuilder()
@@ -98,13 +103,13 @@ public class RequestService {
       return requestRepository.save(request);
     } catch (Exception e) {
       logger.error("Failed to create request: {}", e.getMessage());
-      throw new RuntimeException("Failed to create request: " + e.getMessage());
+      throw new BusinessException("Failed to create request: " + e.getMessage());
     }
   }
 
   public Request updateRequest(String userId, UpdateRequestDto updateRequestDto) {
     Request request = requestRepository.findByRequestId(updateRequestDto.requestId()).orElse(null);
-    validatorService.validateUpdateRequest(userId, request, updateRequestDto);
+    requestValidator.validateUpdateRequest(userId, request, updateRequestDto);
 
     request.setStatus(updateRequestDto.status());
     if (updateRequestDto.answer() != null) request.setAnswer(updateRequestDto.answer());
@@ -116,7 +121,7 @@ public class RequestService {
       return requestRepository.save(request);
     } catch (Exception e) {
       logger.error("Failed to update request status: {}", e.getMessage());
-      throw new RuntimeException("Failed to update request status: " + e.getMessage());
+      throw new BusinessException("Failed to update request status: " + e.getMessage());
     }
   }
 
@@ -139,17 +144,17 @@ public class RequestService {
   }
 
   public RequestStats getRequestStats() {
-    long total = requestRepository.count();
-    long pending = requestRepository.countByStatus("PENDING");
-    long approved = requestRepository.countByStatus("ACCEPTED");
-    long rejected = requestRepository.countByStatus("REJECTED");
+    Integer total = (int) requestRepository.count();
+    Integer pending = requestRepository.countByStatus(RequestStatus.PENDING);
+    Integer approved = requestRepository.countByStatus(RequestStatus.ACCEPTED);
+    Integer rejected = requestRepository.countByStatus(RequestStatus.REJECTED);
     return new RequestStats(total, pending, approved, rejected);
   }
 
   public Request deleteRequestStatus(String requestId) {
     Request request = requestRepository.findByRequestId(requestId).orElse(null);
     if (request == null) {
-      throw new RuntimeException("Request not found with id: " + requestId);
+      throw new ResourceNotFoundException("Request not found with id: " + requestId);
     }
 
     try {
@@ -157,7 +162,7 @@ public class RequestService {
       return request;
     } catch (Exception e) {
       logger.error("Failed to delete request: {}", e.getMessage());
-      throw new RuntimeException("Failed to delete request: " + e.getMessage());
+      throw new BusinessException("Failed to delete request: " + e.getMessage());
     }
   }
 
@@ -165,13 +170,13 @@ public class RequestService {
     Request request = requestRepository.findByRequestId(requestId).orElse(null);
     if (request == null) {
       logger.error("Request not found with id: {}", requestId);
-      throw new RuntimeException("Request not found with id: " + requestId);
+      throw new ResourceNotFoundException("Request not found with id: " + requestId);
     }
     return request;
   }
 
   public List<Request> fetchRequestsByFacultyName(String facultyName) {
-    validatorService.validateFacultyName(facultyName);
+    requestValidator.validateFacultyName(facultyName);
     List<Request> requests = requestRepository.findAll();
     List<Request> facultyRequest = new ArrayList<>();
 
@@ -187,7 +192,82 @@ public class RequestService {
           .toList();
     } catch (Exception e) {
       logger.error("Failed to fetch requests by faculty name: {}", e.getMessage());
-      throw new RuntimeException("Failed to fetch requests by faculty name: " + e.getMessage());
+      throw new BusinessException("Failed to fetch requests by faculty name: " + e.getMessage());
+    }
+  }
+
+  public Integer countByGroupCodes(List<String> groupCodes) {
+    try {
+      return requestRepository.countByGroupCodes(groupCodes);
+    } catch (Exception e) {
+      logger.error("Failed to count requests by group codes: {}", e.getMessage());
+      throw new BusinessException("Failed to count requests by group codes: " + e.getMessage());
+    }
+  }
+
+  public List<String> getWaitingListOfGroup(String groupCode) {
+    List<Request> waitingListRequests = getRequestsByDestinationGroup(groupCode);
+
+    return waitingListRequests.stream()
+        .filter(request -> RequestStatus.PENDING.equals(request.getStatus()))
+        .map(Request::getStudentId)
+        .collect(Collectors.toList());
+  }
+
+  private List<Request> getRequestsByDestinationGroup(String destinationGroupCode) {
+    List<Request> requests = requestRepository.getRequestByDestinationGroupId(destinationGroupCode);
+    if (requests == null) {
+      logger.error("Request not found with destination group id: {}", destinationGroupCode);
+      throw new RuntimeException(
+          "Request not found with destination group id : " + destinationGroupCode);
+    }
+    return requests;
+  }
+
+  public Integer countByGroupCodesAndStatus(List<String> groupCodes, RequestStatus status) {
+    try {
+      return requestRepository.countByGroupCodesAndStatus(groupCodes, status);
+    } catch (Exception e) {
+      logger.error("Failed to count requests by group codes and status: {}", e.getMessage());
+      throw new BusinessException(
+          "Failed to count requests by group codes and status: " + e.getMessage());
+    }
+  }
+
+  public Integer countByGroupCodesAndType(List<String> groupCodes, RequestType type) {
+    try {
+      return requestRepository.countByGroupCodesAndType(groupCodes, type);
+    } catch (Exception e) {
+      logger.error("Failed to count requests by group codes and type: {}", e.getMessage());
+      throw new BusinessException(
+          "Failed to count requests by group codes and type: " + e.getMessage());
+    }
+  }
+
+  public Integer countByStatus(RequestStatus status) {
+    try {
+      return requestRepository.countByStatus(status);
+    } catch (Exception e) {
+      logger.error("Failed to count requests by status: {}", e.getMessage());
+      throw new BusinessException("Failed to count requests by status: " + e.getMessage());
+    }
+  }
+
+  public Integer countByType(RequestType type) {
+    try {
+      return requestRepository.countByType(type);
+    } catch (Exception e) {
+      logger.error("Failed to count requests by type: {}", e.getMessage());
+      throw new BusinessException("Failed to count requests by type: " + e.getMessage());
+    }
+  }
+
+  public Integer countTotalRequests() {
+    try {
+      return Math.toIntExact(requestRepository.count());
+    } catch (Exception e) {
+      logger.error("Failed to count total requests: {}", e.getMessage());
+      throw new BusinessException("Failed to count total requests: " + e.getMessage());
     }
   }
 }

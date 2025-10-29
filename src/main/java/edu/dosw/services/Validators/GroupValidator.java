@@ -1,9 +1,11 @@
-package edu.dosw.services;
+package edu.dosw.services.Validators;
 
 import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Faculty;
 import edu.dosw.model.Group;
 import edu.dosw.model.Student;
+import edu.dosw.services.FacultyService;
+import edu.dosw.services.PeriodService;
 import edu.dosw.services.UserServices.StudentService;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -21,7 +23,7 @@ public class GroupValidator {
   public void validateAddStudentToGroup(Group group, String studentId) {
     if (group.getEnrolled() == group.getMaxCapacity()) {
       logger.error("The group {} is full", group.getGroupCode());
-      throw new BusinessException("Failed to delete group");
+      throw new BusinessException("The group is full");
     }
     if (!group.getYear().equals(periodService.getYear())
         || !group.getPeriod().equals(periodService.getPeriod())) {
@@ -29,7 +31,7 @@ public class GroupValidator {
           "The historial period and year does not match the one from the group: {} != {}",
           group.getPeriod(),
           periodService.getPeriod());
-      throw new IllegalArgumentException(
+      throw new BusinessException(
           "The historial period and year does not match the one from the group"
               + group.getPeriod()
               + " != "
@@ -46,7 +48,7 @@ public class GroupValidator {
             .getAbbreviation()
         == null) {
       logger.error("The destination group is not in your plan");
-      throw new IllegalArgumentException("The origin group is not in your plan");
+      throw new BusinessException("The destination group is not in your plan");
     }
   }
 }

@@ -1,6 +1,7 @@
-package edu.dosw.services;
+package edu.dosw.services.Validators;
 
 import edu.dosw.dto.HistorialDTO;
+import edu.dosw.exception.BusinessException;
 import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.services.UserServices.StudentService;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,7 @@ public class HistorialValidator {
   public void historialUpdateValidator(HistorialStatus oldStatus, HistorialStatus newStatus) {
     if (oldStatus == newStatus) {
       logger.error("Trying to change to the same status");
-      throw new IllegalArgumentException("there are no changes in STATUS");
+      throw new BusinessException("There are no changes in STATUS");
     }
   }
 }

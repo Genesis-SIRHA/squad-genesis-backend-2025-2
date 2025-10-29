@@ -5,6 +5,8 @@ import edu.dosw.dto.LogInDTO;
 import edu.dosw.dto.UserCredentialsDto;
 import edu.dosw.dto.UserInfoDto;
 import edu.dosw.exception.BusinessException;
+import edu.dosw.exception.AuthenticationException;
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.User;
 import edu.dosw.model.enums.Role;
 import edu.dosw.repositories.UserCredentialsRepository;
@@ -37,12 +39,12 @@ public class AuthenticationService {
     String email = logInDTO.email().toLowerCase();
     if (validateUserEmail(email)) {
       logger.error("Invalid email");
-      throw new BusinessException("Invalid email");
+      throw new AuthenticationException("Invalid email");
     }
     Optional<UserCredentialsDto> userCredentials = this.getByEmail(email);
     if (!verifyPassword(logInDTO.password(), userCredentials.get().password())) {
       logger.error("Invalid password");
-      throw new BusinessException("Invalid password");
+      throw new AuthenticationException("Invalid password");
     }
     String token = jwtUtil.generateToken(userCredentials.get().userId(), email);
     UserCredentialsDto user = userCredentials.get();
@@ -75,7 +77,7 @@ public class AuthenticationService {
     Optional<UserCredentialsDto> userCredentials = userCredentialsRepository.findByUserId(id);
     if (userCredentials.isEmpty()) {
       logger.error("User not found");
-      throw new BusinessException("User not found");
+      throw new ResourceNotFoundException("User not found");
     }
     return userCredentials;
   }

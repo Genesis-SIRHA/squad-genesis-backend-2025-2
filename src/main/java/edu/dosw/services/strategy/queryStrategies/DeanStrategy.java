@@ -1,5 +1,6 @@
 package edu.dosw.services.strategy.queryStrategies;
 
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Request;
 import edu.dosw.repositories.RequestRepository;
 import edu.dosw.services.UserServices.DeanService;
@@ -41,7 +42,7 @@ public class DeanStrategy implements QueryStrategy {
     String deanFaculty = deanService.getFacultyByDeanId(userId);
     if (deanFaculty == null) {
       logger.error("User not found with id: " + userId);
-      throw new IllegalArgumentException("User not found with id: " + userId);
+      throw new ResourceNotFoundException("User not found with id: " + userId);
     }
 
     return requestRepository.findAvailableByFacultyAndIsExceptional();

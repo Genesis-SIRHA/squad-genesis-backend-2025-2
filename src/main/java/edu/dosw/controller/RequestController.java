@@ -43,6 +43,15 @@ public class RequestController {
     return ResponseEntity.ok(requests);
   }
 
+  @GetMapping("/waitingList/{groupCode}")
+  @Operation(
+      summary = "Get waiting list of a group",
+      description = "Retrieves a list of student IDs in the waiting list for the specified group")
+  public ResponseEntity<List<String>> getWaitingListOfGroup(@PathVariable String groupCode) {
+    List<String> waitingList = requestService.getWaitingListOfGroup(groupCode);
+    return ResponseEntity.ok(waitingList);
+  }
+
   @GetMapping("/global")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(summary = "Get all requests", description = "Retrieves all requests ")
