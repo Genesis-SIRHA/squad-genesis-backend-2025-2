@@ -41,4 +41,10 @@ public class FacultyController {
   public ResponseEntity<Faculty> updateFacultyByNameAndPlan(@RequestBody FacultyDto facultyDto) {
     return ResponseEntity.ok(facultyService.updateFacultyByNameAndPlan(facultyDto));
   }
+
+  @PatchMapping("/addCourses")
+  @Operation(summary = "Add courses to faculty")
+  public ResponseEntity<Faculty> addCoursesToFaculty(@RequestBody FacultyDto facultyDto) {
+    return ResponseEntity.ok(facultyService.addCoursesToPlan(facultyDto));
+  }
 }
