@@ -1,4 +1,4 @@
-package edu.dosw.controllers;
+package edu.dosw.controller;
 
 import edu.dosw.dto.CreateRequestPeriodDTO;
 import edu.dosw.dto.RequestPeriodDTO;
