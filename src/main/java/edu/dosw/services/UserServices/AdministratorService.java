@@ -71,7 +71,7 @@ public class AdministratorService {
             .build();
     try {
       authenticationService.createAuthentication(
-          new UserInfoDto(administrator.getUserId(), administrator.getEmail(), Role.ADMINISTRATOR));
+          new UserInfoDto(administrator.getUserId(), administrator.getEmail(), Role.ADMINISTRATOR, "pfpURL"));
       return administratorRepository.save(administrator);
     } catch (DataIntegrityViolationException e) {
       throw new ResourceAlreadyExistsException("Data integrity violation: " + e.getMessage());

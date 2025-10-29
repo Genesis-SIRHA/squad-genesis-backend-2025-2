@@ -71,7 +71,7 @@ public class ProfessorService {
             .build();
     try {
       authenticationService.createAuthentication(
-          new UserInfoDto(professor.getUserId(), professor.getEmail(), Role.PROFESSOR));
+          new UserInfoDto(professor.getUserId(), professor.getEmail(), Role.PROFESSOR,"pfpURL"));
       return professorRepository.save(professor);
     } catch (Exception e) {
       throw new BusinessException(

@@ -28,7 +28,7 @@ class AuthenticationControllerTest {
   void login_WithValidCredentials_ShouldReturnTokenAndUserInfo() {
     // Arrange
     LogInDTO loginDto = new LogInDTO("user@mail.escuelaing.edu.co", "password123");
-    UserInfoDto userInfo = new UserInfoDto("1", "user@mail.escuelaing.edu.co", Role.STUDENT);
+    UserInfoDto userInfo = new UserInfoDto("1", "user@mail.escuelaing.edu.co", Role.STUDENT,"");
     AuthResponseDto expectedResponse = new AuthResponseDto("testToken123", userInfo);
 
     when(authenticationService.logIn(any(LogInDTO.class))).thenReturn(expectedResponse);
@@ -122,7 +122,7 @@ class AuthenticationControllerTest {
   void login_WithValidCredentialsDifferentCaseEmail_ShouldReturnToken() {
     // Arrange
     LogInDTO loginDto = new LogInDTO("USER@MAIL.ESCUELAING.EDU.CO", "password123");
-    UserInfoDto userInfo = new UserInfoDto("1", "user@mail.escuelaing.edu.co", Role.STUDENT);
+    UserInfoDto userInfo = new UserInfoDto("1", "user@mail.escuelaing.edu.co", Role.STUDENT,"");
     AuthResponseDto expectedResponse = new AuthResponseDto("testToken123", userInfo);
 
     when(authenticationService.logIn(any(LogInDTO.class))).thenReturn(expectedResponse);
