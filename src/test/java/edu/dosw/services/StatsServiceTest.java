@@ -126,7 +126,9 @@ class StatsServiceTest {
     String facultyName = "Engineering";
     String plan = "2024";
     List<Course> facultyCourses =
-        List.of(new Course("MATH101", "Mathematics", 3), new Course("PHYS101", "Physics", 4));
+        List.of(
+            new Course("MATH101", "Mathematics", 3, "1", List.of()),
+            new Course("PHYS101", "Physics", 4, "1", List.of()));
     List<Group> mathGroups = List.of(createGroup("MATH101-G01", "MATH101"));
     List<Group> physicsGroups = List.of(createGroup("PHYS101-G01", "PHYS101"));
     List<String> facultyGroupCodes = List.of("MATH101-G01", "PHYS101-G01");
@@ -184,7 +186,9 @@ class StatsServiceTest {
     String facultyName = "Engineering";
     String plan = "2023";
     List<Course> facultyCourses =
-        List.of(new Course("MATH101", "Mathematics", 3), new Course("PHYS101", "Physics", 4));
+        List.of(
+            new Course("MATH101", "Mathematics", 3, "1", List.of()),
+            new Course("PHYS101", "Physics", 4, "1", List.of()));
 
     when(facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan))
         .thenReturn(facultyCourses);
@@ -207,7 +211,7 @@ class StatsServiceTest {
   void getFacultyReassignmentStats_WithDifferentPlan_ShouldUseCorrectPlan() {
     String facultyName = "Science";
     String plan = "2025B";
-    List<Course> facultyCourses = List.of(new Course("CHEM101", "Chemistry", 3));
+    List<Course> facultyCourses = List.of(new Course("CHEM101", "Chemistry", 3, "1", List.of()));
     List<Group> chemGroups = List.of(createGroup("CHEM101-G01", "CHEM101"));
     List<String> facultyGroupCodes = List.of("CHEM101-G01");
 

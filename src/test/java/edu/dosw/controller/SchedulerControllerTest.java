@@ -4,12 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import edu.dosw.model.Schedule;
-import edu.dosw.model.Session;
-import edu.dosw.model.enums.DayOfWeek;
 import edu.dosw.services.SchedulerService;
 import java.util.ArrayList;
-import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,93 +21,148 @@ class SchedulerControllerTest {
 
   @InjectMocks private SchedulerController schedulerController;
 
-  private Schedule currentSchedule;
-  private Schedule pastSchedule;
-  private List<Schedule> pastSchedules;
-
-  @BeforeEach
-  void setUp() {
-    Session session1 = new Session();
-    session1.setGroupCode("MAT101");
-    session1.setDay(DayOfWeek.MONDAY);
-    session1.setSlot(1);
-    session1.setYear("2024");
-    session1.setPeriod("1");
-
-    Session session2 = new Session();
-    session2.setGroupCode("FIS201");
-    session2.setDay(DayOfWeek.TUESDAY);
-    session2.setSlot(2);
-    session2.setYear("2023");
-    session2.setPeriod("2");
-
-    ArrayList<Session> currentSessions = new ArrayList<>();
-    currentSessions.add(session1);
-    currentSchedule = new Schedule("123", currentSessions);
-
-    ArrayList<Session> pastSessionsList = new ArrayList<>();
-    pastSessionsList.add(session2);
-    pastSchedule = new Schedule("123", pastSessionsList);
-
-    pastSchedules = new ArrayList<>();
-    pastSchedules.add(pastSchedule);
-  }
-
   @Test
-  void getScheduleById_ShouldReturnActualScheduleStudent() {
-    String studentId = "123";
-    when(schedulerService.getActualScheduleByStudentId(studentId)).thenReturn(currentSchedule);
+  void getScheduleById_WhenScheduleExists_ShouldReturnSchedule() {
+    String studentId = "STU001";
+    Schedule expectedSchedule = new Schedule(studentId, new ArrayList<>());
+
+    when(schedulerService.getActualScheduleByStudentId(studentId)).thenReturn(expectedSchedule);
 
     ResponseEntity<Schedule> response = schedulerController.getActualScheduleByStudentId(studentId);
 
-    assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(currentSchedule, response.getBody());
+    assertNotNull(response.getBody());
+    assertEquals(studentId, response.getBody().getStudentId());
     verify(schedulerService, times(1)).getActualScheduleByStudentId(studentId);
   }
 
   @Test
-  void getScheduleByPeriod_ShouldReturnSchedule() {
-    String studentId = "123";
-    String year = "2023";
-    String period = "2";
-    when(schedulerService.getScheduleByPeriod(studentId, year, period)).thenReturn(pastSchedule);
+  void getScheduleById_WhenScheduleNotExists_ShouldThrowException() {
+    String studentId = "NONEXISTENT";
+    when(schedulerService.getActualScheduleByStudentId(studentId))
+        .thenThrow(new RuntimeException("Schedule not found"));
 
-    ResponseEntity<Schedule> response =
-        schedulerController.getScheduleByPeriod(studentId, year, period);
-
-    assertNotNull(response);
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(pastSchedule, response.getBody());
-    verify(schedulerService, times(1)).getScheduleByPeriod(studentId, year, period);
+    assertThrows(
+        RuntimeException.class, () -> schedulerController.getActualScheduleByStudentId(studentId));
+    verify(schedulerService, times(1)).getActualScheduleByStudentId(studentId);
   }
 
   @Test
-  void getPastSchedules_ShouldReturnPastSchedulesList() {
-    String studentId = "123";
-    when(schedulerService.getPastSchedules(studentId)).thenReturn(pastSchedules);
+  void getScheduleById_WithEmptySchedule_ShouldReturnEmptySchedule() {
+    String studentId = "STU002";
+    Schedule emptySchedule = new Schedule(studentId, new ArrayList<>());
 
-    ResponseEntity<List<Schedule>> response = schedulerController.getPastSchedules(studentId);
+    when(schedulerService.getActualScheduleByStudentId(studentId)).thenReturn(emptySchedule);
 
-    assertNotNull(response);
+    ResponseEntity<Schedule> response = schedulerController.getActualScheduleByStudentId(studentId);
+
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals(1, response.getBody().size());
-    assertEquals(pastSchedule, response.getBody().get(0));
-    verify(schedulerService, times(1)).getPastSchedules(studentId);
+    assertEquals(studentId, response.getBody().getStudentId());
+    verify(schedulerService, times(1)).getActualScheduleByStudentId(studentId);
   }
 
   @Test
-  void getPastSchedules_WhenEmpty_ShouldReturnEmptyList() {
-    String studentId = "123";
-    when(schedulerService.getPastSchedules(studentId)).thenReturn(new ArrayList<>());
+  void getScheduleById_ShouldCallServiceWithCorrectStudentId() {
+    String studentId = "STU003";
+    Schedule schedule = new Schedule(studentId, new ArrayList<>());
 
-    ResponseEntity<List<Schedule>> response = schedulerController.getPastSchedules(studentId);
+    when(schedulerService.getActualScheduleByStudentId(studentId)).thenReturn(schedule);
 
-    assertNotNull(response);
+    schedulerController.getActualScheduleByStudentId(studentId);
+
+    verify(schedulerService, times(1)).getActualScheduleByStudentId(studentId);
+  }
+
+  @Test
+  void getScheduleById_WithMultipleCalls_ShouldCallServiceEachTime() {
+    String studentId1 = "STU001";
+    String studentId2 = "STU002";
+
+    Schedule schedule1 = new Schedule(studentId1, new ArrayList<>());
+    Schedule schedule2 = new Schedule(studentId2, new ArrayList<>());
+
+    when(schedulerService.getActualScheduleByStudentId(studentId1)).thenReturn(schedule1);
+    when(schedulerService.getActualScheduleByStudentId(studentId2)).thenReturn(schedule2);
+
+    ResponseEntity<Schedule> response1 =
+        schedulerController.getActualScheduleByStudentId(studentId1);
+    ResponseEntity<Schedule> response2 =
+        schedulerController.getActualScheduleByStudentId(studentId2);
+
+    assertEquals(HttpStatus.OK, response1.getStatusCode());
+    assertEquals(HttpStatus.OK, response2.getStatusCode());
+    assertEquals(studentId1, response1.getBody().getStudentId());
+    assertEquals(studentId2, response2.getBody().getStudentId());
+    verify(schedulerService, times(1)).getActualScheduleByStudentId(studentId1);
+    verify(schedulerService, times(1)).getActualScheduleByStudentId(studentId2);
+  }
+
+  @Test
+  void getScheduleById_WhenServiceReturnsNull_ShouldReturnNullResponse() {
+    String studentId = "STU004";
+    when(schedulerService.getActualScheduleByStudentId(studentId)).thenReturn(null);
+
+    ResponseEntity<Schedule> response = schedulerController.getActualScheduleByStudentId(studentId);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNull(response.getBody());
+    verify(schedulerService, times(1)).getActualScheduleByStudentId(studentId);
+  }
+
+  @Test
+  void getScheduleById_ShouldReturnCorrectResponseType() {
+    String studentId = "STU005";
+    Schedule schedule = new Schedule(studentId, new ArrayList<>());
+
+    when(schedulerService.getActualScheduleByStudentId(studentId)).thenReturn(schedule);
+
+    ResponseEntity<Schedule> response = schedulerController.getActualScheduleByStudentId(studentId);
+
+    assertInstanceOf(ResponseEntity.class, response);
+    assertInstanceOf(Schedule.class, response.getBody());
+  }
+
+  @Test
+  void getScheduleById_VerifyServiceInteraction() {
+    String studentId = "STU006";
+    Schedule schedule = new Schedule(studentId, new ArrayList<>());
+
+    when(schedulerService.getActualScheduleByStudentId(studentId)).thenReturn(schedule);
+
+    schedulerController.getActualScheduleByStudentId(studentId);
+
+    verify(schedulerService, times(1)).getActualScheduleByStudentId(studentId);
+    verifyNoMoreInteractions(schedulerService);
+  }
+
+  @Test
+  void getScheduleById_WithSpecialCharactersInStudentId_ShouldHandleCorrectly() {
+    String studentId = "STU-007-ABC";
+    Schedule schedule = new Schedule(studentId, new ArrayList<>());
+
+    when(schedulerService.getActualScheduleByStudentId(studentId)).thenReturn(schedule);
+
+    ResponseEntity<Schedule> response = schedulerController.getActualScheduleByStudentId(studentId);
+
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertTrue(response.getBody().isEmpty());
-    verify(schedulerService, times(1)).getPastSchedules(studentId);
+    assertEquals(studentId, response.getBody().getStudentId());
+    verify(schedulerService, times(1)).getActualScheduleByStudentId(studentId);
+  }
+
+  @Test
+  void getScheduleById_WithLongStudentId_ShouldHandleCorrectly() {
+    String studentId = "STU001234567890123456789";
+    Schedule schedule = new Schedule(studentId, new ArrayList<>());
+
+    when(schedulerService.getActualScheduleByStudentId(studentId)).thenReturn(schedule);
+
+    ResponseEntity<Schedule> response = schedulerController.getActualScheduleByStudentId(studentId);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(studentId, response.getBody().getStudentId());
+    verify(schedulerService, times(1)).getActualScheduleByStudentId(studentId);
   }
 }

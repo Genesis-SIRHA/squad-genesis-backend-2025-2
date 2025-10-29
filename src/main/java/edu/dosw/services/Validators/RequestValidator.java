@@ -1,4 +1,4 @@
-package edu.dosw.services;
+package edu.dosw.services.Validators;
 
 import edu.dosw.dto.CreateRequestDto;
 import edu.dosw.dto.UpdateRequestDto;
@@ -11,6 +11,9 @@ import edu.dosw.model.Request;
 import edu.dosw.model.Student;
 import edu.dosw.model.enums.RequestStatus;
 import edu.dosw.model.enums.RequestType;
+import edu.dosw.services.AuthenticationService;
+import edu.dosw.services.FacultyService;
+import edu.dosw.services.GroupService;
 import edu.dosw.services.UserServices.StudentService;
 import java.util.Map;
 import lombok.AllArgsConstructor;
@@ -20,8 +23,8 @@ import org.springframework.stereotype.Service;
 
 @AllArgsConstructor
 @Service
-public class ValidatorService {
-  private static final Logger logger = LoggerFactory.getLogger(ValidatorService.class);
+public class RequestValidator {
+  private static final Logger logger = LoggerFactory.getLogger(RequestValidator.class);
   private GroupService groupService;
   private StudentService studentService;
   private AuthenticationService authenticationService;

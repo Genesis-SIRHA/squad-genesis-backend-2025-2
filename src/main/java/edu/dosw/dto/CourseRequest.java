@@ -2,6 +2,7 @@ package edu.dosw.dto;
 
 import edu.dosw.model.Course;
 import jakarta.validation.constraints.NotBlank;
+import java.util.List;
 
 /**
  * Represents a request to create or update a course. Contains the course abbreviation, fullName,
@@ -15,9 +16,12 @@ public record CourseRequest(
     @NotBlank(message = "El nombre del curso es obligatorio") String courseName,
     int credits,
     String facultyName,
-    String plan) {
+    String plan,
+    String semester,
+    List<String> requisites) {
 
   public Course toEntity() {
-    return new Course(this.abbreviation(), this.courseName(), this.credits());
+    return new Course(
+        this.abbreviation(), this.courseName(), this.credits(), this.semester(), this.requisites());
   }
 }

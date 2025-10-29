@@ -116,7 +116,9 @@ class FacultyControllerTest {
   void updateFacultyByNameAndPlan_WithValidData_ShouldReturnUpdatedFaculty() {
     FacultyDto updateDto =
         new FacultyDto(
-            "Engineering", "2024", Arrays.asList(new Course("MATH101", "Mathematics", 4)));
+            "Engineering",
+            "2024",
+            Arrays.asList(new Course("MATH101", "Mathematics", 4, "1", List.of())));
     Faculty updatedFaculty = new Faculty();
     updatedFaculty.setFacultyName("Engineering");
     updatedFaculty.setPlan("2024");
@@ -145,7 +147,9 @@ class FacultyControllerTest {
   @Test
   void createFaculty_WithCourses_ShouldReturnFacultyWithCourses() {
     List<Course> courses =
-        Arrays.asList(new Course("MATH101", "Mathematics", 4), new Course("PHY101", "Physics", 3));
+        Arrays.asList(
+            new Course("MATH101", "Mathematics", 4, "1", List.of()),
+            new Course("PHY101", "Physics", 3, "1", List.of()));
     FacultyDto facultyDto = new FacultyDto("Engineering", "2024", courses);
     Faculty expectedFaculty = new Faculty();
     expectedFaculty.setFacultyName("Engineering");
@@ -164,7 +168,8 @@ class FacultyControllerTest {
 
   @Test
   void updateFacultyByNameAndPlan_WithNewCourses_ShouldReturnUpdatedFaculty() {
-    List<Course> newCourses = Arrays.asList(new Course("CS101", "Computer Science", 4));
+    List<Course> newCourses =
+        Arrays.asList(new Course("CS101", "Computer Science", 4, "1", List.of()));
     FacultyDto updateDto = new FacultyDto("Engineering", "2024", newCourses);
     Faculty updatedFaculty = new Faculty();
     updatedFaculty.setFacultyName("Engineering");

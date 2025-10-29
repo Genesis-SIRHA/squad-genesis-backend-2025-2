@@ -1,6 +1,7 @@
 package edu.dosw.services;
 
 import edu.dosw.dto.CourseRequest;
+import edu.dosw.dto.CoursesDto;
 import edu.dosw.dto.FacultyDto;
 import edu.dosw.dto.UpdateCourseDTO;
 import edu.dosw.exception.BusinessException;
@@ -9,7 +10,11 @@ import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Faculty;
 import edu.dosw.repositories.FacultyRepository;
-import java.util.*;
+import edu.dosw.services.Validators.FacultyValidator;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -26,11 +31,15 @@ import org.springframework.stereotype.Service;
 public class FacultyService {
   private static final Logger logger = LoggerFactory.getLogger(FacultyService.class);
   private final FacultyRepository facultyRepository;
+  private final FacultyValidator facultyValidator;
 
   public Faculty createFaculty(FacultyDto facultyDto) {
     Faculty faculty = new Faculty();
     faculty.setFacultyName(facultyDto.facultyName());
     faculty.setPlan(facultyDto.plan());
+    facultyValidator.validateAddCourses(
+        new CoursesDto(
+            facultyDto.courses().stream().collect(Collectors.groupingBy(Course::getSemester))));
     if (facultyDto.courses() != null) faculty.setCourses(facultyDto.courses());
     return facultyRepository.save(faculty);
   }
@@ -74,6 +83,10 @@ public class FacultyService {
       logger.error("Faculty not found: {}", facultyDto.facultyName());
       throw new ResourceNotFoundException("Faculty not found: " + facultyDto.facultyName());
     }
+    facultyValidator.validateAddCourses(
+        new CoursesDto(
+            facultyDto.courses().stream().collect(Collectors.groupingBy(Course::getSemester))));
+
     if (facultyDto.courses() != null) faculty.setCourses(facultyDto.courses());
     try {
       return facultyRepository.save(faculty);

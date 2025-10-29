@@ -40,9 +40,9 @@ class PemsumServiceTest {
 
     List<Course> courses =
         Arrays.asList(
-            new Course("MATH101", "Calculus I", 4),
-            new Course("PHYS101", "Physics I", 3),
-            new Course("CHEM101", "Chemistry I", 3));
+            new Course("MATH101", "Calculus I", 4, "1", List.of()),
+            new Course("PHYS101", "Physics I", 3, "1", List.of()),
+            new Course("CHEM101", "Chemistry I", 3, "1", List.of()));
 
     List<Historial> historials =
         Arrays.asList(
@@ -77,7 +77,8 @@ class PemsumServiceTest {
 
     List<Course> courses =
         Arrays.asList(
-            new Course("BIO101", "Biology I", 3), new Course("CHEM101", "Chemistry I", 3));
+            new Course("BIO101", "Biology I", 3, "1", List.of()),
+            new Course("CHEM101", "Chemistry I", 3, "1", List.of()));
 
     List<Historial> historials =
         Arrays.asList(
@@ -110,10 +111,10 @@ class PemsumServiceTest {
 
     List<Course> courses =
         Arrays.asList(
-            new Course("MATH101", "Calculus I", 4),
-            new Course("PHYS101", "Physics I", 3),
-            new Course("CS101", "Programming", 3),
-            new Course("ENG101", "English", 2));
+            new Course("MATH101", "Calculus I", 4, "1", List.of()),
+            new Course("PHYS101", "Physics I", 3, "1", List.of()),
+            new Course("CS101", "Programming", 3, "1", List.of()),
+            new Course("ENG101", "English", 2, "1", List.of()));
 
     List<Historial> historials =
         Arrays.asList(
@@ -144,9 +145,9 @@ class PemsumServiceTest {
 
     List<Course> courses =
         Arrays.asList(
-            new Course("MATH101", "Calculus I", 4),
-            new Course("PHYS101", "Physics I", 3),
-            new Course("CHEM101", "Chemistry I", 3));
+            new Course("MATH101", "Calculus I", 4, "1", List.of()),
+            new Course("PHYS101", "Physics I", 3, "1", List.of()),
+            new Course("CHEM101", "Chemistry I", 3, "1", List.of()));
 
     List<Historial> historials =
         Arrays.asList(
@@ -176,7 +177,8 @@ class PemsumServiceTest {
 
     List<Course> courses =
         Arrays.asList(
-            new Course("MATH101", "Calculus I", 4), new Course("PHYS101", "Physics I", 3));
+            new Course("MATH101", "Calculus I", 4, "1", List.of()),
+            new Course("PHYS101", "Physics I", 3, "1", List.of()));
 
     when(studentService.getStudentById(studentId)).thenReturn(student);
     when(facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024")).thenReturn(courses);
@@ -203,10 +205,10 @@ class PemsumServiceTest {
 
     List<Course> allCourses =
         Arrays.asList(
-            new Course("MATH101", "Calculus I", 4),
-            new Course("PHYS101", "Physics I", 3),
-            new Course("CHEM101", "Chemistry I", 3),
-            new Course("CS101", "Programming", 3));
+            new Course("MATH101", "Calculus I", 4, "1", List.of()),
+            new Course("PHYS101", "Physics I", 3, "1", List.of()),
+            new Course("CHEM101", "Chemistry I", 3, "1", List.of()),
+            new Course("CS101", "Programming", 3, "1", List.of()));
 
     List<Historial> finishedHistorials =
         Arrays.asList(
@@ -238,7 +240,8 @@ class PemsumServiceTest {
 
     List<Course> allCourses =
         Arrays.asList(
-            new Course("BIO101", "Biology I", 3), new Course("CHEM101", "Chemistry I", 3));
+            new Course("BIO101", "Biology I", 3, "1", List.of()),
+            new Course("CHEM101", "Chemistry I", 3, "1", List.of()));
 
     List<Historial> finishedHistorials = Collections.emptyList();
 
@@ -262,7 +265,8 @@ class PemsumServiceTest {
 
     List<Course> allCourses =
         Arrays.asList(
-            new Course("MATH101", "Calculus I", 4), new Course("PHYS101", "Physics I", 3));
+            new Course("MATH101", "Calculus I", 4, "1", List.of()),
+            new Course("PHYS101", "Physics I", 3, "1", List.of()));
 
     List<Historial> finishedHistorials =
         Arrays.asList(
@@ -294,7 +298,8 @@ class PemsumServiceTest {
 
     List<Course> allCourses =
         Arrays.asList(
-            new Course("MATH101", "Calculus I", 4), new Course("PHYS101", "Physics I", 3));
+            new Course("MATH101", "Calculus I", 4, "1", List.of()),
+            new Course("PHYS101", "Physics I", 3, "1", List.of()));
 
     List<Historial> finishedHistorials = Collections.emptyList();
 
@@ -319,10 +324,10 @@ class PemsumServiceTest {
 
     List<Course> facultyCourses =
         Arrays.asList(
-            new Course("MATH101", "Calculus I", 4),
-            new Course("PHYS101", "Physics I", 3),
-            new Course("CHEM101", "Chemistry I", 3),
-            new Course("CS101", "Programming", 3));
+            new Course("MATH101", "Calculus I", 4, "1", List.of()),
+            new Course("PHYS101", "Physics I", 3, "1", List.of()),
+            new Course("CHEM101", "Chemistry I", 3, "1", List.of()),
+            new Course("CS101", "Programming", 3, "1", List.of()));
 
     List<Historial> studentHistorial =
         Arrays.asList(
@@ -353,7 +358,8 @@ class PemsumServiceTest {
     student.setFacultyName("Science");
     student.setPlan("2024");
 
-    List<Course> facultyCourses = Arrays.asList(new Course("BIO101", "Biology I", 3));
+    List<Course> facultyCourses =
+        Arrays.asList(new Course("BIO101", "Biology I", 3, "1", List.of()));
 
     List<Historial> studentHistorial =
         Arrays.asList(
@@ -380,7 +386,8 @@ class PemsumServiceTest {
     student.setFacultyName("Engineering");
     student.setPlan("2024");
 
-    List<Course> facultyCourses = Arrays.asList(new Course("MATH101", "Calculus I", 4));
+    List<Course> facultyCourses =
+        Arrays.asList(new Course("MATH101", "Calculus I", 4, "1", List.of()));
 
     List<Historial> studentHistorial =
         Arrays.asList(
@@ -407,7 +414,8 @@ class PemsumServiceTest {
     student.setFacultyName("Engineering");
     student.setPlan("2024");
 
-    List<Course> facultyCourses = Arrays.asList(new Course("MATH101", "Calculus I", 4));
+    List<Course> facultyCourses =
+        Arrays.asList(new Course("MATH101", "Calculus I", 4, "1", List.of()));
 
     List<Historial> studentHistorial =
         Arrays.asList(
@@ -436,7 +444,8 @@ class PemsumServiceTest {
 
     List<Course> facultyCourses =
         Arrays.asList(
-            new Course("BIO101", "Biology I", 3), new Course("CHEM101", "Chemistry I", 3));
+            new Course("BIO101", "Biology I", 3, "1", List.of()),
+            new Course("CHEM101", "Chemistry I", 3, "1", List.of()));
 
     when(studentService.getStudentById(studentId)).thenReturn(student);
     when(facultyService.findCoursesByFacultyNameAndPlan("Science", "2024"))

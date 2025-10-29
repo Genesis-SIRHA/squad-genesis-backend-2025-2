@@ -8,6 +8,7 @@ import edu.dosw.dto.UpdateCourseDTO;
 import edu.dosw.model.Course;
 import edu.dosw.model.Faculty;
 import edu.dosw.services.FacultyService;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,7 +29,7 @@ class CourseControllerTest {
     String courseAbbreviation = "MATH101";
     String facultyName = "Engineering";
     String plan = "2024";
-    Course expectedCourse = new Course("MATH101", "Mathematics", 4);
+    Course expectedCourse = new Course("MATH101", "Mathematics", 4, "1", List.of());
 
     when(facultyService.findCourseByAbbreviation(courseAbbreviation, facultyName, plan))
         .thenReturn(expectedCourse);
@@ -62,7 +63,7 @@ class CourseControllerTest {
   @Test
   void createCourse_WithValidData_ShouldReturnFaculty() {
     CourseRequest courseRequest =
-        new CourseRequest("MATH101", "Mathematics", 4, "Engineering", "2024");
+        new CourseRequest("MATH101", "Mathematics", 4, "Engineering", "2024", "1", List.of());
     Faculty expectedFaculty = new Faculty();
 
     when(facultyService.addCourse(courseRequest)).thenReturn(expectedFaculty);
@@ -76,7 +77,7 @@ class CourseControllerTest {
 
   @Test
   void createCourse_WithInvalidData_ShouldThrowException() {
-    CourseRequest invalidRequest = new CourseRequest("", "", 0, "", "");
+    CourseRequest invalidRequest = new CourseRequest("", "", 0, "", "", "1", List.of());
 
     when(facultyService.addCourse(invalidRequest))
         .thenThrow(new RuntimeException("Invalid course data"));
@@ -88,7 +89,7 @@ class CourseControllerTest {
   @Test
   void createCourse_WithDuplicateCourse_ShouldThrowException() {
     CourseRequest duplicateRequest =
-        new CourseRequest("MATH101", "Mathematics", 4, "Engineering", "2024");
+        new CourseRequest("MATH101", "Mathematics", 4, "Engineering", "2024", "1", List.of());
 
     when(facultyService.addCourse(duplicateRequest))
         .thenThrow(new RuntimeException("Course already exists"));
@@ -103,7 +104,7 @@ class CourseControllerTest {
     String facultyName = "Engineering";
     String plan = "2024";
     UpdateCourseDTO updateDTO = new UpdateCourseDTO("Advanced Mathematics", 5);
-    Course updatedCourse = new Course("MATH101", "Advanced Mathematics", 5);
+    Course updatedCourse = new Course("MATH101", "Advanced Mathematics", 5, "1", List.of());
 
     when(facultyService.updateCourse(courseAbbreviation, facultyName, plan, updateDTO))
         .thenReturn(updatedCourse);
@@ -174,7 +175,7 @@ class CourseControllerTest {
     String facultyName = "Engineering";
     String plan = "2024";
     UpdateCourseDTO updateDTO = new UpdateCourseDTO(null, 5);
-    Course updatedCourse = new Course("MATH101", "Mathematics", 5);
+    Course updatedCourse = new Course("MATH101", "Mathematics", 5, "1", List.of());
 
     when(facultyService.updateCourse(courseAbbreviation, facultyName, plan, updateDTO))
         .thenReturn(updatedCourse);
@@ -194,7 +195,7 @@ class CourseControllerTest {
     String facultyName = "Engineering";
     String plan = "2024";
     UpdateCourseDTO updateDTO = new UpdateCourseDTO("Advanced Mathematics", null);
-    Course updatedCourse = new Course("MATH101", "Advanced Mathematics", 4);
+    Course updatedCourse = new Course("MATH101", "Advanced Mathematics", 4, "1", List.of());
 
     when(facultyService.updateCourse(courseAbbreviation, facultyName, plan, updateDTO))
         .thenReturn(updatedCourse);

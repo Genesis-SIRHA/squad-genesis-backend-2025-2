@@ -1,8 +1,9 @@
-package edu.dosw.services;
+package edu.dosw.services.Validators;
 
 import edu.dosw.dto.SessionDTO;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.model.Session;
+import edu.dosw.services.PeriodService;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

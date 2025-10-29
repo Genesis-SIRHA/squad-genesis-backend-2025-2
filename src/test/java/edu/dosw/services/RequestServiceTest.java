@@ -16,6 +16,7 @@ import edu.dosw.repositories.RequestRepository;
 import edu.dosw.services.UserServices.DeanService;
 import edu.dosw.services.UserServices.ProfessorService;
 import edu.dosw.services.UserServices.StudentService;
+import edu.dosw.services.Validators.RequestValidator;
 import edu.dosw.services.strategy.AnswerStrategies.AnswerStrategy;
 import edu.dosw.services.strategy.AnswerStrategies.AnswerStrategyFactory;
 import java.time.LocalDate;
@@ -34,7 +35,7 @@ class RequestServiceTest {
 
   @Mock private RequestRepository requestRepository;
 
-  @Mock private ValidatorService validatorService;
+  @Mock private RequestValidator requestValidator;
 
   @Mock private AuthenticationService authenticationService;
 
@@ -96,19 +97,19 @@ class RequestServiceTest {
 
   @Test
   void createRequest_ShouldSaveAndReturnRequest_WhenValidDto() {
-    doNothing().when(validatorService).validateCreateRequest(createRequestDto);
+    doNothing().when(requestValidator).validateCreateRequest(createRequestDto);
     when(requestRepository.save(any(Request.class))).thenReturn(mockRequest1);
 
     Request result = requestService.createRequest(createRequestDto);
 
     assertNotNull(result);
-    verify(validatorService).validateCreateRequest(createRequestDto);
+    verify(requestValidator).validateCreateRequest(createRequestDto);
     verify(requestRepository).save(any(Request.class));
   }
 
   @Test
   void createRequest_ShouldThrowBusinessException_WhenRepositoryFails() {
-    doNothing().when(validatorService).validateCreateRequest(createRequestDto);
+    doNothing().when(requestValidator).validateCreateRequest(createRequestDto);
     when(requestRepository.save(any(Request.class))).thenThrow(new RuntimeException("Save failed"));
 
     assertThrows(BusinessException.class, () -> requestService.createRequest(createRequestDto));
@@ -118,7 +119,7 @@ class RequestServiceTest {
   void updateRequest_ShouldUpdateAndReturnRequest_WhenValid() {
     when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(mockRequest1));
     doNothing()
-        .when(validatorService)
+        .when(requestValidator)
         .validateUpdateRequest(anyString(), any(Request.class), any(UpdateRequestDto.class));
     when(answerStrategyFactory.getStrategy(RequestType.SWAP)).thenReturn(answerStrategy);
     doNothing().when(answerStrategy).answerRequest(any(Request.class));
@@ -140,7 +141,7 @@ class RequestServiceTest {
 
     when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(mockRequest1));
     doNothing()
-        .when(validatorService)
+        .when(requestValidator)
         .validateUpdateRequest(anyString(), any(Request.class), any(UpdateRequestDto.class));
     when(requestRepository.save(any(Request.class))).thenReturn(mockRequest1);
 
@@ -193,14 +194,14 @@ class RequestServiceTest {
     when(requestRepository.findAll()).thenReturn(Arrays.asList(mockRequest1, mockRequest2));
     when(studentService.getFacultyByStudentId("STU001")).thenReturn("Engineering");
     when(studentService.getFacultyByStudentId("STU002")).thenReturn("Medicine");
-    doNothing().when(validatorService).validateFacultyName(facultyName);
+    doNothing().when(requestValidator).validateFacultyName(facultyName);
 
     List<Request> result = requestService.fetchRequestsByFacultyName(facultyName);
 
     assertNotNull(result);
     assertEquals(1, result.size());
     assertEquals("STU001", result.get(0).getStudentId());
-    verify(validatorService).validateFacultyName(facultyName);
+    verify(requestValidator).validateFacultyName(facultyName);
     verify(requestRepository).findAll();
   }
 
@@ -210,7 +211,7 @@ class RequestServiceTest {
 
     when(requestRepository.findAll()).thenReturn(Arrays.asList(mockRequest1, mockRequest2));
     when(studentService.getFacultyByStudentId(anyString())).thenReturn("Medicine");
-    doNothing().when(validatorService).validateFacultyName(facultyName);
+    doNothing().when(requestValidator).validateFacultyName(facultyName);
 
     List<Request> result = requestService.fetchRequestsByFacultyName(facultyName);
 
@@ -222,7 +223,7 @@ class RequestServiceTest {
   void updateRequest_ShouldUpdateManagedBy_WhenProvided() {
     when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(mockRequest1));
     doNothing()
-        .when(validatorService)
+        .when(requestValidator)
         .validateUpdateRequest(anyString(), any(Request.class), any(UpdateRequestDto.class));
     when(answerStrategyFactory.getStrategy(RequestType.SWAP)).thenReturn(answerStrategy);
     when(requestRepository.save(any(Request.class))).thenReturn(mockRequest1);
@@ -236,7 +237,7 @@ class RequestServiceTest {
   void updateRequest_ShouldUpdateAnswer_WhenProvided() {
     when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(mockRequest1));
     doNothing()
-        .when(validatorService)
+        .when(requestValidator)
         .validateUpdateRequest(anyString(), any(Request.class), any(UpdateRequestDto.class));
     when(answerStrategyFactory.getStrategy(RequestType.SWAP)).thenReturn(answerStrategy);
     when(requestRepository.save(any(Request.class))).thenReturn(mockRequest1);
@@ -249,7 +250,7 @@ class RequestServiceTest {
 
   @Test
   void createRequest_ShouldBuildRequestWithCorrectFields() {
-    doNothing().when(validatorService).validateCreateRequest(createRequestDto);
+    doNothing().when(requestValidator).validateCreateRequest(createRequestDto);
     when(requestRepository.save(any(Request.class)))
         .thenAnswer(
             invocation -> {
@@ -287,7 +288,7 @@ class RequestServiceTest {
 
     when(requestRepository.findByRequestId("REQ003")).thenReturn(Optional.of(joinRequest));
     doNothing()
-        .when(validatorService)
+        .when(requestValidator)
         .validateUpdateRequest(anyString(), any(Request.class), any(UpdateRequestDto.class));
     when(answerStrategyFactory.getStrategy(RequestType.JOIN)).thenReturn(answerStrategy);
     doNothing().when(answerStrategy).answerRequest(any(Request.class));
@@ -317,7 +318,7 @@ class RequestServiceTest {
 
     when(requestRepository.findByRequestId("REQ004")).thenReturn(Optional.of(cancellationRequest));
     doNothing()
-        .when(validatorService)
+        .when(requestValidator)
         .validateUpdateRequest(anyString(), any(Request.class), any(UpdateRequestDto.class));
     when(answerStrategyFactory.getStrategy(RequestType.CANCELLATION)).thenReturn(answerStrategy);
     doNothing().when(answerStrategy).answerRequest(any(Request.class));
@@ -335,13 +336,13 @@ class RequestServiceTest {
     CreateRequestDto joinRequestDto =
         new CreateRequestDto("STU005", RequestType.JOIN, "Request to join group", "GROUP003", null);
 
-    doNothing().when(validatorService).validateCreateRequest(joinRequestDto);
+    doNothing().when(requestValidator).validateCreateRequest(joinRequestDto);
     when(requestRepository.save(any(Request.class))).thenReturn(mockRequest1);
 
     Request result = requestService.createRequest(joinRequestDto);
 
     assertNotNull(result);
-    verify(validatorService).validateCreateRequest(joinRequestDto);
+    verify(requestValidator).validateCreateRequest(joinRequestDto);
     verify(requestRepository).save(any(Request.class));
   }
 
@@ -351,13 +352,13 @@ class RequestServiceTest {
         new CreateRequestDto(
             "STU006", RequestType.CANCELLATION, "Request to cancel enrollment", null, "GROUP004");
 
-    doNothing().when(validatorService).validateCreateRequest(cancellationRequestDto);
+    doNothing().when(requestValidator).validateCreateRequest(cancellationRequestDto);
     when(requestRepository.save(any(Request.class))).thenReturn(mockRequest1);
 
     Request result = requestService.createRequest(cancellationRequestDto);
 
     assertNotNull(result);
-    verify(validatorService).validateCreateRequest(cancellationRequestDto);
+    verify(requestValidator).validateCreateRequest(cancellationRequestDto);
     verify(requestRepository).save(any(Request.class));
   }
 

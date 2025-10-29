@@ -1,6 +1,7 @@
 package edu.dosw.controller;
 
 import edu.dosw.dto.CourseRequest;
+import edu.dosw.dto.FacultyDto;
 import edu.dosw.dto.UpdateCourseDTO;
 import edu.dosw.model.Course;
 import edu.dosw.model.Faculty;
@@ -57,11 +58,17 @@ public class CourseController {
    * @param courseRequest The course details to create
    * @return The created course with its generated ID
    */
-  @PostMapping
+  @PostMapping("/addCourse")
   @Operation(summary = "Create a new course", description = "Registers a new course")
   @ApiResponse(responseCode = "200", description = "Course created successfully")
   public ResponseEntity<Faculty> createCourse(@RequestBody CourseRequest courseRequest) {
     return ResponseEntity.ok(facultyService.addCourse(courseRequest));
+  }
+
+  @PatchMapping("/addCourses")
+  @Operation(summary = "Add courses to faculty")
+  public ResponseEntity<Faculty> addCoursesToFaculty(@RequestBody FacultyDto facultyDto) {
+    return ResponseEntity.ok(facultyService.addCoursesToPlan(facultyDto));
   }
 
   /**
