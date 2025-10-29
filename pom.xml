@@ -12,7 +12,7 @@
     </parent>
 
     <groupId>edu.dosw</groupId>
-    <artifactId>taller1dosw</artifactId>
+    <artifactId>sirha-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>SIRHA</name>
     <description>Project GENESIS for SIRHA</description>
@@ -243,6 +243,23 @@
                     </java>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>edu.dosw.Application</mainClass>
+                    <finalName>app</finalName>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
 
         </plugins>
     </build>

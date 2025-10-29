@@ -10,7 +10,12 @@ import org.springframework.data.mongodb.repository.Query;
 public interface HistorialRepository extends MongoRepository<Historial, String> {
 
   @Query("{ 'studentId': ?0, 'year': ?1, 'period': ?2 , 'status': 'ON_GOING'}")
-  ArrayList<Historial> findCurrentSessionsByStudentIdAndYearAndPeriod(
+  ArrayList<Historial> findCurrentHistorialByStudentIdAndYearAndPeriod(
+      String studentId, String year, String period);
+
+  @Query(
+      "{ 'studentId': ?0, 'year': ?1, 'period': ?2, 'status': { $in: ['ON_GOING', 'FINISHED'] } }")
+  ArrayList<Historial> findHistorialByStudentIdAndYearAndPeriod(
       String studentId, String year, String period);
 
   @Query("{ 'studentId': ?0}")

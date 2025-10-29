@@ -32,14 +32,6 @@ public interface RequestRepository extends MongoRepository<Request, String> {
   List<Request> findOwnedBy(String professorId);
 
   /**
-   * Finds all requests with a status of 'EXCEPTIONAL'.
-   *
-   * @return A list of all exceptional requests requiring special attention
-   */
-  @Query("{ 'status': 'EXCEPTIONAL' }")
-  List<Request> queryExceptionRequest();
-
-  /**
    * Finds all requests submitted by a specific student.
    *
    * @param studentId The ID of the student
