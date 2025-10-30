@@ -17,6 +17,12 @@ import org.springframework.web.bind.annotation.*;
 public class DeanController {
   private final DeanService deanService;
 
+  /**
+   * Retrieves a dean by their unique identifier
+   *
+   * @param deanId The unique identifier of the dean
+   * @return ResponseEntity containing the dean data
+   */
   @GetMapping("/{deanId}")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(summary = "Get dean by ID", description = "Retrieves a dean by its unique identifier")
@@ -24,6 +30,12 @@ public class DeanController {
     return ResponseEntity.ok(deanService.getDeanById(deanId));
   }
 
+  /**
+   * Creates a new dean with the provided data
+   *
+   * @param deanCreationRequest The DTO containing dean creation data
+   * @return ResponseEntity containing the created dean
+   */
   @PostMapping("/create")
   @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(summary = "Create dean", description = "Creates a new dean")
@@ -31,6 +43,13 @@ public class DeanController {
     return ResponseEntity.ok(deanService.createDean(deanCreationRequest));
   }
 
+  /**
+   * Updates an existing dean with the provided data
+   *
+   * @param deanUpdateRequest The DTO containing dean update data
+   * @param deanId The unique identifier of the dean to update
+   * @return ResponseEntity containing the updated dean
+   */
   @PatchMapping("/update/{deanId}")
   @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(summary = "Update dean", description = "Updates an existing dean")
@@ -39,6 +58,12 @@ public class DeanController {
     return ResponseEntity.ok(deanService.updateDean(deanId, deanUpdateRequest));
   }
 
+  /**
+   * Deletes a dean by their unique identifier
+   *
+   * @param deanId The unique identifier of the dean to delete
+   * @return ResponseEntity containing the deleted dean
+   */
   @DeleteMapping("/delete/{deanId}")
   @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(summary = "Delete dean", description = "Deletes an existing dean")

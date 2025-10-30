@@ -13,6 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+/**
+ * Strategy implementation for handling join request answers Processes student enrollments into
+ * groups and updates enrollment counts
+ */
 @AllArgsConstructor
 @Component
 public class JoinRequestAnswer implements AnswerStrategy {
@@ -20,6 +24,13 @@ public class JoinRequestAnswer implements AnswerStrategy {
   private final HistorialService historialService;
   private final Logger logger = LoggerFactory.getLogger(JoinRequestAnswer.class);
 
+  /**
+   * Processes a join request by adding the student to the destination group and updating enrollment
+   * counts and historial status
+   *
+   * @param request The join request to process
+   * @throws BusinessException If the group is full or the join process fails
+   */
   public void answerRequest(Request request) {
     Group group = groupService.getGroupByGroupCode(request.getDestinationGroupId());
     if (group.getEnrolled() >= group.getMaxCapacity()) {

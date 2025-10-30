@@ -20,6 +20,13 @@ public class GlobalExceptionHandler {
 
   private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+  /**
+   * Handles business rule violations
+   *
+   * @param ex The BusinessException that was thrown
+   * @param request The HTTP request that caused the exception
+   * @return ResponseEntity with error details
+   */
   @ExceptionHandler(BusinessException.class)
   public ResponseEntity<ErrorResponse> handleBusinessException(
       BusinessException ex, HttpServletRequest request) {
@@ -28,6 +35,13 @@ public class GlobalExceptionHandler {
         HttpStatus.BAD_REQUEST, "BUSINESS_ERROR", ex.getMessage(), request.getRequestURI());
   }
 
+  /**
+   * Handles requests for resources that cannot be found
+   *
+   * @param ex The ResourceNotFoundException that was thrown
+   * @param request The HTTP request that caused the exception
+   * @return ResponseEntity with error details
+   */
   @ExceptionHandler(ResourceNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleResourceNotFound(
       ResourceNotFoundException ex, HttpServletRequest request) {
@@ -36,6 +50,13 @@ public class GlobalExceptionHandler {
         HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND", ex.getMessage(), request.getRequestURI());
   }
 
+  /**
+   * Handles attempts to create resources that already exist
+   *
+   * @param ex The ResourceAlreadyExistsException that was thrown
+   * @param request The HTTP request that caused the exception
+   * @return ResponseEntity with error details
+   */
   @ExceptionHandler(ResourceAlreadyExistsException.class)
   public ResponseEntity<ErrorResponse> handleResourceAlreadyExists(
       ResourceAlreadyExistsException ex, HttpServletRequest request) {
@@ -44,6 +65,13 @@ public class GlobalExceptionHandler {
         HttpStatus.CONFLICT, "RESOURCE_ALREADY_EXISTS", ex.getMessage(), request.getRequestURI());
   }
 
+  /**
+   * Handles general validation exceptions
+   *
+   * @param ex The ValidationException that was thrown
+   * @param request The HTTP request that caused the exception
+   * @return ResponseEntity with error details
+   */
   @ExceptionHandler(ValidationException.class)
   public ResponseEntity<ErrorResponse> handleValidation(
       ValidationException ex, HttpServletRequest request) {
@@ -55,6 +83,13 @@ public class GlobalExceptionHandler {
         request.getRequestURI());
   }
 
+  /**
+   * Handles method argument validation failures
+   *
+   * @param ex The MethodArgumentNotValidException that was thrown
+   * @param request The HTTP request that caused the exception
+   * @return ResponseEntity with error details
+   */
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ErrorResponse> handleValidationExceptions(
       MethodArgumentNotValidException ex, HttpServletRequest request) {
@@ -67,6 +102,13 @@ public class GlobalExceptionHandler {
         HttpStatus.BAD_REQUEST, "INVALID_ARGUMENTS", errors, request.getRequestURI());
   }
 
+  /**
+   * Handles constraint violation exceptions
+   *
+   * @param ex The ConstraintViolationException that was thrown
+   * @param request The HTTP request that caused the exception
+   * @return ResponseEntity with error details
+   */
   @ExceptionHandler(ConstraintViolationException.class)
   public ResponseEntity<ErrorResponse> handleConstraintViolation(
       ConstraintViolationException ex, HttpServletRequest request) {
@@ -79,6 +121,13 @@ public class GlobalExceptionHandler {
         HttpStatus.BAD_REQUEST, "CONSTRAINT_VIOLATION", errors, request.getRequestURI());
   }
 
+  /**
+   * Handles malformed JSON requests
+   *
+   * @param ex The HttpMessageNotReadableException that was thrown
+   * @param request The HTTP request that caused the exception
+   * @return ResponseEntity with error details
+   */
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(
       HttpMessageNotReadableException ex, HttpServletRequest request) {
@@ -90,6 +139,13 @@ public class GlobalExceptionHandler {
         request.getRequestURI());
   }
 
+  /**
+   * Handles authentication failures
+   *
+   * @param ex The AuthenticationException that was thrown
+   * @param request The HTTP request that caused the exception
+   * @return ResponseEntity with error details
+   */
   @ExceptionHandler(AuthenticationException.class)
   public ResponseEntity<ErrorResponse> handleAuthentication(
       AuthenticationException ex, HttpServletRequest request) {
@@ -101,6 +157,13 @@ public class GlobalExceptionHandler {
         request.getRequestURI());
   }
 
+  /**
+   * Handles access denied scenarios
+   *
+   * @param ex The AccessDeniedException that was thrown
+   * @param request The HTTP request that caused the exception
+   * @return ResponseEntity with error details
+   */
   @ExceptionHandler(AccessDeniedException.class)
   public ResponseEntity<ErrorResponse> handleAccessDenied(
       AccessDeniedException ex, HttpServletRequest request) {
@@ -112,6 +175,13 @@ public class GlobalExceptionHandler {
         request.getRequestURI());
   }
 
+  /**
+   * Handles data integrity violations (e.g., duplicate keys, foreign key constraints)
+   *
+   * @param ex The DataIntegrityViolationException that was thrown
+   * @param request The HTTP request that caused the exception
+   * @return ResponseEntity with error details
+   */
   @ExceptionHandler(DataIntegrityViolationException.class)
   public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
       DataIntegrityViolationException ex, HttpServletRequest request) {
@@ -124,6 +194,13 @@ public class GlobalExceptionHandler {
         request.getRequestURI());
   }
 
+  /**
+   * Handles all other uncaught exceptions
+   *
+   * @param ex The Exception that was thrown
+   * @param request The HTTP request that caused the exception
+   * @return ResponseEntity with error details
+   */
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleGeneral(Exception ex, HttpServletRequest request) {
     logger.error("Unexpected error at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
@@ -134,6 +211,15 @@ public class GlobalExceptionHandler {
         request.getRequestURI());
   }
 
+  /**
+   * Builds a standardized error response
+   *
+   * @param status The HTTP status code
+   * @param code The application-specific error code
+   * @param message The error message
+   * @param path The request path where the error occurred
+   * @return ResponseEntity containing the ErrorResponse
+   */
   private ResponseEntity<ErrorResponse> buildResponse(
       HttpStatus status, String code, String message, String path) {
     ErrorResponse errorResponse =

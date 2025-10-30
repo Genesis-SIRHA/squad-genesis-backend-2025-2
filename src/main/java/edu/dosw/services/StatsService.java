@@ -19,6 +19,11 @@ public class StatsService {
   private final FacultyService facultyService;
   private final GroupService groupService;
 
+  /**
+   * Retrieves basic statistics about all requests in the system
+   *
+   * @return RequestStats containing total, pending, approved, and rejected counts
+   */
   public RequestStats getRequestStats() {
     Integer total = requestService.countTotalRequests();
     Integer pending = requestService.countByStatus(RequestStatus.PENDING);
@@ -27,6 +32,12 @@ public class StatsService {
     return new RequestStats(total, pending, approved, rejected);
   }
 
+  /**
+   * Generates reassignment statistics for a specific course
+   *
+   * @param courseAbbreviation The abbreviation of the course
+   * @return ReportDTO containing comprehensive statistics for the course
+   */
   public ReportDTO getCourseReassignmentStats(String courseAbbreviation) {
     List<Group> groups = groupService.getAllGroupsByCourseAbbreviation(courseAbbreviation);
 
@@ -51,6 +62,12 @@ public class StatsService {
     return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
   }
 
+  /**
+   * Generates reassignment statistics for a specific group
+   *
+   * @param groupCode The unique code identifying the group
+   * @return ReportDTO containing comprehensive statistics for the group
+   */
   public ReportDTO getGroupReassignmentStats(String groupCode) {
     List<String> singleGroup = List.of(groupCode);
 
@@ -69,6 +86,13 @@ public class StatsService {
     return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
   }
 
+  /**
+   * Generates reassignment statistics for a specific faculty and academic plan
+   *
+   * @param facultyName The name of the faculty
+   * @param plan The academic plan identifier
+   * @return ReportDTO containing comprehensive statistics for the faculty
+   */
   public ReportDTO getFacultyReassignmentStats(String facultyName, String plan) {
     List<Course> facultyCourses = facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan);
     List<String> courseAbbreviations =
@@ -107,6 +131,11 @@ public class StatsService {
     return new ReportDTO(total, pending, approved, rejected, cancellations, swaps, joins);
   }
 
+  /**
+   * Generates comprehensive reassignment statistics across the entire system
+   *
+   * @return ReportDTO containing global statistics for all requests
+   */
   public ReportDTO getGlobalReassignmentStats() {
     Integer total = requestService.countTotalRequests();
     Integer pending = requestService.countByStatus(RequestStatus.PENDING);

@@ -24,6 +24,12 @@ public class RequestPeriodService {
   private final PeriodService periodService;
   private final RequestPeriodValidator requestPeriodValidator;
 
+  /**
+   * Retrieves the currently active request period
+   *
+   * @return The active request period DTO
+   * @throws ResourceNotFoundException If no active period is found
+   */
   public RequestPeriodDTO getActivePeriod() {
     RequestPeriodDTO periodDTO = requestPeriodRepository.activePeriod();
     if (periodDTO == null) {
@@ -34,6 +40,13 @@ public class RequestPeriodService {
     return periodDTO;
   }
 
+  /**
+   * Retrieves a specific request period by its unique identifier
+   *
+   * @param requestPeriodId The unique identifier of the request period
+   * @return The request period DTO
+   * @throws ResourceNotFoundException If no period is found with the given ID
+   */
   public RequestPeriodDTO getPeriodById(String requestPeriodId) {
     RequestPeriodDTO periodDTO = requestPeriodRepository.getById(requestPeriodId);
     if (periodDTO == null) {
@@ -44,10 +57,22 @@ public class RequestPeriodService {
     return periodDTO;
   }
 
+  /**
+   * Retrieves all request periods in the system
+   *
+   * @return List of all request period DTOs
+   */
   public List<RequestPeriodDTO> getAllPeriods() {
     return requestPeriodRepository.findAll();
   }
 
+  /**
+   * Creates a new active request period
+   *
+   * @param createRequestPeriodDTO The DTO containing request period creation data
+   * @return The created request period DTO
+   * @throws BusinessException If there is already an active period
+   */
   public RequestPeriodDTO createActivePeriod(CreateRequestPeriodDTO createRequestPeriodDTO) {
     try {
       getActivePeriod();
@@ -68,6 +93,12 @@ public class RequestPeriodService {
         "There is still an active period of creation and answer of requests");
   }
 
+  /**
+   * Updates the currently active request period
+   *
+   * @param updateRequestPeriodDTO The DTO containing updated request period data
+   * @return The updated request period DTO
+   */
   public RequestPeriodDTO updateActivePeriod(UpdateRequestPeriodDTO updateRequestPeriodDTO) {
     RequestPeriodDTO periodDTO = requestPeriodRepository.activePeriod();
     LocalDate initialDate = periodDTO.initialDate();

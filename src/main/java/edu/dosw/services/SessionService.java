@@ -26,6 +26,13 @@ public class SessionService {
   private final SessionValidator sessionValidator;
   private final Logger logger = LoggerFactory.getLogger(SessionService.class);
 
+  /**
+   * Retrieves all sessions for a specific group
+   *
+   * @param groupCode The unique code identifying the group
+   * @return List of sessions for the specified group
+   * @throws ResourceNotFoundException If no sessions are found for the group
+   */
   public List<Session> getSessionsByGroupCode(String groupCode) {
     ArrayList<Session> groupSchedule = sessionRepository.findByGroupCode(groupCode);
     if (groupSchedule == null) {
@@ -35,6 +42,13 @@ public class SessionService {
     return groupSchedule;
   }
 
+  /**
+   * Retrieves a specific session by its unique identifier
+   *
+   * @param sessionId The unique identifier of the session
+   * @return The session with the specified ID
+   * @throws ResourceNotFoundException If no session is found with the given ID
+   */
   public Session getSessionBySessionId(String sessionId) {
     Session session = sessionRepository.findBySessionId(sessionId);
     if (session == null) {
@@ -44,6 +58,13 @@ public class SessionService {
     return session;
   }
 
+  /**
+   * Retrieves a session by its schedule and classroom
+   *
+   * @param sessionDto The DTO containing session schedule and classroom information
+   * @return The session matching the criteria
+   * @throws ResourceNotFoundException If no session is found with the given criteria
+   */
   public Session getSessionsByScheduleAndClassroom(SessionDTO sessionDto) {
     String classroom = sessionDto.classroomName();
     Integer slot = sessionDto.slot();
@@ -60,6 +81,13 @@ public class SessionService {
     return session;
   }
 
+  /**
+   * Retrieves a session by its schedule and group code
+   *
+   * @param sessionDTO The DTO containing session schedule and group code information
+   * @return The session matching the criteria
+   * @throws ResourceNotFoundException If no session is found with the given criteria
+   */
   public Session getSessionsByScheduleAndGroupCode(SessionDTO sessionDTO) {
     String groupCode = sessionDTO.groupCode();
     Integer slot = sessionDTO.slot();
@@ -78,6 +106,13 @@ public class SessionService {
     return session;
   }
 
+  /**
+   * Creates a new session
+   *
+   * @param sessiondto The DTO containing session creation data
+   * @return The created session
+   * @throws BusinessException If session creation fails
+   */
   public Session createSession(SessionDTO sessiondto) {
     sessionValidator.validateCreateSession(sessiondto);
 
@@ -98,6 +133,14 @@ public class SessionService {
     }
   }
 
+  /**
+   * Updates an existing session
+   *
+   * @param sessionId The unique identifier of the session to update
+   * @param sessiondto The DTO containing updated session data
+   * @return The updated session
+   * @throws BusinessException If session update fails
+   */
   public Session updateSession(String sessionId, SessionDTO sessiondto) {
     Session session = getSessionBySessionId(sessionId);
     sessionValidator.validateUpdateSession(sessiondto, session.getYear(), session.getPeriod());
@@ -116,6 +159,13 @@ public class SessionService {
     }
   }
 
+  /**
+   * Deletes a specific session
+   *
+   * @param sessionId The unique identifier of the session to delete
+   * @return The deleted session
+   * @throws BusinessException If session deletion fails
+   */
   public Session deleteSession(String sessionId) {
     Session session = getSessionBySessionId(sessionId);
     sessionValidator.validateDeleteSession(session);
@@ -129,6 +179,11 @@ public class SessionService {
     }
   }
 
+  /**
+   * Deletes all sessions associated with a specific group
+   *
+   * @param groupCode The unique code identifying the group
+   */
   public void deleteSessionsByGroupCode(String groupCode) {
     List<Session> sessions = getSessionsByGroupCode(groupCode);
     for (Session session : sessions) {

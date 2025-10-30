@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+/** Represents a faculty in the academic system with its associated courses and academic plan */
 @Data
 @NoArgsConstructor
 @Document(collection = "faculties")
@@ -23,6 +24,13 @@ public class Faculty {
   @Field("courses")
   private List<Course> courses = new ArrayList<>();
 
+  /**
+   * Constructs a Faculty with name, plan, and courses
+   *
+   * @param facultyName The name of the faculty
+   * @param plan The academic plan associated with the faculty
+   * @param courses The list of courses offered by the faculty
+   */
   public Faculty(String facultyName, String plan, List<Course> courses) {
     this.facultyName = facultyName;
     this.plan = plan;

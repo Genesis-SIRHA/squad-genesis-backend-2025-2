@@ -13,6 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+/**
+ * Strategy implementation for handling swap request answers Processes student transfers between
+ * groups and updates enrollment counts
+ */
 @AllArgsConstructor
 @Component
 public class SwapRequestAnswer implements AnswerStrategy {
@@ -20,6 +24,13 @@ public class SwapRequestAnswer implements AnswerStrategy {
   private final HistorialService historialService;
   private final Logger logger = LoggerFactory.getLogger(SwapRequestAnswer.class);
 
+  /**
+   * Processes a swap request by moving the student from origin group to destination group and
+   * updating enrollment counts and historial status for both groups
+   *
+   * @param request The swap request to process
+   * @throws BusinessException If the destination group is full or the swap process fails
+   */
   public void answerRequest(Request request) {
     Group originGroup = groupService.getGroupByGroupCode(request.getOriginGroupId());
     UpdateGroupRequest originGroupRequest =

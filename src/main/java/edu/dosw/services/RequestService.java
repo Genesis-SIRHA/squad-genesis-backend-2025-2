@@ -61,6 +61,14 @@ public class RequestService {
                 new ProfessorStrategy(requestRepository, professorService, studentService));
   }
 
+  /**
+   * Fetches requests based on user role and ID
+   *
+   * @param role The role of the user
+   * @param userId The unique identifier of the user
+   * @return List of requests sorted by creation date
+   * @throws BusinessException If the role is unsupported
+   */
   public List<Request> fetchRequests(Role role, String userId) {
     logger.info("Fetching requests for user: {} with role: {}", userId, role);
 
@@ -75,6 +83,12 @@ public class RequestService {
         .toList();
   }
 
+  /**
+   * Fetches all requests in the system
+   *
+   * @return List of all requests sorted by creation date
+   * @throws BusinessException If fetching fails
+   */
   public List<Request> fetchAllRequests() {
     try {
       return requestRepository.findAll().stream()
@@ -86,6 +100,13 @@ public class RequestService {
     }
   }
 
+  /**
+   * Creates a new request
+   *
+   * @param requestDTO The DTO containing request creation data
+   * @return The created request
+   * @throws BusinessException If request creation period is over or creation fails
+   */
   public Request createRequest(CreateRequestDto requestDTO) {
     try {
       requestPeriodService.getActivePeriod();
@@ -110,6 +131,14 @@ public class RequestService {
     }
   }
 
+  /**
+   * Updates an existing request
+   *
+   * @param userId The ID of the user updating the request
+   * @param updateRequestDto The DTO containing updated request data
+   * @return The updated request
+   * @throws BusinessException If request creation period is over or update fails
+   */
   public Request updateRequest(String userId, UpdateRequestDto updateRequestDto) {
     try {
       requestPeriodService.getActivePeriod();
@@ -152,6 +181,11 @@ public class RequestService {
 
   }
 
+  /**
+   * Retrieves statistics about requests
+   *
+   * @return RequestStats containing total, pending, approved, and rejected counts
+   */
   public RequestStats getRequestStats() {
     Integer total = (int) requestRepository.count();
     Integer pending = requestRepository.countByStatus(RequestStatus.PENDING);
@@ -160,6 +194,14 @@ public class RequestService {
     return new RequestStats(total, pending, approved, rejected);
   }
 
+  /**
+   * Deletes a request by its ID
+   *
+   * @param requestId The unique identifier of the request to delete
+   * @return The deleted request
+   * @throws ResourceNotFoundException If request is not found
+   * @throws BusinessException If deletion fails
+   */
   public Request deleteRequestStatus(String requestId) {
     Request request = requestRepository.findByRequestId(requestId).orElse(null);
     if (request == null) {
@@ -175,6 +217,13 @@ public class RequestService {
     }
   }
 
+  /**
+   * Retrieves a specific request by its ID
+   *
+   * @param requestId The unique identifier of the request
+   * @return The request
+   * @throws ResourceNotFoundException If request is not found
+   */
   public Request getRequest(String requestId) {
     Request request = requestRepository.findByRequestId(requestId).orElse(null);
     if (request == null) {
@@ -184,6 +233,13 @@ public class RequestService {
     return request;
   }
 
+  /**
+   * Fetches requests associated with a specific faculty
+   *
+   * @param facultyName The name of the faculty
+   * @return List of requests sorted by creation date (descending)
+   * @throws BusinessException If fetching fails
+   */
   public List<Request> fetchRequestsByFacultyName(String facultyName) {
     requestValidator.validateFacultyName(facultyName);
     List<Request> requests = requestRepository.findAll();
@@ -205,6 +261,13 @@ public class RequestService {
     }
   }
 
+  /**
+   * Counts requests by group codes
+   *
+   * @param groupCodes The list of group codes to filter by
+   * @return The count of matching requests
+   * @throws BusinessException If counting fails
+   */
   public Integer countByGroupCodes(List<String> groupCodes) {
     try {
       return requestRepository.countByGroupCodes(groupCodes);
@@ -214,6 +277,13 @@ public class RequestService {
     }
   }
 
+  /**
+   * Retrieves the waiting list for a specific group
+   *
+   * @param groupCode The unique code identifying the group
+   * @return List of student IDs in the waiting list
+   * @throws RuntimeException If no requests are found for the destination group
+   */
   public List<String> getWaitingListOfGroup(String groupCode) {
     List<Request> waitingListRequests = getRequestsByDestinationGroup(groupCode);
 
@@ -233,6 +303,14 @@ public class RequestService {
     return requests;
   }
 
+  /**
+   * Counts requests by group codes and status
+   *
+   * @param groupCodes The list of group codes to filter by
+   * @param status The request status to filter by
+   * @return The count of matching requests
+   * @throws BusinessException If counting fails
+   */
   public Integer countByGroupCodesAndStatus(List<String> groupCodes, RequestStatus status) {
     try {
       return requestRepository.countByGroupCodesAndStatus(groupCodes, status);
@@ -243,6 +321,14 @@ public class RequestService {
     }
   }
 
+  /**
+   * Counts requests by group codes and type
+   *
+   * @param groupCodes The list of group codes to filter by
+   * @param type The request type to filter by
+   * @return The count of matching requests
+   * @throws BusinessException If counting fails
+   */
   public Integer countByGroupCodesAndType(List<String> groupCodes, RequestType type) {
     try {
       return requestRepository.countByGroupCodesAndType(groupCodes, type);
@@ -253,6 +339,13 @@ public class RequestService {
     }
   }
 
+  /**
+   * Counts requests by status
+   *
+   * @param status The request status to filter by
+   * @return The count of matching requests
+   * @throws BusinessException If counting fails
+   */
   public Integer countByStatus(RequestStatus status) {
     try {
       return requestRepository.countByStatus(status);
@@ -262,6 +355,13 @@ public class RequestService {
     }
   }
 
+  /**
+   * Counts requests by type
+   *
+   * @param type The request type to filter by
+   * @return The count of matching requests
+   * @throws BusinessException If counting fails
+   */
   public Integer countByType(RequestType type) {
     try {
       return requestRepository.countByType(type);
@@ -271,6 +371,12 @@ public class RequestService {
     }
   }
 
+  /**
+   * Counts total number of requests
+   *
+   * @return The total count of requests
+   * @throws BusinessException If counting fails
+   */
   public Integer countTotalRequests() {
     try {
       return Math.toIntExact(requestRepository.count());
@@ -280,6 +386,14 @@ public class RequestService {
     }
   }
 
+  /**
+   * Retrieves request statistics percentages for a specific user
+   *
+   * @param userId The unique identifier of the user
+   * @param role The role of the user
+   * @return List of percentage statistics for different request categories
+   * @throws BusinessException If the role is administrator or calculation fails
+   */
   public List<Double> getRequestStatsByUserId(String userId, Role role) {
     if (role == Role.ADMINISTRATOR) {
       logger.error("Administrator does no have specific stats for requests");

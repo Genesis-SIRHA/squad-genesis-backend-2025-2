@@ -12,11 +12,17 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Professor extends User {
   private String facultyName;
 
+  /**
+   * Constructs a Professor using the builder pattern
+   *
+   * @param builder The ProfessorBuilder containing professor data
+   */
   public Professor(ProfessorBuilder builder) {
     super(builder.userId, builder.identityDocument, builder.email, builder.fullName);
     this.facultyName = builder.facultyName;
   }
 
+  /** Builder class for creating Professor instances */
   public static class ProfessorBuilder {
     private String userId;
     private String fullName;

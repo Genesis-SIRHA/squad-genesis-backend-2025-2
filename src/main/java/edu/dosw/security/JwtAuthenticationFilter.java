@@ -18,6 +18,10 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * JWT authentication filter that processes JWT tokens from incoming requests and sets up Spring
+ * Security authentication context
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -25,6 +29,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final JwtUtil jwtUtil;
   private final AuthenticationService authenticationService;
 
+  /**
+   * Determines which requests should not be filtered (public endpoints)
+   *
+   * @param request The HTTP request
+   * @return true if the request should not be filtered, false otherwise
+   */
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
     String path = request.getServletPath();
@@ -37,6 +47,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         || path.startsWith("/webjars/");
   }
 
+  /**
+   * Processes JWT token from Authorization header and sets up authentication context
+   *
+   * @param request The HTTP request
+   * @param response The HTTP response
+   * @param filterChain The filter chain
+   * @throws ServletException If a servlet error occurs
+   * @throws IOException If an I/O error occurs
+   */
   @Override
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -77,6 +96,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     filterChain.doFilter(request, response);
   }
 
+  /**
+   * Determines the authorities (roles) for the authenticated user
+   *
+   * @param userInfo The user information DTO
+   * @return List of granted authorities for the user
+   */
   private List<SimpleGrantedAuthority> determineAuthorities(UserInfoDto userInfo) {
     if (userInfo == null || userInfo.role() == null) {
       return List.of(new SimpleGrantedAuthority("ROLE_USER"));

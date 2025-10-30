@@ -21,6 +21,12 @@ import org.springframework.web.bind.annotation.*;
 public class RequestController {
   private final RequestService requestService;
 
+  /**
+   * Creates a new request with the provided details
+   *
+   * @param request The DTO containing request creation data
+   * @return ResponseEntity containing the created request
+   */
   @PostMapping
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT')")
   @Operation(
@@ -31,6 +37,13 @@ public class RequestController {
     return ResponseEntity.ok(createdRequest);
   }
 
+  /**
+   * Retrieves requests based on user role and user ID
+   *
+   * @param userId The unique identifier of the user
+   * @param role The role of the user making the request
+   * @return ResponseEntity containing a list of requests
+   */
   @GetMapping("/{role}/{userId}")
   @PreAuthorize(
       "hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT') and @authenticationService.canAccessUserData(authentication, #userId)")
@@ -43,6 +56,12 @@ public class RequestController {
     return ResponseEntity.ok(requests);
   }
 
+  /**
+   * Retrieves the waiting list for a specific group
+   *
+   * @param groupCode The unique code identifying the group
+   * @return ResponseEntity containing a list of student IDs in the waiting list
+   */
   @GetMapping("/waitingList/{groupCode}")
   @Operation(
       summary = "Get waiting list of a group",
@@ -52,6 +71,11 @@ public class RequestController {
     return ResponseEntity.ok(waitingList);
   }
 
+  /**
+   * Retrieves all requests in the system (global view)
+   *
+   * @return ResponseEntity containing a list of all requests
+   */
   @GetMapping("/global")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(summary = "Get all requests", description = "Retrieves all requests ")
@@ -60,6 +84,12 @@ public class RequestController {
     return ResponseEntity.ok(requests);
   }
 
+  /**
+   * Retrieves a specific request by its unique identifier
+   *
+   * @param requestId The unique identifier of the request
+   * @return ResponseEntity containing the request details
+   */
   @GetMapping("/{requestId}")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT')")
   @Operation(summary = "Get requests by id", description = "Retrieves request by id ")
@@ -68,6 +98,12 @@ public class RequestController {
     return ResponseEntity.ok(request);
   }
 
+  /**
+   * Retrieves historical requests for a specific student
+   *
+   * @param studentId The unique identifier of the student
+   * @return ResponseEntity containing a list of the student's requests
+   */
   @GetMapping("/student/{studentId}")
   @PreAuthorize(
       "hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT') and @authenticationService.canAccessStudentData(authentication, #studentId)")
@@ -79,6 +115,12 @@ public class RequestController {
     return ResponseEntity.ok(requests);
   }
 
+  /**
+   * Retrieves requests associated with a specific faculty
+   *
+   * @param facultyName The name of the faculty
+   * @return ResponseEntity containing a list of faculty-related requests
+   */
   @GetMapping("/faculty/{facultyName}")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR')")
   @Operation(
@@ -108,6 +150,13 @@ public class RequestController {
     return ResponseEntity.ok(requestService.getRequestStatsByUserId(userId, role));
   }
 
+  /**
+   * Updates the status of an existing request
+   *
+   * @param userId The unique identifier of the user updating the request
+   * @param updateRequestDto The DTO containing updated request data
+   * @return ResponseEntity containing the updated request
+   */
   @PatchMapping("/status/{userId}")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR')")
   @Operation(
@@ -118,6 +167,12 @@ public class RequestController {
     return ResponseEntity.ok(requestService.updateRequest(userId, updateRequestDto));
   }
 
+  /**
+   * Cancels a request by its unique identifier
+   *
+   * @param requestId The unique identifier of the request to cancel
+   * @return ResponseEntity containing the cancelled request
+   */
   @DeleteMapping("/{requestId}")
   @PreAuthorize(
       "hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT') and @authenticationService.canAccessUserRequest(authentication, #requestId)")

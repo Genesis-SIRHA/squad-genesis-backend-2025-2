@@ -16,10 +16,19 @@ public class User {
   protected String email;
   protected String fullName;
 
+  /** Default constructor that generates a unique user ID */
   public User() {
     this.userId = UUID.randomUUID().toString();
   }
 
+  /**
+   * Constructs a User with specified details
+   *
+   * @param userId The unique identifier for the user
+   * @param identityDocument The identity document number
+   * @param email The email address of the user
+   * @param fullName The full name of the user
+   */
   public User(String userId, String identityDocument, String email, String fullName) {
     this.userId = userId;
     this.identityDocument = identityDocument;

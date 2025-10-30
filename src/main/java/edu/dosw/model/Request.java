@@ -32,6 +32,7 @@ public class Request {
   private LocalDate updatedAt;
   private String answer;
 
+  /** Default constructor that initializes request with default values */
   public Request() {
     this.requestId = UUID.randomUUID().toString();
     this.createdAt = LocalDate.now();
@@ -42,6 +43,11 @@ public class Request {
     this.answer = null;
   }
 
+  /**
+   * Constructs a Request using the builder pattern
+   *
+   * @param builder The RequestBuilder containing request data
+   */
   public Request(RequestBuilder builder) {
     this();
     this.studentId = builder.studentId;
@@ -51,6 +57,7 @@ public class Request {
     this.destinationGroupId = builder.destinationGroupId;
   }
 
+  /** Builder class for creating Request instances */
   public static class RequestBuilder {
     private String studentId;
     private String description;

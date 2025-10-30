@@ -10,7 +10,11 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class OpenApiConfig {
-
+  /**
+   * Configures custom OpenAPI documentation with JWT security scheme
+   *
+   * @return OpenAPI instance with API information and security configuration
+   */
   @Bean
   public OpenAPI customOpenAPI() {
     final String securitySchemeName = "bearerAuth";

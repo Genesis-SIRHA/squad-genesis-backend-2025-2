@@ -17,6 +17,12 @@ import org.springframework.web.bind.annotation.*;
 public class StudentController {
   private final StudentService studentService;
 
+  /**
+   * Retrieves a student by their unique identifier
+   *
+   * @param studentId The unique identifier of the student
+   * @return ResponseEntity containing the student data
+   */
   @GetMapping("/{studentId}")
   @PreAuthorize(
       "hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT') and @authenticationService.canAccessStudentData(authentication, #studentId)")
@@ -27,6 +33,12 @@ public class StudentController {
     return ResponseEntity.ok(studentService.getStudentById(studentId));
   }
 
+  /**
+   * Creates a new student with the provided data
+   *
+   * @param studentCreationRequest The DTO containing student creation data
+   * @return ResponseEntity containing the created student
+   */
   @PostMapping("/create")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(summary = "Create student", description = "Creates a new student")
@@ -34,6 +46,13 @@ public class StudentController {
     return ResponseEntity.ok(studentService.createStudent(studentCreationRequest));
   }
 
+  /**
+   * Updates an existing student with the provided data
+   *
+   * @param studentUpdateRequest The DTO containing student update data
+   * @param studentId The unique identifier of the student to update
+   * @return ResponseEntity containing the updated student
+   */
   @PatchMapping("/update/{studentId}")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(summary = "Update student", description = "Updates an existing student")
@@ -42,6 +61,12 @@ public class StudentController {
     return ResponseEntity.ok(studentService.updateStudent(studentId, studentUpdateRequest));
   }
 
+  /**
+   * Deletes a student by their unique identifier
+   *
+   * @param studentId The unique identifier of the student to delete
+   * @return ResponseEntity containing the deleted student
+   */
   @DeleteMapping("/delete/{studentId}")
   @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(summary = "Delete student", description = "Deletes an existing student")

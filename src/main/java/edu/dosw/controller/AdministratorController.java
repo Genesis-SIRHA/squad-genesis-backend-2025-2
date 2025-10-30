@@ -17,6 +17,12 @@ import org.springframework.web.bind.annotation.*;
 public class AdministratorController {
   private final AdministratorService administratorService;
 
+  /**
+   * Retrieves an administrator by their unique identifier
+   *
+   * @param administratorId The unique identifier of the administrator
+   * @return ResponseEntity containing the administrator data
+   */
   @GetMapping("/{administratorId}")
   @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(
@@ -26,6 +32,12 @@ public class AdministratorController {
     return ResponseEntity.ok(administratorService.getAdministratorById(administratorId));
   }
 
+  /**
+   * Creates a new administrator with the provided data
+   *
+   * @param administratorCreationRequest The DTO containing administrator creation data
+   * @return ResponseEntity containing the created administrator
+   */
   @PostMapping("/create")
   @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(summary = "Create administrator", description = "Creates a new administrator")
@@ -35,6 +47,13 @@ public class AdministratorController {
         administratorService.createAdministrator(administratorCreationRequest));
   }
 
+  /**
+   * Updates an existing administrator with the provided data
+   *
+   * @param administratorUpdateRequest The DTO containing administrator update data
+   * @param administratorId The unique identifier of the administrator to update
+   * @return ResponseEntity containing the updated administrator
+   */
   @PatchMapping("/update/{administratorId}")
   @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(summary = "Update administrator", description = "Updates an existing administrator")
@@ -45,6 +64,12 @@ public class AdministratorController {
         administratorService.updateAdministrator(administratorId, administratorUpdateRequest));
   }
 
+  /**
+   * Deletes an administrator by their unique identifier
+   *
+   * @param administratorId The unique identifier of the administrator to delete
+   * @return ResponseEntity containing the deleted administrator
+   */
   @DeleteMapping("/delete/{administratorId}")
   @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(summary = "Delete administrator", description = "Deletes an existing administrator")

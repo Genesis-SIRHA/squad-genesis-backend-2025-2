@@ -20,6 +20,11 @@ public class RequestPeriodController {
 
   private final RequestPeriodService requestPeriodService;
 
+  /**
+   * Retrieves the currently active request period
+   *
+   * @return ResponseEntity containing the active request period data
+   */
   @GetMapping("/active")
   @Operation(
       summary = "Get active request period",
@@ -28,6 +33,12 @@ public class RequestPeriodController {
     return ResponseEntity.ok(requestPeriodService.getActivePeriod());
   }
 
+  /**
+   * Retrieves a specific request period by its unique identifier
+   *
+   * @param requestPeriodId The unique identifier of the request period
+   * @return ResponseEntity containing the request period data
+   */
   @GetMapping("/{requestPeriodId}")
   @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(
@@ -37,6 +48,11 @@ public class RequestPeriodController {
     return ResponseEntity.ok(requestPeriodService.getPeriodById(requestPeriodId));
   }
 
+  /**
+   * Retrieves all request periods in the system
+   *
+   * @return ResponseEntity containing a list of all request periods
+   */
   @GetMapping("/all")
   @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(
@@ -46,6 +62,12 @@ public class RequestPeriodController {
     return ResponseEntity.ok(requestPeriodService.getAllPeriods());
   }
 
+  /**
+   * Creates a new request period
+   *
+   * @param createRequestPeriodDTO The DTO containing request period creation data
+   * @return ResponseEntity containing the created request period
+   */
   @PostMapping("/create")
   @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(
@@ -56,6 +78,12 @@ public class RequestPeriodController {
     return ResponseEntity.ok(requestPeriodService.createActivePeriod(createRequestPeriodDTO));
   }
 
+  /**
+   * Updates the currently active request period
+   *
+   * @param updateRequestPeriodDTO The DTO containing updated request period data
+   * @return ResponseEntity containing the updated request period
+   */
   @PutMapping("/update")
   @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(

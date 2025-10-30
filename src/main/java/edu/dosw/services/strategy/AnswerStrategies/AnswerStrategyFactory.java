@@ -13,6 +13,13 @@ public class AnswerStrategyFactory {
   private GroupService groupService;
   private HistorialService historialService;
 
+  /**
+   * Retrieves the appropriate answer strategy for the given request type
+   *
+   * @param type The type of request to get strategy for
+   * @return AnswerStrategy implementation specific to the request type
+   * @throws BusinessException If an invalid request type is provided
+   */
   public AnswerStrategy getStrategy(RequestType type) {
     return switch (type) {
       case JOIN -> new JoinRequestAnswer(groupService, historialService);

@@ -21,10 +21,23 @@ public class SecurityConfig {
 
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+  /**
+   * Constructs SecurityConfig with required dependencies
+   *
+   * @param jwtAuthenticationFilter The JWT authentication filter to use
+   */
   public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
     this.jwtAuthenticationFilter = jwtAuthenticationFilter;
   }
 
+  /**
+   * Configures the security filter chain with CORS, CSRF, session management, and authorization
+   * rules
+   *
+   * @param http The HttpSecurity to configure
+   * @return Configured SecurityFilterChain
+   * @throws Exception If configuration fails
+   */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.csrf(csrf -> csrf.disable())
