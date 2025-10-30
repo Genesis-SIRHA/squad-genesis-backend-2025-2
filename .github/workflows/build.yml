@@ -91,12 +91,16 @@ jobs:
           name: build-artifacts
           path: target
 
+      - name: Login to Azure using Publish Profile
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_SANDBOX }}
+
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'sirha-sandbox'
-          package: 'target/app.jar'
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_SANDBOX }}
+          package: 'target/*.jar'
 
   deploy-prod:
     runs-on: ubuntu-latest
@@ -112,9 +116,13 @@ jobs:
           name: build-artifacts
           path: target
 
+      - name: Login to Azure using Publish Profile
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_PROD }}
+
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'sirha-prod'
-          package: 'target/app.jar'
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_PROD }}
+          package: 'target/*.jar'
