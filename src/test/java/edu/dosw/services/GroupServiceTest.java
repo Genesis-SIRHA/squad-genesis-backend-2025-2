@@ -45,12 +45,12 @@ class GroupServiceTest {
   @Test
   void getAllGroupsByCourseAbbreviation_ShouldReturnGroups() {
     List<Group> expectedGroups = Arrays.asList(createGroup("GROUP1"), createGroup("GROUP2"));
-    when(groupRepository.findAllByCourseId("CS101")).thenReturn(expectedGroups);
+    when(groupRepository.findAllByAbbreviation("CS101")).thenReturn(expectedGroups);
 
     List<Group> result = groupService.getAllGroupsByCourseAbbreviation("CS101");
 
     assertEquals(2, result.size());
-    verify(groupRepository).findAllByCourseId("CS101");
+    verify(groupRepository).findAllByAbbreviation("CS101");
   }
 
   @Test
