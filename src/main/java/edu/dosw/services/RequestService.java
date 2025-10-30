@@ -60,7 +60,8 @@ public class RequestService {
         Map.of(
             Role.STUDENT, new StudentStrategy(requestRepository, studentService),
             Role.DEAN, new DeanStrategy(requestRepository, deanService),
-            Role.PROFESSOR, new ProfessorStrategy(requestRepository, professorService, studentService));
+            Role.PROFESSOR,
+                new ProfessorStrategy(requestRepository, professorService, studentService));
   }
 
   public List<Request> fetchRequests(Role role, String userId) {

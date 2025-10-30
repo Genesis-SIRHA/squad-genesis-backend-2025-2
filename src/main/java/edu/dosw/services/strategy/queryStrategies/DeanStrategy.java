@@ -5,11 +5,9 @@ import edu.dosw.model.Request;
 import edu.dosw.repositories.RequestRepository;
 import edu.dosw.services.UserServices.DeanService;
 import java.util.List;
-
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Implementation of QueryStrategy for dean users. This strategy allows dean users to see all
