@@ -1,110 +1,108 @@
 package edu.dosw.controller;
 
 import edu.dosw.dto.CourseRequest;
-import edu.dosw.dto.GroupRequest;
+import edu.dosw.dto.UpdateCourseDTO;
 import edu.dosw.model.Course;
 import edu.dosw.model.Faculty;
 import edu.dosw.services.FacultyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Controller that handles all course-related HTTP requests. Provides endpoints for CRUD operations
- * on courses and their groups.
- */
 @RestController
-@RequestMapping("/api/courses")
+@RequestMapping("/courses")
 @Tag(name = "Course Controller", description = "APIs for managing courses and groups")
 public class CourseController {
 
   private final FacultyService facultyService;
 
   /**
-   * Constructs a new CourseController with the provided FacultyService.
+   * Constructs CourseController with required dependencies
    *
-   * @param facultyService The service to handle course operations
+   * @param facultyService The faculty service to handle course operations
    */
   public CourseController(FacultyService facultyService) {
     this.facultyService = facultyService;
   }
 
   /**
-   * Retrieves a specific course by its ID.
+   * Retrieves a course by its abbreviation within a specific faculty and plan
    *
-   * @param id The ID of the course to retrieve
-   * @return The course details if found, 404 otherwise
+   * @param courseAbbreviation The abbreviation of the course to retrieve
+   * @param facultyName The name of the faculty where the course belongs
+   * @param plan The academic plan identifier
+   * @return ResponseEntity containing the course details
    */
-  @GetMapping("/{id}")
-  @Operation(summary = "Get course by ID", description = "Retrieve course details by its ID")
-  public ResponseEntity<Course> getCourseById(@PathVariable String id) {
-    return facultyService
-        .findCourseByCode(id)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+  @GetMapping("/{courseAbbreviation}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT')")
+  @Operation(
+      summary = "Get course by courseAbbreviation",
+      description = "Retrieve course details by its courseAbbreviation")
+  public ResponseEntity<Course> getCourseById(
+      @PathVariable String courseAbbreviation,
+      @RequestParam String facultyName,
+      @RequestParam String plan) {
+    Course course = facultyService.findCourseByAbbreviation(courseAbbreviation, facultyName, plan);
+    return ResponseEntity.ok(course);
   }
 
   /**
-   * Creates a new course.
+   * Creates a new course in the system
    *
-   * @param courseRequest The course details to create
-   * @return The created course with its generated ID
+   * @param courseRequest The DTO containing course creation data
+   * @return ResponseEntity containing the updated faculty with the new course
    */
   @PostMapping
-  @Operation(summary = "Create a new course", description = "Registers a new course with groups")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
+  @Operation(summary = "Create a new course", description = "Registers a new course")
   @ApiResponse(responseCode = "200", description = "Course created successfully")
-  public ResponseEntity<Faculty> createCourse(@Valid @RequestBody CourseRequest courseRequest) {
-    return ResponseEntity.ok(facultyService.createCourse(courseRequest));
+  public ResponseEntity<Faculty> createCourse(@RequestBody CourseRequest courseRequest) {
+    return ResponseEntity.ok(facultyService.addCourse(courseRequest));
   }
 
   /**
-   * Updates an existing course.
+   * Updates an existing course with new information
    *
-   * @param id The ID of the course to update
-   * @param courseRequest The updated course details
-   * @return The updated course if found, 404 otherwise
+   * @param courseAbbreviation The abbreviation of the course to update
+   * @param facultyName The name of the faculty where the course belongs
+   * @param plan The academic plan identifier
+   * @param updateCourseDTO The DTO containing updated course data
+   * @return ResponseEntity containing the updated course
    */
-  @PutMapping("/{id}")
-  @Operation(summary = "Update course", description = "Updates course details including groups")
-  public ResponseEntity<Faculty> updateCourse(
-      @PathVariable String id, @Valid @RequestBody CourseRequest courseRequest) {
-    Faculty faculty = facultyService.updateCourse(id, courseRequest);
-    return ResponseEntity.ok((faculty));
+  @PatchMapping("/{courseAbbreviation}")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
+  @Operation(summary = "Update course", description = "Updates course")
+  public ResponseEntity<Course> updateCourse(
+      @PathVariable String courseAbbreviation,
+      @RequestParam String facultyName,
+      @RequestParam String plan,
+      @RequestBody UpdateCourseDTO updateCourseDTO) {
+    Course course =
+        facultyService.updateCourse(courseAbbreviation, facultyName, plan, updateCourseDTO);
+    return ResponseEntity.ok((course));
   }
 
   /**
-   * Adds a new group to an existing course.
+   * Deletes a course by its abbreviation from a specific faculty and plan
    *
-   * @param courseId The ID of the course to add the group to
-   * @param groupRequest The details of the group to add
-   * @return The updated course with the new group if found, 404 otherwise
+   * @param courseAbbreviation The abbreviation of the course to delete
+   * @param facultyName The name of the faculty where the course belongs
+   * @param plan The academic plan identifier
+   * @return ResponseEntity with no content
    */
-  @PostMapping("/{courseId}/groups")
+  @DeleteMapping("/{courseAbbreviation}")
+  @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(
-      summary = "Add group to course",
-      description = "Adds a new group to an existing course")
-  public ResponseEntity<Course> addGroupToCourse(
-      @PathVariable String courseId, @Valid @RequestBody GroupRequest groupRequest) {
-    Boolean result = facultyService.addGroupToCourse(groupRequest);
-    if (result) {
-      return ResponseEntity.ok().build();
-    }
-    return ResponseEntity.badRequest().build();
-  }
-
-  /**
-   * Deletes a course by its ID.
-   *
-   * @param id The ID of the course to delete
-   * @return 204 No Content if successful
-   */
-  @DeleteMapping("/{id}")
-  @Operation(summary = "Delete course", description = "Deletes a course by its ID")
-  public ResponseEntity<Void> deleteCourse(@PathVariable String id) {
-    facultyService.deleteCourse(id);
+      summary = "Delete course by it's courseAbbreviation",
+      description = "Deletes a course by its courseAbbreviation")
+  public ResponseEntity<Void> deleteCourseByCourseAbbreviation(
+      @PathVariable String courseAbbreviation,
+      @RequestParam String facultyName,
+      @RequestParam String plan) {
+    facultyService.deleteCourse(courseAbbreviation, facultyName, plan);
     return ResponseEntity.noContent().build();
   }
 }

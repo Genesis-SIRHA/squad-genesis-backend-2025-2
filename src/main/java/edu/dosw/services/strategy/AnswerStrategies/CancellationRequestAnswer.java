@@ -1,0 +1,55 @@
+package edu.dosw.services.strategy.AnswerStrategies;
+
+import edu.dosw.dto.UpdateGroupRequest;
+import edu.dosw.exception.BusinessException;
+import edu.dosw.model.Group;
+import edu.dosw.model.Request;
+import edu.dosw.model.enums.HistorialStatus;
+import edu.dosw.services.GroupService;
+import edu.dosw.services.HistorialService;
+import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+/**
+ * Strategy implementation for handling cancellation request answers Processes student cancellations
+ * from groups and updates enrollment counts
+ */
+@AllArgsConstructor
+@Component
+public class CancellationRequestAnswer implements AnswerStrategy {
+  private final GroupService groupService;
+  private final HistorialService historialService;
+  private final Logger logger = LoggerFactory.getLogger(CancellationRequestAnswer.class);
+
+  /**
+   * Processes a cancellation request by removing the student from the group and updating enrollment
+   * counts and historial status
+   *
+   * @param request The cancellation request to process
+   * @throws BusinessException If the cancellation process fails
+   */
+  public void answerRequest(Request request) {
+    Group group = groupService.getGroupByGroupCode(request.getOriginGroupId());
+
+    try {
+      UpdateGroupRequest groupRequest =
+          new UpdateGroupRequest(
+              group.getProfessorId(),
+              group.isLab(),
+              group.getGroupNum(),
+              group.getMaxCapacity(),
+              group.getEnrolled() - 1);
+
+      groupService.updateGroup(group.getGroupCode(), groupRequest);
+
+      historialService.updateHistorial(
+          request.getStudentId(), request.getOriginGroupId(), HistorialStatus.CANCELLED);
+
+    } catch (Exception e) {
+      logger.error("Failed to answer request: {}", e.getMessage());
+      throw new BusinessException("Failed to answer request: " + e.getMessage());
+    }
+  }
+}

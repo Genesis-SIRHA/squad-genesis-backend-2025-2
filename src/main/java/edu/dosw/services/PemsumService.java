@@ -1,11 +1,13 @@
 package edu.dosw.services;
 
+import edu.dosw.dto.CourseStatus;
 import edu.dosw.exception.BusinessException;
-import edu.dosw.model.Course;
-import edu.dosw.model.Historial;
-import edu.dosw.model.Pemsum;
-import edu.dosw.model.User;
+import edu.dosw.exception.ResourceNotFoundException;
+import edu.dosw.model.*;
+import edu.dosw.model.enums.HistorialStatus;
+import edu.dosw.services.UserServices.StudentService;
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,8 +23,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class PemsumService {
   private final FacultyService facultyService;
-  private final MembersService membersService;
+  private final StudentService studentService;
   private final HistorialService historialService;
+  private final GroupService groupService;
   private final PeriodService periodService;
   private static final Logger logger = LoggerFactory.getLogger(PemsumService.class);
 
@@ -30,17 +33,20 @@ public class PemsumService {
    * Constructs a new PemsumService with required dependencies.
    *
    * @param facultyService Service for faculty-related operations
-   * @param membersService Service for member-related operations
+   * @param studentService Service for student-related operations
    * @param historialService Service for academic history operations
+   * @param groupService Service for group-related operations
    */
   @Autowired
   public PemsumService(
       FacultyService facultyService,
-      MembersService membersService,
-      HistorialService historialService) {
+      StudentService studentService,
+      HistorialService historialService,
+      GroupService groupService) {
     this.facultyService = facultyService;
-    this.membersService = membersService;
     this.historialService = historialService;
+    this.studentService = studentService;
+    this.groupService = groupService;
     Clock clock = Clock.systemDefaultZone();
     this.periodService = new PeriodService(clock);
   }
@@ -60,53 +66,51 @@ public class PemsumService {
    *
    * @param studentId The unique identifier of the student
    * @return A fully constructed Pemsum object
-   * @throws BusinessException if faculty name or plan is invalid
+   * @throws BusinessException if faculty fullName or plan is invalid
    */
   private Pemsum buildPemsum(String studentId) {
-    User student = membersService.listById(studentId);
+    Student student = studentService.getStudentById(studentId);
     String facultyName = student.getFacultyName();
     String plan = student.getPlan();
 
-    List<Course> courses = facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan);
+    List<Course> courses =
+        new ArrayList<>(facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan));
     if (courses.isEmpty()) {
-      logger.error("Invalid faculty name or plan: " + facultyName + " - " + plan);
-      throw new BusinessException("Invalid faculty name or plan: " + facultyName + " - " + plan);
+      logger.error("Invalid faculty fullName or plan: " + facultyName + " - " + plan);
+      throw new ResourceNotFoundException(
+          "Invalid faculty fullName or plan: " + facultyName + " - " + plan);
     }
 
-    String year = periodService.getYear();
-    String period = periodService.getPeriod();
+    List<Historial> historials =
+        new ArrayList<>(historialService.getSessionsByCourses(studentId, courses));
 
-    List<Historial> historials = historialService.getSessionsByCourses(studentId, courses);
+    List<CourseStatus> coursesList = getCoursesList(courses, historials);
 
-    Map<Course, String> coursesMap = getCoursesMap(courses, historials);
-
-    // Créditos totales y aprobados
     int totalCredits = courses.stream().mapToInt(Course::getCredits).sum();
-    int approvedCredits = getApprovedCredits(coursesMap);
+    int approvedCredits = getApprovedCredits(coursesList);
 
-    // Construcción del Pemsum
     return new Pemsum.Builder()
         .studentId(studentId)
-        .studentName(student.getName())
+        .studentName(student.getFullName())
         .facultyName(facultyName)
         .facultyPlan(plan)
         .totalCredits(totalCredits)
         .approvedCredits(approvedCredits)
-        .courses(coursesMap)
+        .courses(coursesList)
         .build();
   }
 
   /**
    * Calculates the total number of approved credits from a course map.
    *
-   * @param coursesMap Map of courses with their status
+   * @param coursesList list of courses with their status
    * @return The sum of credits for all approved courses
    */
-  private int getApprovedCredits(Map<Course, String> coursesMap) {
+  int getApprovedCredits(List<CourseStatus> coursesList) {
     int approvedCredits = 0;
-    for (Course course : coursesMap.keySet()) {
-      if ("approved".equalsIgnoreCase(coursesMap.get(course))) {
-        approvedCredits += course.getCredits();
+    for (CourseStatus course : coursesList) {
+      if (HistorialStatus.FINISHED.toString().equals(course.getStatus())) {
+        approvedCredits += course.getCourse().getCredits();
       }
     }
     return approvedCredits;
@@ -119,15 +123,98 @@ public class PemsumService {
    * @param historials List of the student's academic history records
    * @return A map of courses with their current status
    */
-  private Map<Course, String> getCoursesMap(List<Course> courses, List<Historial> historials) {
-    Map<Course, String> coursesMap = new HashMap<>();
+  List<CourseStatus> getCoursesList(List<Course> courses, List<Historial> historials) {
+    List<CourseStatus> coursesList = new ArrayList<>();
     for (Course course : courses) {
-      historials.stream()
-          .filter(h -> h.getGroupCode().equals(course.getAbbreviation()))
-          .findFirst()
-          .ifPresentOrElse(
-              h -> coursesMap.put(course, h.getStatus()), () -> coursesMap.put(course, "pending"));
+      String status =
+          historials.stream()
+              .filter(h -> h.getGroupCode().equals(course.getAbbreviation()))
+              .findFirst()
+              .map(h -> h.getStatus().toString())
+              .orElse("pending");
+      coursesList.add(new CourseStatus(course, status));
     }
-    return coursesMap;
+    return coursesList;
+  }
+
+  /**
+   * Calculates the percentage of completed courses for a student.
+   *
+   * @param studentId The unique identifier of the student
+   * @return The percentage of completed courses
+   */
+  public double getCompletedCoursesPercentage(String studentId) {
+    Student student = studentService.getStudentById(studentId);
+    String facultyName = student.getFacultyName();
+    String plan = student.getPlan();
+    List<Course> facultyCourses = facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan);
+    if (facultyCourses.isEmpty()) {
+      logger.error("Invalid faculty fullName or plan: " + facultyName + " - " + plan);
+      throw new ResourceNotFoundException(
+          "Invalid faculty fullName or plan: " + facultyName + " - " + plan);
+    }
+
+    List<Historial> finishedHistorial =
+        historialService.getHistorialByStudentIdAndStatus(studentId, HistorialStatus.FINISHED);
+
+    int approvedCredits =
+        finishedHistorial.stream()
+            .mapToInt(
+                historial -> {
+                  Group group = groupService.getGroupByGroupCode(historial.getGroupCode());
+                  return facultyCourses.stream()
+                      .filter(course -> course.getAbbreviation().equals(group.getAbbreviation()))
+                      .findFirst()
+                      .map(Course::getCredits)
+                      .orElse(0);
+                })
+            .sum();
+
+    int totalCredits = facultyCourses.stream().mapToInt(Course::getCredits).sum();
+
+    if (totalCredits == 0) {
+      return 0.0;
+    }
+    return (double) approvedCredits / totalCredits * 100;
+  }
+
+  /**
+   * Retrieves the status of all courses for a student.
+   *
+   * @param studentId The unique identifier of the student
+   * @return A map of course abbreviations to their status
+   */
+  public Map<String, String> getStudentCoursesStatus(String studentId) {
+    Student student = studentService.getStudentById(studentId);
+    String facultyName = student.getFacultyName();
+    String plan = student.getPlan();
+
+    List<Course> facultyCourses = facultyService.findCoursesByFacultyNameAndPlan(facultyName, plan);
+
+    if (facultyCourses.isEmpty()) {
+      logger.error("Invalid faculty name or plan: " + facultyName + " - " + plan);
+      throw new ResourceNotFoundException(
+          "Invalid faculty name or plan: " + facultyName + " - " + plan);
+    }
+
+    Map<String, String> courseStatusMap = new HashMap<>();
+
+    List<Historial> studentHistorial = historialService.getHistorialByStudentId(studentId);
+
+    for (Historial historial : studentHistorial) {
+      String courseAbbreviation = historial.getGroupCode();
+      String newStatus = historial.getStatus().toString();
+      String currentStatus = courseStatusMap.get(courseAbbreviation);
+
+      if (currentStatus == null || !HistorialStatus.FINISHED.toString().equals(currentStatus)) {
+        courseStatusMap.put(courseAbbreviation, newStatus);
+      }
+    }
+
+    for (Course course : facultyCourses) {
+      courseStatusMap.putIfAbsent(course.getAbbreviation(), "PENDING");
+    }
+
+    return courseStatusMap;
   }
 }

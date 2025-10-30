@@ -1,173 +1,500 @@
 package edu.dosw.services;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import edu.dosw.dto.CourseRequest;
-import edu.dosw.dto.GroupRequest;
+import edu.dosw.dto.CoursesDto;
+import edu.dosw.dto.FacultyDto;
+import edu.dosw.dto.UpdateCourseDTO;
 import edu.dosw.exception.BusinessException;
+import edu.dosw.exception.ResourceAlreadyExistsException;
+import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Course;
 import edu.dosw.model.Faculty;
-import edu.dosw.model.Group;
 import edu.dosw.repositories.FacultyRepository;
-import java.util.List;
-import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
+import edu.dosw.services.Validators.FacultyValidator;
+import java.util.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-/** Unit tests for {@link FacultyService}. */
+@ExtendWith(MockitoExtension.class)
 class FacultyServiceTest {
 
   @Mock private FacultyRepository facultyRepository;
 
-  @Mock private GroupService groupService;
+  @Mock private FacultyValidator facultyValidator;
 
   @InjectMocks private FacultyService facultyService;
 
-  private Faculty faculty;
-  private Course course;
+  @Test
+  void createFaculty_WithValidData_ShouldReturnSavedFaculty() {
+    FacultyDto facultyDto = createFacultyDto();
+    Faculty faculty = createFaculty();
 
-  @BeforeEach
-  void setUp() {
-    MockitoAnnotations.openMocks(this);
-    course = new Course("CS101", "Algorithms", 4);
-    faculty = new Faculty("Engineering", "2025", List.of(course));
+    doNothing().when(facultyValidator).validateAddCourses(any(CoursesDto.class));
+    when(facultyRepository.save(any(Faculty.class))).thenReturn(faculty);
+
+    Faculty result = facultyService.createFaculty(facultyDto);
+
+    assertNotNull(result);
+    verify(facultyValidator).validateAddCourses(any(CoursesDto.class));
+    verify(facultyRepository).save(any(Faculty.class));
   }
 
   @Test
-  void getAllFacultyName_shouldReturnMap() {
-    when(facultyRepository.findAll()).thenReturn(List.of(faculty));
+  void createFaculty_WithNullCourses_ShouldReturnSavedFaculty() {
+    FacultyDto facultyDto = new FacultyDto("Engineering", "2024", new ArrayList<>());
+    Faculty faculty = createFaculty();
 
-    var result = facultyService.getAllFacultyName();
+    doNothing().when(facultyValidator).validateAddCourses(any(CoursesDto.class));
+    when(facultyRepository.save(any(Faculty.class))).thenReturn(faculty);
 
-    assertEquals(1, result.size());
-    assertEquals("2025", result.get("Engineering"));
+    Faculty result = facultyService.createFaculty(facultyDto);
+
+    assertNotNull(result);
+    verify(facultyValidator).validateAddCourses(any(CoursesDto.class));
+    verify(facultyRepository).save(any(Faculty.class));
   }
 
   @Test
-  void findCoursesByFacultyNameAndPlan_shouldReturnCourses() {
-    when(facultyRepository.findByNameAndPlan("Engineering", "2025"))
-        .thenReturn(Optional.of(faculty));
+  void getAllFacultyNames_ShouldReturnFacultyNamesMap() {
+    List<Faculty> faculties =
+        Arrays.asList(createFaculty("Engineering", "2024"), createFaculty("Science", "2024"));
 
-    var result = facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2025");
+    when(facultyRepository.findAll()).thenReturn(faculties);
 
-    assertEquals(1, result.size());
-    assertEquals("CS101", result.get(0).getAbbreviation());
+    Map<String, String> result = facultyService.getAllFacultyNames();
+
+    assertNotNull(result);
+    assertEquals(2, result.size());
+    assertTrue(result.containsKey("engineering"));
+    assertTrue(result.containsKey("science"));
+    assertEquals("2024", result.get("engineering"));
+    verify(facultyRepository).findAll();
   }
 
   @Test
-  void findCoursesByFacultyNameAndPlan_shouldThrowIfFacultyNotFound() {
-    when(facultyRepository.findByNameAndPlan("Invalid", "2025")).thenReturn(Optional.empty());
+  void getAllFaculties_ShouldReturnAllFaculties() {
+    List<Faculty> expectedFaculties =
+        Arrays.asList(createFaculty("Engineering", "2024"), createFaculty("Science", "2024"));
 
-    BusinessException ex =
+    when(facultyRepository.findAll()).thenReturn(expectedFaculties);
+
+    List<Faculty> result = facultyService.getAllFaculties();
+
+    assertNotNull(result);
+    assertEquals(2, result.size());
+    verify(facultyRepository).findAll();
+  }
+
+  @Test
+  void getAllFaculties_WhenRepositoryThrowsException_ShouldThrowBusinessException() {
+    when(facultyRepository.findAll()).thenThrow(new RuntimeException("Database error"));
+
+    BusinessException exception =
+        assertThrows(BusinessException.class, () -> facultyService.getAllFaculties());
+
+    assertTrue(exception.getMessage().contains("An inesperated error has occurred"));
+    verify(facultyRepository).findAll();
+  }
+
+  @Test
+  void getFacultyByNameAndPlan_WithExistingFaculty_ShouldReturnFaculty() {
+    Faculty expectedFaculty = createFaculty("Engineering", "2024");
+
+    when(facultyRepository.findByNameAndPlan("Engineering", "2024"))
+        .thenReturn(Optional.of(expectedFaculty));
+
+    Faculty result = facultyService.getFacultyByNameAndPlan("Engineering", "2024");
+
+    assertNotNull(result);
+    assertEquals("Engineering", result.getFacultyName());
+    assertEquals("2024", result.getPlan());
+    verify(facultyRepository).findByNameAndPlan("Engineering", "2024");
+  }
+
+  @Test
+  void getFacultyByNameAndPlan_WithNonExistingFaculty_ShouldThrowResourceNotFoundException() {
+    when(facultyRepository.findByNameAndPlan("NonExistent", "2024")).thenReturn(Optional.empty());
+
+    ResourceNotFoundException exception =
         assertThrows(
-            BusinessException.class,
-            () -> facultyService.findCoursesByFacultyNameAndPlan("Invalid", "2025"));
+            ResourceNotFoundException.class,
+            () -> facultyService.getFacultyByNameAndPlan("NonExistent", "2024"));
 
-    assertEquals("Faculty not found: Invalid", ex.getMessage());
+    assertEquals("Faculty not found: NonExistent", exception.getMessage());
+    verify(facultyRepository).findByNameAndPlan("NonExistent", "2024");
   }
 
   @Test
-  void createCourse_shouldSaveAndReturnFaculty() {
-    CourseRequest request = new CourseRequest("CS102", "Data Structures", 3, "Engineering", "2025");
-    when(facultyRepository.findByNameAndPlan("Engineering", "2025"))
-        .thenReturn(Optional.of(faculty));
-    when(facultyRepository.save(any(Faculty.class))).thenAnswer(i -> i.getArgument(0));
+  void updateFacultyByNameAndPlan_WithExistingFaculty_ShouldReturnUpdatedFaculty() {
+    FacultyDto facultyDto = createFacultyDto();
+    Faculty existingFaculty = createFaculty("Engineering", "2024");
 
-    Faculty result = facultyService.createCourse(request);
+    when(facultyRepository.findByNameAndPlan("Engineering", "2024"))
+        .thenReturn(Optional.of(existingFaculty));
+    doNothing().when(facultyValidator).validateAddCourses(any(CoursesDto.class));
+    when(facultyRepository.save(existingFaculty)).thenReturn(existingFaculty);
+
+    Faculty result = facultyService.updateFacultyByNameAndPlan(facultyDto);
 
     assertNotNull(result);
-    assertTrue(result.getCourses().stream().anyMatch(c -> c.getAbbreviation().equals("CS102")));
+    verify(facultyRepository).findByNameAndPlan("Engineering", "2024");
+    verify(facultyValidator).validateAddCourses(any(CoursesDto.class));
+    verify(facultyRepository).save(existingFaculty);
   }
 
   @Test
-  void createCourse_shouldThrowIfCourseExists() {
-    CourseRequest request = new CourseRequest("CS101", "Algorithms", 4, "Engineering", "2025");
-    when(facultyRepository.findByNameAndPlan("Engineering", "2025"))
-        .thenReturn(Optional.of(faculty));
+  void updateFacultyByNameAndPlan_WithNonExistingFaculty_ShouldThrowResourceNotFoundException() {
+    FacultyDto facultyDto = createFacultyDto();
 
-    BusinessException ex =
-        assertThrows(BusinessException.class, () -> facultyService.createCourse(request));
+    when(facultyRepository.findByNameAndPlan("Engineering", "2024")).thenReturn(Optional.empty());
 
-    assertEquals("Course already exists: CS101", ex.getMessage());
+    ResourceNotFoundException exception =
+        assertThrows(
+            ResourceNotFoundException.class,
+            () -> facultyService.updateFacultyByNameAndPlan(facultyDto));
+
+    assertEquals("Faculty not found: Engineering", exception.getMessage());
+    verify(facultyRepository).findByNameAndPlan("Engineering", "2024");
+    verify(facultyRepository, never()).save(any());
   }
 
   @Test
-  void updateCourse_shouldSaveUpdatedFaculty() {
-    CourseRequest request = new CourseRequest("CS103", "New Course", 5, "Engineering", "2025");
-    when(facultyRepository.findByNameAndPlan("Engineering", "2025"))
-        .thenReturn(Optional.of(faculty));
-    when(facultyRepository.save(any(Faculty.class))).thenAnswer(i -> i.getArgument(0));
+  void updateFacultyByNameAndPlan_WhenSaveFails_ShouldThrowBusinessException() {
+    FacultyDto facultyDto = createFacultyDto();
+    Faculty existingFaculty = createFaculty("Engineering", "2024");
 
-    Faculty result = facultyService.updateCourse("CS101", request);
+    when(facultyRepository.findByNameAndPlan("Engineering", "2024"))
+        .thenReturn(Optional.of(existingFaculty));
+    doNothing().when(facultyValidator).validateAddCourses(any(CoursesDto.class));
+    when(facultyRepository.save(existingFaculty)).thenThrow(new RuntimeException("Save failed"));
+
+    BusinessException exception =
+        assertThrows(
+            BusinessException.class, () -> facultyService.updateFacultyByNameAndPlan(facultyDto));
+
+    assertTrue(exception.getMessage().contains("An inesperated error has occurred"));
+    verify(facultyRepository).findByNameAndPlan("Engineering", "2024");
+    verify(facultyValidator).validateAddCourses(any(CoursesDto.class));
+    verify(facultyRepository).save(existingFaculty);
+  }
+
+  @Test
+  void addCoursesToPlan_WithExistingFaculty_ShouldReturnUpdatedFaculty() {
+    FacultyDto facultyDto = createFacultyDto();
+    Faculty existingFaculty = createFaculty("Engineering", "2024");
+
+    when(facultyRepository.findByNameAndPlan("Engineering", "2024"))
+        .thenReturn(Optional.of(existingFaculty));
+    when(facultyRepository.save(existingFaculty)).thenReturn(existingFaculty);
+
+    Faculty result = facultyService.addCoursesToPlan(facultyDto);
 
     assertNotNull(result);
-    assertTrue(result.getCourses().stream().anyMatch(c -> c.getAbbreviation().equals("CS103")));
+    verify(facultyRepository).findByNameAndPlan("Engineering", "2024");
+    verify(facultyRepository).save(existingFaculty);
   }
 
   @Test
-  void updateCourse_shouldThrowIfFacultyNotFound() {
-    CourseRequest request = new CourseRequest("CS103", "New Course", 5, "Invalid", "2025");
-    when(facultyRepository.findByNameAndPlan("Invalid", "2025")).thenReturn(Optional.empty());
+  void addCoursesToPlan_WithNonExistingFaculty_ShouldThrowBusinessException() {
+    FacultyDto facultyDto = createFacultyDto();
 
-    BusinessException ex =
-        assertThrows(BusinessException.class, () -> facultyService.updateCourse("CS101", request));
+    when(facultyRepository.findByNameAndPlan("Engineering", "2024")).thenReturn(Optional.empty());
 
-    assertEquals("Faculty not found: Invalid", ex.getMessage());
+    BusinessException exception =
+        assertThrows(BusinessException.class, () -> facultyService.addCoursesToPlan(facultyDto));
+
+    assertEquals("Faculty not found: Engineering", exception.getMessage());
+    verify(facultyRepository).findByNameAndPlan("Engineering", "2024");
+    verify(facultyRepository, never()).save(any());
   }
 
   @Test
-  void addGroupToCourse_shouldReturnTrueIfGroupAdded() {
-    when(facultyRepository.findAll()).thenReturn(List.of(faculty));
-    GroupRequest groupRequest = new GroupRequest("G1", "CS101", "2025", "1", "T1", true, 1, 30, 0);
-    when(groupService.createGroup(groupRequest)).thenReturn(new Group());
+  void addCoursesToPlan_WhenSaveFails_ShouldThrowBusinessException() {
+    FacultyDto facultyDto = createFacultyDto();
+    Faculty existingFaculty = createFaculty("Engineering", "2024");
 
-    Boolean result = facultyService.addGroupToCourse(groupRequest);
+    when(facultyRepository.findByNameAndPlan("Engineering", "2024"))
+        .thenReturn(Optional.of(existingFaculty));
+    when(facultyRepository.save(existingFaculty)).thenThrow(new RuntimeException("Save failed"));
 
-    assertTrue(result);
+    BusinessException exception =
+        assertThrows(BusinessException.class, () -> facultyService.addCoursesToPlan(facultyDto));
+
+    assertTrue(exception.getMessage().contains("An inesperated error has occurred"));
+    verify(facultyRepository).findByNameAndPlan("Engineering", "2024");
+    verify(facultyRepository).save(existingFaculty);
   }
 
   @Test
-  void addGroupToCourse_shouldThrowIfCourseNotFound() {
-    when(facultyRepository.findAll()).thenReturn(List.of()); // no faculties
+  void findCoursesByFacultyNameAndPlan_WithExistingFaculty_ShouldReturnCourses() {
+    Faculty faculty = createFaculty("Engineering", "2024");
 
-    GroupRequest groupRequest =
-        new GroupRequest("G1", "INVALID", "2025", "1", "T1", true, 1, 30, 0);
+    when(facultyRepository.findByNameAndPlan("Engineering", "2024"))
+        .thenReturn(Optional.of(faculty));
 
-    BusinessException ex =
-        assertThrows(BusinessException.class, () -> facultyService.addGroupToCourse(groupRequest));
+    List<Course> result = facultyService.findCoursesByFacultyNameAndPlan("Engineering", "2024");
 
-    assertEquals("Faculty not found: INVALID", ex.getMessage());
+    assertNotNull(result);
+    assertEquals(2, result.size());
+    verify(facultyRepository).findByNameAndPlan("Engineering", "2024");
   }
 
   @Test
-  void deleteCourse_shouldCallRepositoryDelete() {
-    doNothing().when(facultyRepository).deleteById("CS101");
+  void
+      findCoursesByFacultyNameAndPlan_WithNonExistingFaculty_ShouldThrowResourceNotFoundException() {
+    when(facultyRepository.findByNameAndPlan("NonExistent", "2024")).thenReturn(Optional.empty());
 
-    facultyService.deleteCourse("CS101");
+    ResourceNotFoundException exception =
+        assertThrows(
+            ResourceNotFoundException.class,
+            () -> facultyService.findCoursesByFacultyNameAndPlan("NonExistent", "2024"));
 
-    verify(facultyRepository, times(1)).deleteById("CS101");
+    assertEquals("Faculty not found: NonExistent", exception.getMessage());
+    verify(facultyRepository).findByNameAndPlan("NonExistent", "2024");
   }
 
   @Test
-  void findCourseByCode_shouldReturnCourseIfExists() {
-    when(facultyRepository.findAll()).thenReturn(List.of(faculty));
+  void addCourse_WithValidData_ShouldReturnUpdatedFaculty() {
+    CourseRequest request =
+        new CourseRequest("NEW101", "New Course", 3, "Engineering", "2024", "1", null);
+    Faculty faculty = createFaculty("Engineering", "2024");
 
-    Optional<Course> result = facultyService.findCourseByCode("CS101");
+    when(facultyRepository.findByNameAndPlan("engineering", "2024"))
+        .thenReturn(Optional.of(faculty));
+    when(facultyRepository.save(faculty)).thenReturn(faculty);
 
-    assertTrue(result.isPresent());
-    assertEquals("CS101", result.get().getAbbreviation());
+    Faculty result = facultyService.addCourse(request);
+
+    assertNotNull(result);
+    verify(facultyRepository).findByNameAndPlan("engineering", "2024");
+    verify(facultyRepository).save(faculty);
   }
 
   @Test
-  void findCourseByCode_shouldReturnEmptyIfNotFound() {
-    when(facultyRepository.findAll()).thenReturn(List.of(faculty));
+  void addCourse_WithNonExistingFaculty_ShouldThrowResourceNotFoundException() {
+    CourseRequest request =
+        new CourseRequest("CS101", "Computer Science", 3, "Engineering", "2024", "1", null);
 
-    Optional<Course> result = facultyService.findCourseByCode("INVALID");
+    when(facultyRepository.findByNameAndPlan("engineering", "2024")).thenReturn(Optional.empty());
 
-    assertTrue(result.isEmpty());
+    ResourceNotFoundException exception =
+        assertThrows(ResourceNotFoundException.class, () -> facultyService.addCourse(request));
+
+    assertEquals("Faculty not found: Engineering", exception.getMessage());
+    verify(facultyRepository).findByNameAndPlan("engineering", "2024");
+    verify(facultyRepository, never()).save(any());
+  }
+
+  @Test
+  void addCourse_WithExistingCourse_ShouldThrowResourceAlreadyExistsException() {
+    CourseRequest request =
+        new CourseRequest("CS101", "Computer Science", 3, "Engineering", "2024", "1", null);
+    Faculty faculty = createFaculty("Engineering", "2024");
+
+    when(facultyRepository.findByNameAndPlan("engineering", "2024"))
+        .thenReturn(Optional.of(faculty));
+
+    ResourceAlreadyExistsException exception =
+        assertThrows(ResourceAlreadyExistsException.class, () -> facultyService.addCourse(request));
+
+    assertEquals("Course already exists: CS101", exception.getMessage());
+    verify(facultyRepository).findByNameAndPlan("engineering", "2024");
+    verify(facultyRepository, never()).save(any());
+  }
+
+  @Test
+  void updateCourse_WithValidData_ShouldReturnUpdatedCourse() {
+    UpdateCourseDTO updateCourseDTO = new UpdateCourseDTO("Advanced Computer Science", 4);
+    Faculty faculty = createFaculty("Engineering", "2024");
+
+    when(facultyRepository.findByNameAndPlan("engineering", "2024"))
+        .thenReturn(Optional.of(faculty));
+    when(facultyRepository.save(faculty)).thenReturn(faculty);
+
+    Course result = facultyService.updateCourse("CS101", "Engineering", "2024", updateCourseDTO);
+
+    assertNotNull(result);
+    assertEquals("advanced computer science", result.getCourseName());
+    assertEquals(4, result.getCredits());
+    verify(facultyRepository).findByNameAndPlan("engineering", "2024");
+    verify(facultyRepository).save(faculty);
+  }
+
+  @Test
+  void updateCourse_WithNonExistingFaculty_ShouldThrowResourceNotFoundException() {
+    UpdateCourseDTO updateCourseDTO = new UpdateCourseDTO("Advanced Computer Science", 4);
+
+    when(facultyRepository.findByNameAndPlan("engineering", "2024")).thenReturn(Optional.empty());
+
+    ResourceNotFoundException exception =
+        assertThrows(
+            ResourceNotFoundException.class,
+            () -> facultyService.updateCourse("CS101", "Engineering", "2024", updateCourseDTO));
+
+    assertEquals("Faculty not found: Engineering", exception.getMessage());
+    verify(facultyRepository).findByNameAndPlan("engineering", "2024");
+    verify(facultyRepository, never()).save(any());
+  }
+
+  @Test
+  void updateCourse_WithNonExistingCourse_ShouldThrowResourceNotFoundException() {
+    UpdateCourseDTO updateCourseDTO = new UpdateCourseDTO("Advanced Computer Science", 4);
+    Faculty faculty = createFaculty("Engineering", "2024");
+
+    when(facultyRepository.findByNameAndPlan("engineering", "2024"))
+        .thenReturn(Optional.of(faculty));
+
+    ResourceNotFoundException exception =
+        assertThrows(
+            ResourceNotFoundException.class,
+            () ->
+                facultyService.updateCourse("NONEXISTENT", "Engineering", "2024", updateCourseDTO));
+
+    assertEquals("Course not found: NONEXISTENT", exception.getMessage());
+    verify(facultyRepository).findByNameAndPlan("engineering", "2024");
+    verify(facultyRepository, never()).save(any());
+  }
+
+  @Test
+  void findCourseByAbbreviation_WithExistingCourse_ShouldReturnCourse() {
+    Faculty faculty = createFaculty("Engineering", "2024");
+
+    when(facultyRepository.findByNameAndPlan("engineering", "2024"))
+        .thenReturn(Optional.of(faculty));
+
+    Course result = facultyService.findCourseByAbbreviation("CS101", "Engineering", "2024");
+
+    assertNotNull(result);
+    assertEquals("CS101", result.getAbbreviation());
+    verify(facultyRepository).findByNameAndPlan("engineering", "2024");
+  }
+
+  @Test
+  void findCourseByAbbreviation_WithNonExistingFaculty_ShouldThrowResourceNotFoundException() {
+    when(facultyRepository.findByNameAndPlan("engineering", "2024")).thenReturn(Optional.empty());
+
+    ResourceNotFoundException exception =
+        assertThrows(
+            ResourceNotFoundException.class,
+            () -> facultyService.findCourseByAbbreviation("CS101", "Engineering", "2024"));
+
+    assertEquals("Course not found: CS101", exception.getMessage());
+    verify(facultyRepository).findByNameAndPlan("engineering", "2024");
+  }
+
+  @Test
+  void findCourseByAbbreviation_WithEmptyCourses_ShouldThrowResourceNotFoundException() {
+    Faculty faculty = createFaculty("Engineering", "2024");
+    faculty.setCourses(new ArrayList<>());
+
+    when(facultyRepository.findByNameAndPlan("engineering", "2024"))
+        .thenReturn(Optional.of(faculty));
+
+    ResourceNotFoundException exception =
+        assertThrows(
+            ResourceNotFoundException.class,
+            () -> facultyService.findCourseByAbbreviation("CS101", "Engineering", "2024"));
+
+    assertEquals("Course data is corrupted for: CS101", exception.getMessage());
+    verify(facultyRepository).findByNameAndPlan("engineering", "2024");
+  }
+
+  @Test
+  void findCourseByAbbreviation_WithNonExistingCourse_ShouldReturnNull() {
+    Faculty faculty = createFaculty("Engineering", "2024");
+
+    when(facultyRepository.findByNameAndPlan("engineering", "2024"))
+        .thenReturn(Optional.of(faculty));
+
+    Course result = facultyService.findCourseByAbbreviation("NONEXISTENT", "Engineering", "2024");
+
+    assertNull(result);
+    verify(facultyRepository).findByNameAndPlan("engineering", "2024");
+  }
+
+  @Test
+  void deleteCourse_WithExistingCourse_ShouldDeleteCourse() {
+    Faculty faculty = createFacultyWithMutableCourses("Engineering", "2024");
+
+    when(facultyRepository.findByNameAndPlan("engineering", "2024"))
+        .thenReturn(Optional.of(faculty));
+    when(facultyRepository.save(faculty)).thenReturn(faculty);
+
+    facultyService.deleteCourse("CS101", "Engineering", "2024");
+
+    verify(facultyRepository).findByNameAndPlan("engineering", "2024");
+    verify(facultyRepository).save(faculty);
+  }
+
+  @Test
+  void deleteCourse_WithNonExistingFaculty_ShouldThrowResourceNotFoundException() {
+    when(facultyRepository.findByNameAndPlan("engineering", "2024")).thenReturn(Optional.empty());
+
+    ResourceNotFoundException exception =
+        assertThrows(
+            ResourceNotFoundException.class,
+            () -> facultyService.deleteCourse("CS101", "Engineering", "2024"));
+
+    assertEquals("Faculty not found: Engineering", exception.getMessage());
+    verify(facultyRepository).findByNameAndPlan("engineering", "2024");
+    verify(facultyRepository, never()).save(any());
+  }
+
+  private FacultyDto createFacultyDto() {
+    List<Course> courses =
+        Arrays.asList(
+            createCourse("CS101", "Computer Science", 3, "1"),
+            createCourse("MATH101", "Mathematics", 4, "1"));
+    return new FacultyDto("Engineering", "2024", courses);
+  }
+
+  private Faculty createFaculty() {
+    return createFaculty("Engineering", "2024");
+  }
+
+  private Faculty createFaculty(String name, String plan) {
+    Faculty faculty = new Faculty();
+    faculty.setFacultyName(name);
+    faculty.setPlan(plan);
+
+    List<Course> courses =
+        Arrays.asList(
+            createCourse("CS101", "Computer Science", 3, "1"),
+            createCourse("MATH101", "Mathematics", 4, "1"));
+    faculty.setCourses(new ArrayList<>(courses));
+
+    return faculty;
+  }
+
+  private Faculty createFacultyWithMutableCourses(String name, String plan) {
+    Faculty faculty = new Faculty();
+    faculty.setFacultyName(name);
+    faculty.setPlan(plan);
+
+    List<Course> courses =
+        new ArrayList<>(
+            Arrays.asList(
+                createCourse("CS101", "Computer Science", 3, "1"),
+                createCourse("MATH101", "Mathematics", 4, "1")));
+    faculty.setCourses(courses);
+
+    return faculty;
+  }
+
+  private Course createCourse(
+      String abbreviation, String courseName, int credits, String semester) {
+    Course course = new Course();
+    course.setAbbreviation(abbreviation);
+    course.setCourseName(courseName);
+    course.setCredits(credits);
+    course.setSemester(semester);
+    return course;
   }
 }

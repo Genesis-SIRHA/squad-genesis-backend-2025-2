@@ -1,29 +1,31 @@
 package edu.dosw.model;
 
 import jakarta.validation.constraints.NotBlank;
+import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.NoArgsConstructor;
 
 @Data
-@Document(collection = "courses")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Course {
-  @Id @NotBlank private String abbreviation;
+  @NotBlank private String abbreviation;
 
   @NotBlank private String courseName;
 
   private int credits;
+  private String semester;
+  private List<String> requisites;
 
+  /**
+   * Constructs a Course with abbreviation and course name
+   *
+   * @param abbreviation The course abbreviation code
+   * @param courseName The full name of the course
+   */
   public Course(String abbreviation, String courseName) {
     this.abbreviation = abbreviation;
     this.courseName = courseName;
-  }
-
-  public Course() {}
-
-  public Course(String abbreviation, String courseName, int credits) {
-    this.abbreviation = abbreviation;
-    this.courseName = courseName;
-    this.credits = credits;
   }
 }
