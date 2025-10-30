@@ -41,7 +41,7 @@ public class GroupService {
    * @return a list of groups associated with the given course abbreviation
    */
   public List<Group> getAllGroupsByCourseAbbreviation(String abbreviation) {
-    return groupRepository.findAllByCourseId(abbreviation);
+    return groupRepository.findAllByAbbreviation(abbreviation);
   }
 
   /**

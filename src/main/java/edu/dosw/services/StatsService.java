@@ -29,11 +29,12 @@ public class StatsService {
 
   public ReportDTO getCourseReassignmentStats(String courseAbbreviation) {
     List<Group> groups = groupService.getAllGroupsByCourseAbbreviation(courseAbbreviation);
-    List<String> groupCodes = groups.stream().map(Group::getGroupCode).collect(Collectors.toList());
 
-    if (groupCodes.isEmpty()) {
+    if (groups.isEmpty()) {
       return new ReportDTO(0, 0, 0, 0, 0, 0, 0);
     }
+
+    List<String> groupCodes = groups.stream().map(Group::getGroupCode).collect(Collectors.toList());
 
     Integer total = requestService.countByGroupCodes(groupCodes);
     Integer pending = requestService.countByGroupCodesAndStatus(groupCodes, RequestStatus.PENDING);

@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.repository.Query;
 
 public interface GroupRepository extends MongoRepository<Group, String> {
   @Query("{ 'abbreviation': ?0 }")
-  List<Group> findAllByCourseId(String abbreviation);
+  List<Group> findAllByAbbreviation(String abbreviation);
 
   @Query("{ 'groupCode': ?0 }")
   Optional<Group> findByGroupCode(String code);
