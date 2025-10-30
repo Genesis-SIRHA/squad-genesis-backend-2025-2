@@ -68,4 +68,10 @@ public interface RequestRepository extends MongoRepository<Request, String> {
 
   @Query("{ 'type': ?0 }")
   Integer countByType(RequestType type);
+
+  @Query(value = "{ 'studentId': ?0 }", count = true)
+  Integer countByStudentId(String studentId);
+
+  @Query(value = "{ 'studentId': ?0, 'status': ?1 }", count = true)
+  Integer countByStudentIdAndStatus(String studentId, RequestStatus status);
 }

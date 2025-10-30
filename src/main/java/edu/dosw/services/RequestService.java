@@ -21,10 +21,7 @@ import edu.dosw.services.strategy.queryStrategies.ProfessorStrategy;
 import edu.dosw.services.strategy.queryStrategies.QueryStrategy;
 import edu.dosw.services.strategy.queryStrategies.StudentStrategy;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -280,6 +277,38 @@ public class RequestService {
     } catch (Exception e) {
       logger.error("Failed to count total requests: {}", e.getMessage());
       throw new BusinessException("Failed to count total requests: " + e.getMessage());
+    }
+  }
+
+  public List<Double> getRequestStatsByStudent(String studentId) {
+    List<Double> percentages = new ArrayList<>();
+    try {
+      Integer totalRequests = requestRepository.countByStudentId(studentId);
+
+      if (totalRequests == 0) {
+        return Arrays.asList(0.0, 0.0, 0.0, 0.0);
+      }
+
+      Integer pendingRequests =
+          requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.PENDING);
+      Integer acceptedRequests =
+          requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.ACCEPTED);
+      Integer rejectedRequests =
+          requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.REJECTED);
+      Integer waitingRequests =
+          requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.WAITING);
+      Integer inReviewRequests =
+          requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.IN_REVIEW);
+
+      percentages.add((double) acceptedRequests / totalRequests);
+      percentages.add((double) (pendingRequests) / totalRequests);
+      percentages.add((double) (waitingRequests + inReviewRequests) / totalRequests);
+      percentages.add((double) rejectedRequests / totalRequests);
+
+      return percentages;
+    } catch (Exception e) {
+      logger.error("Failed to get request stats by student: {}", e.getMessage());
+      throw new BusinessException("Failed to get request stats by student: " + e.getMessage());
     }
   }
 }
