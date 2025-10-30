@@ -12,6 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+/**
+ * Strategy implementation for handling cancellation request answers Processes student cancellations
+ * from groups and updates enrollment counts
+ */
 @AllArgsConstructor
 @Component
 public class CancellationRequestAnswer implements AnswerStrategy {
@@ -19,6 +23,13 @@ public class CancellationRequestAnswer implements AnswerStrategy {
   private final HistorialService historialService;
   private final Logger logger = LoggerFactory.getLogger(CancellationRequestAnswer.class);
 
+  /**
+   * Processes a cancellation request by removing the student from the group and updating enrollment
+   * counts and historial status
+   *
+   * @param request The cancellation request to process
+   * @throws BusinessException If the cancellation process fails
+   */
   public void answerRequest(Request request) {
     Group group = groupService.getGroupByGroupCode(request.getOriginGroupId());
 

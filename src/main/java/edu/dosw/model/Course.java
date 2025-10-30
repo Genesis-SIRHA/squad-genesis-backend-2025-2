@@ -18,6 +18,12 @@ public class Course {
   private String semester;
   private List<String> requisites;
 
+  /**
+   * Constructs a Course with abbreviation and course name
+   *
+   * @param abbreviation The course abbreviation code
+   * @param courseName The full name of the course
+   */
   public Course(String abbreviation, String courseName) {
     this.abbreviation = abbreviation;
     this.courseName = courseName;

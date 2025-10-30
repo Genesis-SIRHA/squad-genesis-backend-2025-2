@@ -22,6 +22,11 @@ public class Group {
   private int enrolled;
   private int maxCapacity;
 
+  /**
+   * Constructs a Group using the builder pattern
+   *
+   * @param builder The GroupBuilder containing group data
+   */
   public Group(GroupBuilder builder) {
     this.groupCode = builder.groupCode;
     this.abbreviation = builder.abbreviation;
@@ -34,6 +39,7 @@ public class Group {
     this.maxCapacity = builder.maxCapacity;
   }
 
+  /** Builder class for creating Group instances */
   public static class GroupBuilder {
     private String groupCode;
     private String abbreviation;

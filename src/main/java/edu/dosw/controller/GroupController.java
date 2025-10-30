@@ -22,6 +22,12 @@ import org.springframework.web.bind.annotation.*;
 public class GroupController {
   private final GroupService groupService;
 
+  /**
+   * Retrieves a group by its unique group code
+   *
+   * @param groupCode The unique code identifying the group
+   * @return ResponseEntity containing the group details
+   */
   @GetMapping("/{groupCode}")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT')")
   @Operation(
@@ -32,6 +38,12 @@ public class GroupController {
     return ResponseEntity.ok(groupService.getGroupByGroupCode(groupCode));
   }
 
+  /**
+   * Retrieves all groups associated with a specific course abbreviation
+   *
+   * @param courseAbbreviation The abbreviation of the course
+   * @return ResponseEntity containing a list of groups for the course
+   */
   @GetMapping("/{courseAbbreviation}")
   @Operation(
       summary = "Get group by course abbreviation",
@@ -41,6 +53,12 @@ public class GroupController {
     return ResponseEntity.ok(groupService.getAllGroupsByCourseAbbreviation(courseAbbreviation));
   }
 
+  /**
+   * Retrieves course information associated with a specific group code
+   *
+   * @param groupCode The unique code identifying the group
+   * @return ResponseEntity containing the course details
+   */
   @GetMapping("/{groupCode}/course")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT')")
   @Operation(
@@ -51,6 +69,14 @@ public class GroupController {
     return ResponseEntity.ok(course);
   }
 
+  /**
+   * Creates a new group within a specific faculty and academic plan
+   *
+   * @param groupRequest The DTO containing group creation data
+   * @param facultyName The name of the faculty where the group will be created
+   * @param plan The academic plan identifier
+   * @return ResponseEntity containing the created group
+   */
   @PostMapping("/{facultyName}")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(
@@ -64,6 +90,13 @@ public class GroupController {
     return ResponseEntity.ok(groupService.createGroup(groupRequest, facultyName, plan));
   }
 
+  /**
+   * Updates an existing group with new information
+   *
+   * @param groupCode The unique code identifying the group to update
+   * @param groupRequest The DTO containing updated group data
+   * @return ResponseEntity containing the updated group
+   */
   @PutMapping("/{groupCode}")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(
@@ -74,6 +107,12 @@ public class GroupController {
     return ResponseEntity.ok(groupService.updateGroup(groupCode, groupRequest));
   }
 
+  /**
+   * Deletes a group by its group code
+   *
+   * @param groupCode The unique code identifying the group to delete
+   * @return ResponseEntity containing the deleted group
+   */
   @DeleteMapping("/{groupCode}")
   @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(
@@ -83,7 +122,12 @@ public class GroupController {
     return ResponseEntity.ok(groupService.deleteGroup(groupCode));
   }
 
-  // Sessions endpoints
+  /**
+   * Retrieves all sessions associated with a specific group
+   *
+   * @param groupCode The unique code identifying the group
+   * @return ResponseEntity containing a list of sessions for the group
+   */
   @GetMapping("/sessions/{groupCode}")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT')")
   @Operation(
@@ -94,6 +138,12 @@ public class GroupController {
     return ResponseEntity.ok(groupService.getSessionsByGroupCode(groupCode));
   }
 
+  /**
+   * Retrieves a specific session by its unique identifier
+   *
+   * @param sessionId The unique identifier of the session
+   * @return ResponseEntity containing the session details
+   */
   @GetMapping("/session/{sessionId}")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT')")
   @Operation(
@@ -104,6 +154,12 @@ public class GroupController {
     return ResponseEntity.ok(groupService.getSessionBySessionId(sessionId));
   }
 
+  /**
+   * Creates a new session and associates it with a group
+   *
+   * @param sessiondto The DTO containing session creation data
+   * @return ResponseEntity containing the created session
+   */
   @PostMapping("/session")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(
@@ -114,6 +170,13 @@ public class GroupController {
     return ResponseEntity.ok(groupService.addSession(sessiondto));
   }
 
+  /**
+   * Updates an existing session with new information
+   *
+   * @param sessionId The unique identifier of the session to update
+   * @param sessiondto The DTO containing updated session data
+   * @return ResponseEntity containing the updated session
+   */
   @PatchMapping("/sessions/{sessionId}")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(
@@ -124,6 +187,12 @@ public class GroupController {
     return ResponseEntity.ok(groupService.updateSession(sessionId, sessiondto));
   }
 
+  /**
+   * Deletes a specific session by its identifier
+   *
+   * @param sessionId The unique identifier of the session to delete
+   * @return ResponseEntity containing the deleted session
+   */
   @DeleteMapping("/sessions/{sessionId}")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(
@@ -133,6 +202,12 @@ public class GroupController {
     return ResponseEntity.ok(groupService.deleteSession(sessionId));
   }
 
+  /**
+   * Deletes all sessions associated with a specific group
+   *
+   * @param groupId The unique identifier of the group
+   * @return ResponseEntity containing the updated group without sessions
+   */
   @DeleteMapping("/sessions/{groupId}")
   @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(
@@ -142,7 +217,13 @@ public class GroupController {
     return ResponseEntity.ok(groupService.deleteSessionsFromGroup(groupId));
   }
 
-  // Student enrollment endpoints
+  /**
+   * Enrolls a student in a specific group
+   *
+   * @param groupCode The unique code identifying the group
+   * @param studentId The unique identifier of the student to enroll
+   * @return ResponseEntity containing the updated group with the new student
+   */
   @PostMapping("/student/{groupCode}/{studentId}")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR')")
   @Operation(
@@ -153,6 +234,13 @@ public class GroupController {
     return ResponseEntity.ok(groupService.addStudent(groupCode, studentId));
   }
 
+  /**
+   * Removes a student from a specific group
+   *
+   * @param groupCode The unique code identifying the group
+   * @param studentId The unique identifier of the student to remove
+   * @return ResponseEntity containing the updated group without the student
+   */
   @DeleteMapping("/student/{groupCode}/{studentId}")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR')")
   @Operation(

@@ -17,6 +17,12 @@ public class StatsController {
 
   private final StatsService statsService;
 
+  /**
+   * Retrieves reassignment statistics for a specific course
+   *
+   * @param courseAbbreviation The abbreviation of the course
+   * @return ResponseEntity containing course reassignment statistics
+   */
   @GetMapping("/courses/{courseAbbreviation}")
   @Operation(
       summary = "Get course reassignment statistics",
@@ -26,6 +32,12 @@ public class StatsController {
     return ResponseEntity.ok(statsService.getCourseReassignmentStats(courseAbbreviation));
   }
 
+  /**
+   * Retrieves reassignment statistics for a specific group
+   *
+   * @param groupCode The unique code identifying the group
+   * @return ResponseEntity containing group reassignment statistics
+   */
   @GetMapping("/groups/{groupCode}")
   @Operation(
       summary = "Get group reassignment statistics",
@@ -34,6 +46,13 @@ public class StatsController {
     return ResponseEntity.ok(statsService.getGroupReassignmentStats(groupCode));
   }
 
+  /**
+   * Retrieves reassignment statistics for a specific faculty and academic plan
+   *
+   * @param facultyName The name of the faculty
+   * @param plan The academic plan identifier
+   * @return ResponseEntity containing faculty reassignment statistics
+   */
   @GetMapping("/faculties/{facultyName}")
   @Operation(
       summary = "Get faculty reassignment statistics",
@@ -44,6 +63,11 @@ public class StatsController {
     return ResponseEntity.ok(statsService.getFacultyReassignmentStats(facultyName, plan));
   }
 
+  /**
+   * Retrieves comprehensive reassignment statistics across the entire system
+   *
+   * @return ResponseEntity containing global reassignment statistics
+   */
   @GetMapping("/global")
   @Operation(
       summary = "Get global reassignment statistics",
@@ -52,6 +76,11 @@ public class StatsController {
     return ResponseEntity.ok(statsService.getGlobalReassignmentStats());
   }
 
+  /**
+   * Retrieves basic statistics about requests in the system
+   *
+   * @return ResponseEntity containing request statistics
+   */
   @GetMapping("/requests")
   @Operation(
       summary = "Get request statistics",

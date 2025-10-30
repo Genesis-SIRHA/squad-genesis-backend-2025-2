@@ -17,6 +17,11 @@ public class Student extends User {
   private Integer semester;
   private AcademicGrade academicGrade;
 
+  /**
+   * Constructs a Student using the builder pattern
+   *
+   * @param builder The StudentBuilder containing student data
+   */
   public Student(StudentBuilder builder) {
     super(builder.userId, builder.identityDocument, builder.email, builder.fullName);
     this.plan = builder.plan;
@@ -26,6 +31,7 @@ public class Student extends User {
     this.semester = builder.semester;
   }
 
+  /** Builder class for creating Student instances */
   public static class StudentBuilder {
     public Integer semester;
     private String userId;

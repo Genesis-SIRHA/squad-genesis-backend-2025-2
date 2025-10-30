@@ -23,6 +23,14 @@ public class HistorialService {
   private final PeriodService periodService;
   private final Logger logger = LoggerFactory.getLogger(HistorialService.class);
 
+  /**
+   * Retrieves group codes for a student in a specific academic period
+   *
+   * @param studentId The unique identifier of the student
+   * @param year The academic year
+   * @param period The academic period
+   * @return List of group codes the student is enrolled in for the specified period
+   */
   public List<String> getGroupCodesByStudentIdAndPeriod(
       String studentId, String year, String period) {
     ArrayList<Historial> historial =
@@ -34,6 +42,14 @@ public class HistorialService {
     return groupCodes;
   }
 
+  /**
+   * Retrieves a specific historial record by student ID and group code
+   *
+   * @param studentId The unique identifier of the student
+   * @param groupCode The unique code identifying the group
+   * @return The historial record matching the criteria
+   * @throws ResourceNotFoundException If no historial record is found
+   */
   public Historial getByStudentIdAndGroupCode(String studentId, String groupCode) {
     Historial historial = historialRepository.findByStudentIdAndGroupCode(studentId, groupCode);
     if (historial == null) {
@@ -44,6 +60,13 @@ public class HistorialService {
     return historial;
   }
 
+  /**
+   * Retrieves the latest historial records for a student's courses
+   *
+   * @param studentId The unique identifier of the student
+   * @param courses The list of courses to filter historial records
+   * @return List of the most recent historial records for each course
+   */
   public List<Historial> getSessionsByCourses(String studentId, List<Course> courses) {
     List<Historial> completeHistorial = historialRepository.findByStudentId(studentId);
     List<Historial> lastCourseState = new ArrayList<>();

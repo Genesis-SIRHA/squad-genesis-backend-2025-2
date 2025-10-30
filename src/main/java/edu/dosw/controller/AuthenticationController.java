@@ -25,6 +25,12 @@ public class AuthenticationController {
 
   private final AuthenticationService authenticationService;
 
+  /**
+   * Authenticates a user and returns JWT token
+   *
+   * @param logInDTO The login credentials containing email and password
+   * @return ResponseEntity containing authentication response with JWT token
+   */
   @PostMapping("/login")
   @PreAuthorize("permitAll()")
   @Operation(
@@ -35,6 +41,12 @@ public class AuthenticationController {
     return ResponseEntity.ok(response);
   }
 
+  /**
+   * Retrieves information about the currently authenticated user
+   *
+   * @param authentication The authentication object containing user details
+   * @return ResponseEntity containing user information
+   */
   @GetMapping("/me")
   @PreAuthorize("isAuthenticated()")
   @Operation(summary = "Get current user info")

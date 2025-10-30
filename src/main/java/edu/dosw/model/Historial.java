@@ -19,6 +19,11 @@ public class Historial {
   private String year;
   private String period;
 
+  /**
+   * Constructs a Historial using the builder pattern
+   *
+   * @param builder The HistorialBuilder containing historial data
+   */
   public Historial(HistorialBuilder builder) {
     this.studentId = builder.studentId;
     this.groupCode = builder.groupCode;
@@ -27,6 +32,7 @@ public class Historial {
     this.period = builder.period;
   }
 
+  /** Builder class for creating Historial instances */
   public static class HistorialBuilder {
     private String studentId;
     private String groupCode;

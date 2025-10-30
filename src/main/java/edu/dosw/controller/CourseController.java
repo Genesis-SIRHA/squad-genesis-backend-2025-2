@@ -19,10 +19,23 @@ public class CourseController {
 
   private final FacultyService facultyService;
 
+  /**
+   * Constructs CourseController with required dependencies
+   *
+   * @param facultyService The faculty service to handle course operations
+   */
   public CourseController(FacultyService facultyService) {
     this.facultyService = facultyService;
   }
 
+  /**
+   * Retrieves a course by its abbreviation within a specific faculty and plan
+   *
+   * @param courseAbbreviation The abbreviation of the course to retrieve
+   * @param facultyName The name of the faculty where the course belongs
+   * @param plan The academic plan identifier
+   * @return ResponseEntity containing the course details
+   */
   @GetMapping("/{courseAbbreviation}")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT')")
   @Operation(
@@ -36,6 +49,12 @@ public class CourseController {
     return ResponseEntity.ok(course);
   }
 
+  /**
+   * Creates a new course in the system
+   *
+   * @param courseRequest The DTO containing course creation data
+   * @return ResponseEntity containing the updated faculty with the new course
+   */
   @PostMapping
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(summary = "Create a new course", description = "Registers a new course")
@@ -44,6 +63,15 @@ public class CourseController {
     return ResponseEntity.ok(facultyService.addCourse(courseRequest));
   }
 
+  /**
+   * Updates an existing course with new information
+   *
+   * @param courseAbbreviation The abbreviation of the course to update
+   * @param facultyName The name of the faculty where the course belongs
+   * @param plan The academic plan identifier
+   * @param updateCourseDTO The DTO containing updated course data
+   * @return ResponseEntity containing the updated course
+   */
   @PatchMapping("/{courseAbbreviation}")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(summary = "Update course", description = "Updates course")
@@ -57,6 +85,14 @@ public class CourseController {
     return ResponseEntity.ok((course));
   }
 
+  /**
+   * Deletes a course by its abbreviation from a specific faculty and plan
+   *
+   * @param courseAbbreviation The abbreviation of the course to delete
+   * @param facultyName The name of the faculty where the course belongs
+   * @param plan The academic plan identifier
+   * @return ResponseEntity with no content
+   */
   @DeleteMapping("/{courseAbbreviation}")
   @PreAuthorize("hasRole('ADMINISTRATOR')")
   @Operation(

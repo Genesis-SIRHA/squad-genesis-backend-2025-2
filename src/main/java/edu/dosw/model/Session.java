@@ -22,6 +22,11 @@ public class Session {
   private String year;
   private String period;
 
+  /**
+   * Constructs a Session using the builder pattern
+   *
+   * @param builder The SessionBuilder containing session data
+   */
   public Session(SessionBuilder builder) {
     this.sessionId = UUID.randomUUID().toString();
     this.groupCode = builder.groupCode;
@@ -32,6 +37,7 @@ public class Session {
     this.period = builder.period;
   }
 
+  /** Builder class for creating Session instances */
   public static class SessionBuilder {
     private String groupCode;
     private String classroomName;

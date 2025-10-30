@@ -19,6 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class HistorialController {
   HistorialService historialService;
 
+  /**
+   * Retrieves all historial records from the system
+   *
+   * @return ResponseEntity containing a list of all historial records
+   */
   @GetMapping("/global")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN')")
   @Operation(description = "Get all historial")

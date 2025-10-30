@@ -16,10 +16,21 @@ public class PemsumController {
 
   private final PemsumService pemsumService;
 
+  /**
+   * Constructs PemsumController with required dependencies
+   *
+   * @param pemsumService The pemsum service to handle student academic record operations
+   */
   public PemsumController(PemsumService pemsumService) {
     this.pemsumService = pemsumService;
   }
 
+  /**
+   * Retrieves the complete Pemsum (academic record) for a specific student
+   *
+   * @param studentId The unique identifier of the student
+   * @return ResponseEntity containing the student's Pemsum data
+   */
   @GetMapping("/{studentId}/respond")
   @PreAuthorize(
       "hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT') and @authenticationService.canAccessStudentData(authentication, #studentId)")
@@ -28,6 +39,12 @@ public class PemsumController {
     return ResponseEntity.ok(pemsumService.getPemsum(studentId));
   }
 
+  /**
+   * Calculates the percentage of completed courses for a student
+   *
+   * @param studentId The unique identifier of the student
+   * @return ResponseEntity containing the percentage of completed courses
+   */
   @GetMapping("/{studentId}/completed-courses")
   @Operation(
       summary = "Get completed courses percentage",
@@ -37,6 +54,12 @@ public class PemsumController {
     return ResponseEntity.ok(pemsumService.getCompletedCoursesPercentage(studentId));
   }
 
+  /**
+   * Retrieves the status of all courses for a student including pending courses from their faculty
+   *
+   * @param studentId The unique identifier of the student
+   * @return ResponseEntity containing a map of course names to their status
+   */
   @GetMapping("/{studentId}/courses-status")
   @Operation(
       summary = "Get student courses status",
