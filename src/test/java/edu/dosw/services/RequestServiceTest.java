@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import edu.dosw.dto.CreateRequestDto;
 import edu.dosw.dto.RequestPeriodDTO;
+import edu.dosw.dto.RequestStats;
 import edu.dosw.dto.UpdateRequestDto;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.exception.ResourceNotFoundException;
@@ -1235,5 +1236,239 @@ class RequestServiceTest {
     when(requestRepository.count()).thenThrow(new RuntimeException("Count failed"));
 
     assertThrows(RuntimeException.class, () -> requestService.getRequestStats());
+  }
+
+  @Test
+  void getRequestStatsByUserId_WithStudentRole_ShouldReturnCorrectPercentages() {
+    String userId = "student-123";
+    Role role = Role.STUDENT;
+
+    when(requestRepository.countByStudentId(userId)).thenReturn(10);
+    when(requestRepository.countByStudentIdAndStatus(userId, RequestStatus.PENDING)).thenReturn(3);
+    when(requestRepository.countByStudentIdAndStatus(userId, RequestStatus.ACCEPTED)).thenReturn(4);
+    when(requestRepository.countByStudentIdAndStatus(userId, RequestStatus.REJECTED)).thenReturn(2);
+    when(requestRepository.countByStudentIdAndStatus(userId, RequestStatus.WAITING)).thenReturn(1);
+    when(requestRepository.countByStudentIdAndStatus(userId, RequestStatus.IN_REVIEW))
+        .thenReturn(0);
+    when(requestRepository.countByStudentIdAndType(userId, RequestType.JOIN)).thenReturn(5);
+    when(requestRepository.countByStudentIdAndType(userId, RequestType.SWAP)).thenReturn(3);
+    when(requestRepository.countByStudentIdAndType(userId, RequestType.CANCELLATION)).thenReturn(2);
+
+    List<Double> result = requestService.getRequestStatsByUserId(userId, role);
+
+    assertEquals(8, result.size());
+    assertEquals(30.0, result.get(0));
+    assertEquals(40.0, result.get(1));
+    assertEquals(20.0, result.get(2));
+    assertEquals(10.0, result.get(3));
+    assertEquals(0.0, result.get(4));
+    assertEquals(50.0, result.get(5));
+    assertEquals(30.0, result.get(6));
+    assertEquals(20.0, result.get(7));
+  }
+
+  @Test
+  void getRequestStatsByUserId_WithStudentRoleAndZeroTotal_ShouldReturnZeros() {
+    String userId = "student-123";
+    Role role = Role.STUDENT;
+
+    when(requestRepository.countByStudentId(userId)).thenReturn(0);
+
+    List<Double> result = requestService.getRequestStatsByUserId(userId, role);
+
+    assertEquals(4, result.size());
+    assertEquals(Arrays.asList(0.0, 0.0, 0.0, 0.0), result);
+  }
+
+  @Test
+  void getRequestStatsByUserId_WithProfessorRole_ShouldReturnCorrectPercentages() {
+    String userId = "prof-123";
+    Role role = Role.PROFESSOR;
+
+    when(requestRepository.countByGestedBy(userId)).thenReturn(20);
+    when(requestRepository.countByGestedByAndRequestStatus(userId, RequestStatus.PENDING))
+        .thenReturn(5);
+    when(requestRepository.countByGestedByAndRequestStatus(userId, RequestStatus.ACCEPTED))
+        .thenReturn(10);
+    when(requestRepository.countByGestedByAndRequestStatus(userId, RequestStatus.REJECTED))
+        .thenReturn(3);
+    when(requestRepository.countByGestedByAndRequestStatus(userId, RequestStatus.WAITING))
+        .thenReturn(1);
+    when(requestRepository.countByGestedByAndRequestStatus(userId, RequestStatus.IN_REVIEW))
+        .thenReturn(1);
+    when(requestRepository.countByGestedByAndType(userId, RequestType.JOIN)).thenReturn(12);
+    when(requestRepository.countByGestedByAndType(userId, RequestType.SWAP)).thenReturn(6);
+    when(requestRepository.countByGestedByAndType(userId, RequestType.CANCELLATION)).thenReturn(2);
+
+    List<Double> result = requestService.getRequestStatsByUserId(userId, role);
+
+    assertEquals(8, result.size());
+    assertEquals(25.0, result.get(0));
+    assertEquals(50.0, result.get(1));
+    assertEquals(15.0, result.get(2));
+    assertEquals(5.0, result.get(3));
+    assertEquals(5.0, result.get(4));
+    assertEquals(60.0, result.get(5));
+    assertEquals(30.0, result.get(6));
+    assertEquals(10.0, result.get(7));
+  }
+
+  @Test
+  void getRequestStatsByUserId_WithDeanRole_ShouldReturnCorrectPercentages() {
+    String userId = "dean-123";
+    Role role = Role.DEAN;
+
+    when(requestRepository.countByGestedBy(userId)).thenReturn(15);
+    when(requestRepository.countByGestedByAndRequestStatus(userId, RequestStatus.PENDING))
+        .thenReturn(3);
+    when(requestRepository.countByGestedByAndRequestStatus(userId, RequestStatus.ACCEPTED))
+        .thenReturn(8);
+    when(requestRepository.countByGestedByAndRequestStatus(userId, RequestStatus.REJECTED))
+        .thenReturn(4);
+    when(requestRepository.countByGestedByAndRequestStatus(userId, RequestStatus.WAITING))
+        .thenReturn(0);
+    when(requestRepository.countByGestedByAndRequestStatus(userId, RequestStatus.IN_REVIEW))
+        .thenReturn(0);
+    when(requestRepository.countByGestedByAndType(userId, RequestType.JOIN)).thenReturn(10);
+    when(requestRepository.countByGestedByAndType(userId, RequestType.SWAP)).thenReturn(4);
+    when(requestRepository.countByGestedByAndType(userId, RequestType.CANCELLATION)).thenReturn(1);
+
+    List<Double> result = requestService.getRequestStatsByUserId(userId, role);
+
+    assertEquals(8, result.size());
+    assertEquals(20.0, result.get(0));
+    assertEquals(53.33, result.get(1), 0.01);
+    assertEquals(26.67, result.get(2), 0.01);
+    assertEquals(0.0, result.get(3));
+    assertEquals(0.0, result.get(4));
+    assertEquals(66.67, result.get(5), 0.01);
+    assertEquals(26.67, result.get(6), 0.01);
+    assertEquals(6.67, result.get(7), 0.01);
+  }
+
+  @Test
+  void getRequestStatsByUserId_WithAdministratorRole_ShouldThrowBusinessException() {
+    String userId = "admin-123";
+    Role role = Role.ADMINISTRATOR;
+
+    BusinessException exception =
+        assertThrows(
+            BusinessException.class, () -> requestService.getRequestStatsByUserId(userId, role));
+
+    assertEquals("Administrator does no have specific stats for requests", exception.getMessage());
+  }
+
+  @Test
+  void getRequestStatsByUserId_WithRepositoryException_ShouldThrowBusinessException() {
+    String userId = "student-123";
+    Role role = Role.STUDENT;
+
+    when(requestRepository.countByStudentId(userId))
+        .thenThrow(new RuntimeException("Database error"));
+
+    BusinessException exception =
+        assertThrows(
+            BusinessException.class, () -> requestService.getRequestStatsByUserId(userId, role));
+
+    assertTrue(exception.getMessage().contains("Failed to get request stats by student"));
+  }
+
+  @Test
+  void getRequestStats_ShouldReturnCorrectStats() {
+    when(requestRepository.count()).thenReturn(100L);
+    when(requestRepository.countByStatus(RequestStatus.PENDING)).thenReturn(30);
+    when(requestRepository.countByStatus(RequestStatus.ACCEPTED)).thenReturn(50);
+    when(requestRepository.countByStatus(RequestStatus.REJECTED)).thenReturn(20);
+
+    RequestStats result = requestService.getRequestStats();
+
+    assertNotNull(result);
+    assertEquals(100, result.total());
+    assertEquals(30, result.pending());
+    assertEquals(50, result.approved());
+    assertEquals(20, result.rejected());
+  }
+
+  @Test
+  void getRequestStats_WithZeroRequests_ShouldReturnZeroStats() {
+    when(requestRepository.count()).thenReturn(0L);
+    when(requestRepository.countByStatus(RequestStatus.PENDING)).thenReturn(0);
+    when(requestRepository.countByStatus(RequestStatus.ACCEPTED)).thenReturn(0);
+    when(requestRepository.countByStatus(RequestStatus.REJECTED)).thenReturn(0);
+
+    RequestStats result = requestService.getRequestStats();
+
+    assertNotNull(result);
+    assertEquals(0, result.total());
+    assertEquals(0, result.pending());
+    assertEquals(0, result.approved());
+    assertEquals(0, result.rejected());
+  }
+
+  @Test
+  void fetchRequestsByFacultyName_WithValidFaculty_ShouldReturnSortedRequests() {
+    String facultyName = "Engineering";
+
+    Request request1 = new Request();
+    request1.setRequestId("req1");
+    request1.setStudentId("student1");
+    request1.setCreatedAt(LocalDate.of(2024, 1, 10));
+
+    Request request2 = new Request();
+    request2.setRequestId("req2");
+    request2.setStudentId("student2");
+    request2.setCreatedAt(LocalDate.of(2024, 1, 15));
+
+    Request request3 = new Request();
+    request3.setRequestId("req3");
+    request3.setStudentId("student3");
+    request3.setCreatedAt(LocalDate.of(2024, 1, 5));
+
+    List<Request> allRequests = Arrays.asList(request1, request2, request3);
+
+    when(requestRepository.findAll()).thenReturn(allRequests);
+    when(studentService.getFacultyByStudentId("student1")).thenReturn("Engineering");
+    when(studentService.getFacultyByStudentId("student2")).thenReturn("Engineering");
+    when(studentService.getFacultyByStudentId("student3")).thenReturn("Science");
+
+    List<Request> result = requestService.fetchRequestsByFacultyName(facultyName);
+
+    assertEquals(2, result.size());
+    assertEquals("req2", result.get(0).getRequestId());
+    assertEquals("req1", result.get(1).getRequestId());
+  }
+
+  @Test
+  void fetchRequestsByFacultyName_WithNoMatchingRequests_ShouldReturnEmptyList() {
+    String facultyName = "Engineering";
+
+    Request request1 = new Request();
+    request1.setRequestId("req1");
+    request1.setStudentId("student1");
+    request1.setCreatedAt(LocalDate.of(2024, 1, 10));
+
+    List<Request> allRequests = List.of(request1);
+
+    when(requestRepository.findAll()).thenReturn(allRequests);
+    when(studentService.getFacultyByStudentId("student1")).thenReturn("Science");
+
+    List<Request> result = requestService.fetchRequestsByFacultyName(facultyName);
+
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void fetchRequestsByFacultyName_WithInvalidFaculty_ShouldThrowBusinessException() {
+    String facultyName = "InvalidFaculty";
+
+    doThrow(new BusinessException("Faculty InvalidFaculty does not exist"))
+        .when(requestValidator)
+        .validateFacultyName(facultyName);
+
+    BusinessException exception =
+        assertThrows(
+            BusinessException.class, () -> requestService.fetchRequestsByFacultyName(facultyName));
+
+    assertTrue(exception.getMessage().contains("does not exist"));
   }
 }
