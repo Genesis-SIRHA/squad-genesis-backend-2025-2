@@ -101,8 +101,8 @@ public class RequestController {
   @GetMapping("/{studentId}/stats")
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'STUDENT')")
   @Operation(
-          summary = "Get request percentages by studentId",
-          description = "Retrieves percentages about requests by studentId")
+      summary = "Get request percentages by studentId",
+      description = "Retrieves percentages about requests by studentId")
   public ResponseEntity<List<Double>> getRequestStatsByStudent(@PathVariable String studentId) {
     return ResponseEntity.ok(requestService.getRequestStatsByStudent(studentId));
   }

@@ -288,15 +288,20 @@ public class RequestService {
         return Arrays.asList(0.0, 0.0, 0.0, 0.0);
       }
 
-      Integer pendingRequests = requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.PENDING);
-      Integer acceptedRequests = requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.ACCEPTED);
-      Integer rejectedRequests = requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.REJECTED);
-      Integer waitingRequests = requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.WAITING);
-      Integer inReviewRequests = requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.IN_REVIEW);
+      Integer pendingRequests =
+          requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.PENDING);
+      Integer acceptedRequests =
+          requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.ACCEPTED);
+      Integer rejectedRequests =
+          requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.REJECTED);
+      Integer waitingRequests =
+          requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.WAITING);
+      Integer inReviewRequests =
+          requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.IN_REVIEW);
 
       percentages.add((double) acceptedRequests / totalRequests);
       percentages.add((double) (pendingRequests) / totalRequests);
-      percentages.add((double) (waitingRequests+inReviewRequests) / totalRequests);
+      percentages.add((double) (waitingRequests + inReviewRequests) / totalRequests);
       percentages.add((double) rejectedRequests / totalRequests);
 
       return percentages;
