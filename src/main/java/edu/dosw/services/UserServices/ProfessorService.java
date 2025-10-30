@@ -158,7 +158,7 @@ public class ProfessorService {
    * @throws BusinessException if no user is found with the given ID
    */
   public String getFacultyByProfessorId(String professorId) {
-    Optional<Professor> user = professorRepository.findById(professorId);
+    Optional<Professor> user = professorRepository.findByUserId(professorId);
     if (user.isEmpty()) {
       logger.error("User not found with professorId: " + professorId);
       throw new ResourceNotFoundException("User not found with professorId: " + professorId);

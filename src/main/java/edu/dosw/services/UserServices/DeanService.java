@@ -163,7 +163,7 @@ public class DeanService {
    * @throws BusinessException if no user is found with the given ID
    */
   public String getFacultyByDeanId(String deanId) {
-    Optional<Dean> user = deanRepository.findById(deanId);
+    Optional<Dean> user = deanRepository.findByUserId(deanId);
     if (user.isEmpty()) {
       logger.error("User not found with deanId: " + deanId);
       throw new ResourceNotFoundException("User not found with deanId: " + deanId);

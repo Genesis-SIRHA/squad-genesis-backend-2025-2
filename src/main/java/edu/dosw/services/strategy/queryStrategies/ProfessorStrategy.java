@@ -4,6 +4,7 @@ import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Request;
 import edu.dosw.repositories.RequestRepository;
 import edu.dosw.services.UserServices.ProfessorService;
+import edu.dosw.services.UserServices.StudentService;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 public class ProfessorStrategy implements QueryStrategy {
   private final RequestRepository requestRepository;
   private final ProfessorService professorService;
+  private final StudentService studentService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   /**
@@ -40,7 +42,7 @@ public class ProfessorStrategy implements QueryStrategy {
 
     for (Request request : allRequest) {
       String studentId = request.getStudentId();
-      String studentFaculty = professorService.getFacultyByProfessorId(studentId);
+      String studentFaculty = studentService.getFacultyByStudentId(studentId);
       if (professorFaculty.equals(studentFaculty)) {
         allAvailable.add(request);
       }
