@@ -17,7 +17,20 @@ Sprints de 1 semana en los cuales se deciden las tareas a realizar con base en e
 y en estrategia de planning poker se decide el peso de cada una de estas.
 https://genesissirha.atlassian.net/jira/software/projects/SIR/boards/1/backlog
 
+### Tecnologías Utilizadas
+* Backend: Java 17, Spring Boot 3.x
 
+* Build Tool: Maven
+
+* Base de Datos: MongoDB
+
+* Documentación API: Swagger UI/OpenAPI 3.0
+
+* Testing: JUnit 5, Mockito, Jacoco
+
+* CI/CD: Azure DevOps
+
+* Gestión de Proyectos: Jira
 ## Estrategías de gitflow:
 
 1. Ramas Principales: 
