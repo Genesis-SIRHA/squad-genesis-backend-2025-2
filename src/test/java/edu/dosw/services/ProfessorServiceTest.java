@@ -170,17 +170,17 @@ class ProfessorServiceTest {
   // Tests para getFacultyByProfessorId
   @Test
   void getFacultyByProfessorId_WhenProfessorExists_ShouldReturnFacultyName() {
-    when(professorRepository.findById(PROFESSOR_ID)).thenReturn(Optional.of(existingProfessor));
+    when(professorRepository.findByUserId(PROFESSOR_ID)).thenReturn(Optional.of(existingProfessor));
 
     String result = professorService.getFacultyByProfessorId(PROFESSOR_ID);
 
     assertEquals(FACULTY_NAME, result);
-    verify(professorRepository, times(1)).findById(PROFESSOR_ID);
+    verify(professorRepository, times(1)).findByUserId(PROFESSOR_ID);
   }
 
   @Test
   void getFacultyByProfessorId_WhenProfessorNotFound_ShouldThrowException() {
-    when(professorRepository.findById(PROFESSOR_ID)).thenReturn(Optional.empty());
+    when(professorRepository.findByUserId(PROFESSOR_ID)).thenReturn(Optional.empty());
 
     ResourceNotFoundException exception =
         assertThrows(
@@ -188,7 +188,7 @@ class ProfessorServiceTest {
             () -> professorService.getFacultyByProfessorId(PROFESSOR_ID));
 
     assertEquals("User not found with professorId: " + PROFESSOR_ID, exception.getMessage());
-    verify(professorRepository, times(1)).findById(PROFESSOR_ID);
+    verify(professorRepository, times(1)).findByUserId(PROFESSOR_ID);
   }
 
   @Test
@@ -203,12 +203,12 @@ class ProfessorServiceTest {
             .facultyName("Different Faculty")
             .build();
 
-    when(professorRepository.findById(differentProfessorId))
+    when(professorRepository.findByUserId(differentProfessorId))
         .thenReturn(Optional.of(differentProfessor));
 
     String result = professorService.getFacultyByProfessorId(differentProfessorId);
 
     assertEquals("Different Faculty", result);
-    verify(professorRepository, times(1)).findById(differentProfessorId);
+    verify(professorRepository, times(1)).findByUserId(differentProfessorId);
   }
 }

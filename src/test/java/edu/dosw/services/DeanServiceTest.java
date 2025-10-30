@@ -162,24 +162,24 @@ class DeanServiceTest {
   // Tests para getFacultyByDeanId
   @Test
   void getFacultyByDeanId_WhenDeanExists_ShouldReturnFacultyName() {
-    when(deanRepository.findById(DEAN_ID)).thenReturn(Optional.of(existingDean));
+    when(deanRepository.findByUserId(DEAN_ID)).thenReturn(Optional.of(existingDean));
 
     String result = deanService.getFacultyByDeanId(DEAN_ID);
 
     assertEquals(FACULTY_NAME, result);
-    verify(deanRepository, times(1)).findById(DEAN_ID);
+    verify(deanRepository, times(1)).findByUserId(DEAN_ID);
   }
 
   @Test
   void getFacultyByDeanId_WhenDeanNotFound_ShouldThrowException() {
-    when(deanRepository.findById(DEAN_ID)).thenReturn(Optional.empty());
+    when(deanRepository.findByUserId(DEAN_ID)).thenReturn(Optional.empty());
 
     ResourceNotFoundException exception =
         assertThrows(
             ResourceNotFoundException.class, () -> deanService.getFacultyByDeanId(DEAN_ID));
 
     assertEquals("User not found with deanId: " + DEAN_ID, exception.getMessage());
-    verify(deanRepository, times(1)).findById(DEAN_ID);
+    verify(deanRepository, times(1)).findByUserId(DEAN_ID);
   }
 
   @Test
@@ -194,11 +194,11 @@ class DeanServiceTest {
             .facultyName("Different Faculty")
             .build();
 
-    when(deanRepository.findById(differentDeanId)).thenReturn(Optional.of(differentDean));
+    when(deanRepository.findByUserId(differentDeanId)).thenReturn(Optional.of(differentDean));
 
     String result = deanService.getFacultyByDeanId(differentDeanId);
 
     assertEquals("Different Faculty", result);
-    verify(deanRepository, times(1)).findById(differentDeanId);
+    verify(deanRepository, times(1)).findByUserId(differentDeanId);
   }
 }
