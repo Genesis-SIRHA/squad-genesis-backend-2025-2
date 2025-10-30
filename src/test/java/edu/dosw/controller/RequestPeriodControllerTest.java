@@ -1,4 +1,3 @@
 package edu.dosw.controller;
 
-public class RequestPeriodControllerTest {
-}
+public class RequestPeriodControllerTest {}

@@ -11,10 +11,9 @@ import edu.dosw.model.Professor;
 import edu.dosw.repositories.ProfessorRepository;
 import edu.dosw.services.UserServices.ProfessorService;
 import edu.dosw.utils.IdGenerator;
+import jakarta.validation.ValidationException;
 import java.lang.reflect.Method;
 import java.util.Optional;
-
-import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -214,221 +213,203 @@ class ProfessorServiceTest {
     assertEquals("Different Faculty", result);
     verify(professorRepository, times(1)).findById(differentProfessorId);
   }
-    @Test
-    void createProfessor_WithValidData_ShouldCreateProfessorSuccessfully() {
-        when(idGenerator.generateUniqueId()).thenReturn(GENERATED_ID);
-        doNothing().when(authenticationService).createAuthentication(any(UserInfoDto.class));
 
-        Professor expectedProfessor = new Professor.ProfessorBuilder()
-                .userId(GENERATED_ID)
-                .fullName(validProfessorDto.fullName())
-                .email("juan.perez-g@escuelaing.edu.co")
-                .identityDocument(validProfessorDto.identityDocument())
-                .facultyName(validProfessorDto.facultyName())
-                .build();
+  @Test
+  void createProfessor_WithValidData_ShouldCreateProfessorSuccessfully() {
+    when(idGenerator.generateUniqueId()).thenReturn(GENERATED_ID);
+    doNothing().when(authenticationService).createAuthentication(any(UserInfoDto.class));
 
-        when(professorRepository.save(any(Professor.class))).thenReturn(expectedProfessor);
+    Professor expectedProfessor =
+        new Professor.ProfessorBuilder()
+            .userId(GENERATED_ID)
+            .fullName(validProfessorDto.fullName())
+            .email("juan.perez-g@escuelaing.edu.co")
+            .identityDocument(validProfessorDto.identityDocument())
+            .facultyName(validProfessorDto.facultyName())
+            .build();
 
-        Professor result = professorService.createProfessor(validProfessorDto);
+    when(professorRepository.save(any(Professor.class))).thenReturn(expectedProfessor);
 
-        assertNotNull(result);
-        assertEquals(GENERATED_ID, result.getUserId());
-        assertEquals(validProfessorDto.fullName(), result.getFullName());
-        assertEquals("juan.perez-g@escuelaing.edu.co", result.getEmail());
-        assertEquals(validProfessorDto.identityDocument(), result.getIdentityDocument());
-        assertEquals(validProfessorDto.facultyName(), result.getFacultyName());
+    Professor result = professorService.createProfessor(validProfessorDto);
 
-        verify(idGenerator, times(1)).generateUniqueId();
-        verify(authenticationService, times(1)).createAuthentication(any(UserInfoDto.class));
-        verify(professorRepository, times(1)).save(any(Professor.class));
-    }
+    assertNotNull(result);
+    assertEquals(GENERATED_ID, result.getUserId());
+    assertEquals(validProfessorDto.fullName(), result.getFullName());
+    assertEquals("juan.perez-g@escuelaing.edu.co", result.getEmail());
+    assertEquals(validProfessorDto.identityDocument(), result.getIdentityDocument());
+    assertEquals(validProfessorDto.facultyName(), result.getFacultyName());
 
-    @Test
-    void createProfessor_WithNullIdentityDocument_ShouldThrowValidationException() {
-        ProfessorDto invalidProfessorDto = new ProfessorDto(
-                "Juan Carlos Perez Gomez",
-                null,
-                FACULTY_NAME
-        );
+    verify(idGenerator, times(1)).generateUniqueId();
+    verify(authenticationService, times(1)).createAuthentication(any(UserInfoDto.class));
+    verify(professorRepository, times(1)).save(any(Professor.class));
+  }
 
-        ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> professorService.createProfessor(invalidProfessorDto)
-        );
+  @Test
+  void createProfessor_WithNullIdentityDocument_ShouldThrowValidationException() {
+    ProfessorDto invalidProfessorDto =
+        new ProfessorDto("Juan Carlos Perez Gomez", null, FACULTY_NAME);
 
-        assertEquals("Personal data is incomplete", exception.getMessage());
-        verify(professorRepository, never()).save(any(Professor.class));
-    }
+    ValidationException exception =
+        assertThrows(
+            ValidationException.class, () -> professorService.createProfessor(invalidProfessorDto));
 
-    @Test
-    void createProfessor_WithNullFullName_ShouldThrowValidationException() {
-        ProfessorDto invalidProfessorDto = new ProfessorDto(
-                null,
-                "12345678",
-                FACULTY_NAME
-        );
+    assertEquals("Personal data is incomplete", exception.getMessage());
+    verify(professorRepository, never()).save(any(Professor.class));
+  }
 
-        ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> professorService.createProfessor(invalidProfessorDto)
-        );
+  @Test
+  void createProfessor_WithNullFullName_ShouldThrowValidationException() {
+    ProfessorDto invalidProfessorDto = new ProfessorDto(null, "12345678", FACULTY_NAME);
 
-        assertEquals("Personal data is incomplete", exception.getMessage());
-        verify(professorRepository, never()).save(any(Professor.class));
-    }
+    ValidationException exception =
+        assertThrows(
+            ValidationException.class, () -> professorService.createProfessor(invalidProfessorDto));
 
-    @Test
-    void createProfessor_WithNullFacultyName_ShouldThrowValidationException() {
-        ProfessorDto invalidProfessorDto = new ProfessorDto(
-                "Juan Carlos Perez Gomez",
-                "12345678",
-                null
-        );
+    assertEquals("Personal data is incomplete", exception.getMessage());
+    verify(professorRepository, never()).save(any(Professor.class));
+  }
 
-        ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> professorService.createProfessor(invalidProfessorDto)
-        );
+  @Test
+  void createProfessor_WithNullFacultyName_ShouldThrowValidationException() {
+    ProfessorDto invalidProfessorDto =
+        new ProfessorDto("Juan Carlos Perez Gomez", "12345678", null);
 
-        assertEquals("Academic data is incomplete", exception.getMessage());
-        verify(professorRepository, never()).save(any(Professor.class));
-    }
+    ValidationException exception =
+        assertThrows(
+            ValidationException.class, () -> professorService.createProfessor(invalidProfessorDto));
 
-    @Test
-    void createProfessor_WhenAuthenticationServiceFails_ShouldThrowBusinessException() {
-        when(idGenerator.generateUniqueId()).thenReturn(GENERATED_ID);
-        doThrow(new RuntimeException("Authentication service error"))
-                .when(authenticationService).createAuthentication(any(UserInfoDto.class));
+    assertEquals("Academic data is incomplete", exception.getMessage());
+    verify(professorRepository, never()).save(any(Professor.class));
+  }
 
-        BusinessException exception = assertThrows(
-                BusinessException.class,
-                () -> professorService.createProfessor(validProfessorDto)
-        );
+  @Test
+  void createProfessor_WhenAuthenticationServiceFails_ShouldThrowBusinessException() {
+    when(idGenerator.generateUniqueId()).thenReturn(GENERATED_ID);
+    doThrow(new RuntimeException("Authentication service error"))
+        .when(authenticationService)
+        .createAuthentication(any(UserInfoDto.class));
 
-        assertTrue(exception.getMessage().contains("An inesperated error has occurred when creating the professor"));
-        verify(idGenerator, times(1)).generateUniqueId();
-        verify(authenticationService, times(1)).createAuthentication(any(UserInfoDto.class));
-        verify(professorRepository, never()).save(any(Professor.class));
-    }
+    BusinessException exception =
+        assertThrows(
+            BusinessException.class, () -> professorService.createProfessor(validProfessorDto));
 
-    @Test
-    void createProfessor_WhenRepositorySaveFails_ShouldThrowBusinessException() {
-        when(idGenerator.generateUniqueId()).thenReturn(GENERATED_ID);
-        doNothing().when(authenticationService).createAuthentication(any(UserInfoDto.class));
-        when(professorRepository.save(any(Professor.class))).thenThrow(new RuntimeException("Database error"));
+    assertTrue(
+        exception
+            .getMessage()
+            .contains("An inesperated error has occurred when creating the professor"));
+    verify(idGenerator, times(1)).generateUniqueId();
+    verify(authenticationService, times(1)).createAuthentication(any(UserInfoDto.class));
+    verify(professorRepository, never()).save(any(Professor.class));
+  }
 
-        BusinessException exception = assertThrows(
-                BusinessException.class,
-                () -> professorService.createProfessor(validProfessorDto)
-        );
+  @Test
+  void createProfessor_WhenRepositorySaveFails_ShouldThrowBusinessException() {
+    when(idGenerator.generateUniqueId()).thenReturn(GENERATED_ID);
+    doNothing().when(authenticationService).createAuthentication(any(UserInfoDto.class));
+    when(professorRepository.save(any(Professor.class)))
+        .thenThrow(new RuntimeException("Database error"));
 
-        assertTrue(exception.getMessage().contains("An inesperated error has occurred when creating the professor"));
-        verify(idGenerator, times(1)).generateUniqueId();
-        verify(authenticationService, times(1)).createAuthentication(any(UserInfoDto.class));
-        verify(professorRepository, times(1)).save(any(Professor.class));
-    }
+    BusinessException exception =
+        assertThrows(
+            BusinessException.class, () -> professorService.createProfessor(validProfessorDto));
 
-    @Test
-    void updateProfessor_WithAllFields_ShouldUpdateAllFieldsSuccessfully() {
-        when(professorRepository.findByUserId(PROFESSOR_ID)).thenReturn(Optional.of(existingProfessor));
-        when(professorRepository.save(any(Professor.class))).thenReturn(existingProfessor);
+    assertTrue(
+        exception
+            .getMessage()
+            .contains("An inesperated error has occurred when creating the professor"));
+    verify(idGenerator, times(1)).generateUniqueId();
+    verify(authenticationService, times(1)).createAuthentication(any(UserInfoDto.class));
+    verify(professorRepository, times(1)).save(any(Professor.class));
+  }
 
-        ProfessorDto updateRequest = new ProfessorDto(
-                "Carlos Andres Rodriguez",
-                "87654321",
-                "Computer Science"
-        );
+  @Test
+  void updateProfessor_WithAllFields_ShouldUpdateAllFieldsSuccessfully() {
+    when(professorRepository.findByUserId(PROFESSOR_ID)).thenReturn(Optional.of(existingProfessor));
+    when(professorRepository.save(any(Professor.class))).thenReturn(existingProfessor);
 
-        Professor result = professorService.updateProfessor(PROFESSOR_ID, updateRequest);
+    ProfessorDto updateRequest =
+        new ProfessorDto("Carlos Andres Rodriguez", "87654321", "Computer Science");
 
-        assertNotNull(result);
-        assertEquals("Carlos Andres Rodriguez", existingProfessor.getFullName());
-        assertEquals("87654321", existingProfessor.getIdentityDocument());
-        assertEquals("Computer Science", existingProfessor.getFacultyName());
-        verify(professorRepository, times(1)).findByUserId(PROFESSOR_ID);
-        verify(professorRepository, times(1)).save(existingProfessor);
-    }
+    Professor result = professorService.updateProfessor(PROFESSOR_ID, updateRequest);
 
-    @Test
-    void updateProfessor_WithPartialFields_ShouldUpdateOnlyProvidedFields() {
-        when(professorRepository.findByUserId(PROFESSOR_ID)).thenReturn(Optional.of(existingProfessor));
-        when(professorRepository.save(any(Professor.class))).thenReturn(existingProfessor);
+    assertNotNull(result);
+    assertEquals("Carlos Andres Rodriguez", existingProfessor.getFullName());
+    assertEquals("87654321", existingProfessor.getIdentityDocument());
+    assertEquals("Computer Science", existingProfessor.getFacultyName());
+    verify(professorRepository, times(1)).findByUserId(PROFESSOR_ID);
+    verify(professorRepository, times(1)).save(existingProfessor);
+  }
 
-        ProfessorDto updateRequest = new ProfessorDto(
-                "Nombre Actualizado",
-                null,
-                null
-        );
+  @Test
+  void updateProfessor_WithPartialFields_ShouldUpdateOnlyProvidedFields() {
+    when(professorRepository.findByUserId(PROFESSOR_ID)).thenReturn(Optional.of(existingProfessor));
+    when(professorRepository.save(any(Professor.class))).thenReturn(existingProfessor);
 
-        Professor result = professorService.updateProfessor(PROFESSOR_ID, updateRequest);
+    ProfessorDto updateRequest = new ProfessorDto("Nombre Actualizado", null, null);
 
-        assertNotNull(result);
-        assertEquals("Nombre Actualizado", existingProfessor.getFullName());
-        assertEquals("12345678", existingProfessor.getIdentityDocument());
-        assertEquals(FACULTY_NAME, existingProfessor.getFacultyName());
-        verify(professorRepository, times(1)).findByUserId(PROFESSOR_ID);
-        verify(professorRepository, times(1)).save(existingProfessor);
-    }
+    Professor result = professorService.updateProfessor(PROFESSOR_ID, updateRequest);
 
-    @Test
-    void updateProfessor_WhenProfessorNotFound_ShouldThrowResourceNotFoundException() {
-        when(professorRepository.findByUserId(PROFESSOR_ID)).thenReturn(Optional.empty());
+    assertNotNull(result);
+    assertEquals("Nombre Actualizado", existingProfessor.getFullName());
+    assertEquals("12345678", existingProfessor.getIdentityDocument());
+    assertEquals(FACULTY_NAME, existingProfessor.getFacultyName());
+    verify(professorRepository, times(1)).findByUserId(PROFESSOR_ID);
+    verify(professorRepository, times(1)).save(existingProfessor);
+  }
 
-        ProfessorDto updateRequest = new ProfessorDto(
-                "Nombre Actualizado",
-                "87654321",
-                "Computer Science"
-        );
+  @Test
+  void updateProfessor_WhenProfessorNotFound_ShouldThrowResourceNotFoundException() {
+    when(professorRepository.findByUserId(PROFESSOR_ID)).thenReturn(Optional.empty());
 
-        ResourceNotFoundException exception = assertThrows(
-                ResourceNotFoundException.class,
-                () -> professorService.updateProfessor(PROFESSOR_ID, updateRequest)
-        );
+    ProfessorDto updateRequest =
+        new ProfessorDto("Nombre Actualizado", "87654321", "Computer Science");
 
-        assertEquals("Professor not found", exception.getMessage());
-        verify(professorRepository, times(1)).findByUserId(PROFESSOR_ID);
-        verify(professorRepository, never()).save(any(Professor.class));
-    }
+    ResourceNotFoundException exception =
+        assertThrows(
+            ResourceNotFoundException.class,
+            () -> professorService.updateProfessor(PROFESSOR_ID, updateRequest));
 
-    @Test
-    void updateProfessor_WhenRepositorySaveFails_ShouldThrowBusinessException() {
-        when(professorRepository.findByUserId(PROFESSOR_ID)).thenReturn(Optional.of(existingProfessor));
-        when(professorRepository.save(any(Professor.class))).thenThrow(new RuntimeException("Database error"));
+    assertEquals("Professor not found", exception.getMessage());
+    verify(professorRepository, times(1)).findByUserId(PROFESSOR_ID);
+    verify(professorRepository, never()).save(any(Professor.class));
+  }
 
-        ProfessorDto updateRequest = new ProfessorDto(
-                "Nombre Actualizado",
-                "87654321",
-                "Computer Science"
-        );
+  @Test
+  void updateProfessor_WhenRepositorySaveFails_ShouldThrowBusinessException() {
+    when(professorRepository.findByUserId(PROFESSOR_ID)).thenReturn(Optional.of(existingProfessor));
+    when(professorRepository.save(any(Professor.class)))
+        .thenThrow(new RuntimeException("Database error"));
 
-        BusinessException exception = assertThrows(
-                BusinessException.class,
-                () -> professorService.updateProfessor(PROFESSOR_ID, updateRequest)
-        );
+    ProfessorDto updateRequest =
+        new ProfessorDto("Nombre Actualizado", "87654321", "Computer Science");
 
-        assertTrue(exception.getMessage().contains("An inesperated error has occurred when updating the professor"));
-        verify(professorRepository, times(1)).findByUserId(PROFESSOR_ID);
-        verify(professorRepository, times(1)).save(existingProfessor);
-    }
+    BusinessException exception =
+        assertThrows(
+            BusinessException.class,
+            () -> professorService.updateProfessor(PROFESSOR_ID, updateRequest));
 
-    @Test
-    void updateProfessor_WithOnlyFacultyUpdate_ShouldUpdateOnlyFaculty() {
-        when(professorRepository.findByUserId(PROFESSOR_ID)).thenReturn(Optional.of(existingProfessor));
-        when(professorRepository.save(any(Professor.class))).thenReturn(existingProfessor);
+    assertTrue(
+        exception
+            .getMessage()
+            .contains("An inesperated error has occurred when updating the professor"));
+    verify(professorRepository, times(1)).findByUserId(PROFESSOR_ID);
+    verify(professorRepository, times(1)).save(existingProfessor);
+  }
 
-        ProfessorDto updateRequest = new ProfessorDto(
-                null,
-                null,
-                "Nueva Facultad"
-        );
+  @Test
+  void updateProfessor_WithOnlyFacultyUpdate_ShouldUpdateOnlyFaculty() {
+    when(professorRepository.findByUserId(PROFESSOR_ID)).thenReturn(Optional.of(existingProfessor));
+    when(professorRepository.save(any(Professor.class))).thenReturn(existingProfessor);
 
-        Professor result = professorService.updateProfessor(PROFESSOR_ID, updateRequest);
+    ProfessorDto updateRequest = new ProfessorDto(null, null, "Nueva Facultad");
 
-        assertNotNull(result);
-        assertEquals("Nueva Facultad", existingProfessor.getFacultyName());
-        assertEquals("Juan Carlos Perez Gomez", existingProfessor.getFullName());
-        assertEquals("12345678", existingProfessor.getIdentityDocument());
-        verify(professorRepository, times(1)).findByUserId(PROFESSOR_ID);
-        verify(professorRepository, times(1)).save(existingProfessor);
-    }
+    Professor result = professorService.updateProfessor(PROFESSOR_ID, updateRequest);
+
+    assertNotNull(result);
+    assertEquals("Nueva Facultad", existingProfessor.getFacultyName());
+    assertEquals("Juan Carlos Perez Gomez", existingProfessor.getFullName());
+    assertEquals("12345678", existingProfessor.getIdentityDocument());
+    verify(professorRepository, times(1)).findByUserId(PROFESSOR_ID);
+    verify(professorRepository, times(1)).save(existingProfessor);
+  }
 }

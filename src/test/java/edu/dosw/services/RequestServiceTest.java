@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 
 import edu.dosw.dto.CreateRequestDto;
 import edu.dosw.dto.RequestPeriodDTO;
-import edu.dosw.dto.RequestStats;
 import edu.dosw.dto.UpdateRequestDto;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.exception.ResourceNotFoundException;
@@ -21,13 +20,11 @@ import edu.dosw.services.UserServices.StudentService;
 import edu.dosw.services.Validators.RequestValidator;
 import edu.dosw.services.strategy.AnswerStrategies.AnswerStrategy;
 import edu.dosw.services.strategy.AnswerStrategies.AnswerStrategyFactory;
-
+import edu.dosw.services.strategy.queryStrategies.QueryStrategy;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.*;
-
-import edu.dosw.services.strategy.queryStrategies.QueryStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -269,9 +266,7 @@ class RequestServiceTest {
     when(answerStrategyFactory.getStrategy(RequestType.SWAP)).thenReturn(answerStrategy);
     when(requestRepository.save(any(Request.class))).thenReturn(mockRequest1);
 
-
     requestService.updateRequest("USER001", updateRequestDto);
-
 
     verify(requestRepository).save(argThat(request -> request.getGestedBy().equals("DEAN001")));
     verify(requestPeriodService).getActivePeriod();
@@ -442,794 +437,803 @@ class RequestServiceTest {
     assertNull(request.getAnswer());
   }
 
+  @Test
+  void countByGroupCodes_ShouldReturnCount() {
+    List<String> groupCodes = List.of("GROUP001", "GROUP002");
+    when(requestRepository.countByGroupCodes(groupCodes)).thenReturn(5);
 
-    @Test
-    void countByGroupCodes_ShouldReturnCount() {
-        List<String> groupCodes = List.of("GROUP001", "GROUP002");
-        when(requestRepository.countByGroupCodes(groupCodes)).thenReturn(5);
+    Integer result = requestService.countByGroupCodes(groupCodes);
 
-        Integer result = requestService.countByGroupCodes(groupCodes);
+    assertEquals(5, result);
+    verify(requestRepository).countByGroupCodes(groupCodes);
+  }
 
-        assertEquals(5, result);
-        verify(requestRepository).countByGroupCodes(groupCodes);
+  @Test
+  void countByGroupCodes_ShouldThrowBusinessException_WhenRepositoryFails() {
+    List<String> groupCodes = List.of("GROUP001");
+    when(requestRepository.countByGroupCodes(groupCodes))
+        .thenThrow(new RuntimeException("DB error"));
+
+    assertThrows(BusinessException.class, () -> requestService.countByGroupCodes(groupCodes));
+  }
+
+  @Test
+  void getWaitingListOfGroup_ShouldReturnStudentIds() {
+    String groupCode = "GROUP001";
+    Request pendingRequest1 =
+        new Request.RequestBuilder()
+            .studentId("STU001")
+            .type(RequestType.JOIN)
+            .destinationGroupId(groupCode)
+            .build();
+    pendingRequest1.setStatus(RequestStatus.PENDING);
+
+    Request pendingRequest2 =
+        new Request.RequestBuilder()
+            .studentId("STU002")
+            .type(RequestType.JOIN)
+            .destinationGroupId(groupCode)
+            .build();
+    pendingRequest2.setStatus(RequestStatus.PENDING);
+
+    Request acceptedRequest =
+        new Request.RequestBuilder()
+            .studentId("STU003")
+            .type(RequestType.JOIN)
+            .destinationGroupId(groupCode)
+            .build();
+    acceptedRequest.setStatus(RequestStatus.ACCEPTED);
+
+    when(requestRepository.getRequestByDestinationGroupId(groupCode))
+        .thenReturn(List.of(pendingRequest1, pendingRequest2, acceptedRequest));
+
+    List<String> result = requestService.getWaitingListOfGroup(groupCode);
+
+    assertEquals(2, result.size());
+    assertTrue(result.contains("STU001"));
+    assertTrue(result.contains("STU002"));
+    assertFalse(result.contains("STU003"));
+  }
+
+  @Test
+  void getWaitingListOfGroup_ShouldThrowException_WhenNoRequestsFound() {
+    String groupCode = "NONEXISTENT";
+    when(requestRepository.getRequestByDestinationGroupId(groupCode)).thenReturn(null);
+
+    assertThrows(RuntimeException.class, () -> requestService.getWaitingListOfGroup(groupCode));
+  }
+
+  @Test
+  void countByGroupCodesAndStatus_ShouldReturnCount() {
+    List<String> groupCodes = List.of("GROUP001", "GROUP002");
+    RequestStatus status = RequestStatus.PENDING;
+    when(requestRepository.countByGroupCodesAndStatus(groupCodes, status)).thenReturn(3);
+
+    Integer result = requestService.countByGroupCodesAndStatus(groupCodes, status);
+
+    assertEquals(3, result);
+    verify(requestRepository).countByGroupCodesAndStatus(groupCodes, status);
+  }
+
+  @Test
+  void countByGroupCodesAndType_ShouldReturnCount() {
+    List<String> groupCodes = List.of("GROUP001");
+    RequestType type = RequestType.JOIN;
+    when(requestRepository.countByGroupCodesAndType(groupCodes, type)).thenReturn(2);
+
+    Integer result = requestService.countByGroupCodesAndType(groupCodes, type);
+
+    assertEquals(2, result);
+    verify(requestRepository).countByGroupCodesAndType(groupCodes, type);
+  }
+
+  @Test
+  void countByStatus_ShouldReturnCount() {
+    RequestStatus status = RequestStatus.ACCEPTED;
+    when(requestRepository.countByStatus(status)).thenReturn(25);
+
+    Integer result = requestService.countByStatus(status);
+
+    assertEquals(25, result);
+    verify(requestRepository).countByStatus(status);
+  }
+
+  @Test
+  void countByType_ShouldReturnCount() {
+    RequestType type = RequestType.SWAP;
+    when(requestRepository.countByType(type)).thenReturn(15);
+
+    Integer result = requestService.countByType(type);
+
+    assertEquals(15, result);
+    verify(requestRepository).countByType(type);
+  }
+
+  @Test
+  void countTotalRequests_ShouldReturnTotalCount() {
+    when(requestRepository.count()).thenReturn(150L);
+
+    Integer result = requestService.countTotalRequests();
+
+    assertEquals(150, result);
+    verify(requestRepository).count();
+  }
+
+  @Test
+  void countTotalRequests_ShouldThrowBusinessException_WhenCountFails() {
+    when(requestRepository.count()).thenThrow(new RuntimeException("Count failed"));
+
+    assertThrows(BusinessException.class, () -> requestService.countTotalRequests());
+  }
+
+  @Test
+  void requestAnswerReplicator_ShouldCallAnswerStrategy_WhenStatusAccepted() {
+    Request request =
+        new Request.RequestBuilder().studentId("STU001").type(RequestType.SWAP).build();
+    request.setStatus(RequestStatus.ACCEPTED);
+
+    when(answerStrategyFactory.getStrategy(RequestType.SWAP)).thenReturn(answerStrategy);
+
+    // Usar reflection para llamar al método privado
+    invokePrivateMethod(requestService, "requestAnswerReplicator", request);
+
+    verify(answerStrategy).answerRequest(request);
+  }
+
+  @Test
+  void requestAnswerReplicator_ShouldNotCallAnswerStrategy_WhenStatusNotAccepted() {
+    Request request =
+        new Request.RequestBuilder().studentId("STU001").type(RequestType.SWAP).build();
+    request.setStatus(RequestStatus.PENDING);
+
+    invokePrivateMethod(requestService, "requestAnswerReplicator", request);
+
+    verify(answerStrategyFactory, never()).getStrategy(any());
+    verify(answerStrategy, never()).answerRequest(any());
+  }
+
+  @Test
+  void updateRequest_ShouldHandleWaitingStatus() {
+    UpdateRequestDto waitingDto =
+        new UpdateRequestDto("REQ001", RequestStatus.WAITING, "Need more info", "PROF001");
+    Request request =
+        new Request.RequestBuilder().studentId("STU001").type(RequestType.JOIN).build();
+
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
+    when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(request));
+    doNothing()
+        .when(requestValidator)
+        .validateUpdateRequest(anyString(), eq(request), eq(waitingDto));
+    when(requestRepository.save(any(Request.class))).thenReturn(request);
+
+    Request result = requestService.updateRequest("USER001", waitingDto);
+
+    assertNotNull(result);
+    assertEquals(RequestStatus.WAITING, result.getStatus());
+    verify(answerStrategyFactory, never()).getStrategy(any());
+  }
+
+  @Test
+  void updateRequest_ShouldHandleInReviewStatus() {
+    UpdateRequestDto inReviewDto =
+        new UpdateRequestDto("REQ001", RequestStatus.IN_REVIEW, "Under review", "DEAN001");
+    Request request =
+        new Request.RequestBuilder().studentId("STU001").type(RequestType.CANCELLATION).build();
+
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
+    when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(request));
+    doNothing()
+        .when(requestValidator)
+        .validateUpdateRequest(anyString(), eq(request), eq(inReviewDto));
+    when(requestRepository.save(any(Request.class))).thenReturn(request);
+
+    Request result = requestService.updateRequest("USER001", inReviewDto);
+
+    assertNotNull(result);
+    assertEquals(RequestStatus.IN_REVIEW, result.getStatus());
+    verify(answerStrategyFactory, never()).getStrategy(any());
+  }
+
+  @Test
+  void createRequest_ShouldSetDefaultValuesCorrectly() {
+    CreateRequestDto createDto =
+        new CreateRequestDto("STU001", RequestType.JOIN, "Test request", null, "GROUP001");
+
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
+    doNothing().when(requestValidator).validateCreateRequest(createDto);
+    when(requestRepository.save(any(Request.class)))
+        .thenAnswer(
+            invocation -> {
+              Request saved = invocation.getArgument(0);
+              assertEquals("STU001", saved.getStudentId());
+              assertEquals(RequestType.JOIN, saved.getType());
+              assertEquals("Test request", saved.getDescription());
+              assertEquals("GROUP001", saved.getDestinationGroupId());
+              assertNull(saved.getOriginGroupId());
+              assertEquals(RequestStatus.PENDING, saved.getStatus());
+              assertNotNull(saved.getRequestId());
+              assertNotNull(saved.getCreatedAt());
+              assertNotNull(saved.getUpdatedAt());
+              assertFalse(saved.getIsExceptional());
+              assertNull(saved.getGestedBy());
+              assertNull(saved.getAnswer());
+              return saved;
+            });
+
+    requestService.createRequest(createDto);
+  }
+
+  @Test
+  void updateRequest_ShouldHandleNullAnswerAndManagedBy() {
+    UpdateRequestDto updateDto = new UpdateRequestDto("REQ001", RequestStatus.PENDING, null, null);
+    Request request =
+        new Request.RequestBuilder().studentId("STU001").type(RequestType.SWAP).build();
+
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
+    when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(request));
+    doNothing()
+        .when(requestValidator)
+        .validateUpdateRequest(anyString(), eq(request), eq(updateDto));
+    when(requestRepository.save(any(Request.class))).thenReturn(request);
+
+    Request result = requestService.updateRequest("USER001", updateDto);
+
+    assertNotNull(result);
+    assertEquals(RequestStatus.PENDING, result.getStatus());
+    assertNull(result.getAnswer());
+    assertNull(result.getGestedBy());
+  }
+
+  @Test
+  void updateRequest_ShouldUpdateOnlyStatusWhenOtherFieldsNull() {
+    UpdateRequestDto updateDto = new UpdateRequestDto("REQ001", RequestStatus.REJECTED, null, null);
+    Request originalRequest =
+        new Request.RequestBuilder().studentId("STU001").type(RequestType.CANCELLATION).build();
+    originalRequest.setAnswer("Original answer");
+    originalRequest.setGestedBy("Original user");
+
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
+    when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(originalRequest));
+    doNothing()
+        .when(requestValidator)
+        .validateUpdateRequest(anyString(), eq(originalRequest), eq(updateDto));
+    when(requestRepository.save(any(Request.class))).thenReturn(originalRequest);
+
+    Request result = requestService.updateRequest("USER001", updateDto);
+
+    assertEquals(RequestStatus.REJECTED, result.getStatus());
+    assertEquals("Original answer", result.getAnswer());
+    assertEquals("Original user", result.getGestedBy());
+  }
+
+  @Test
+  void fetchAllRequests_ShouldReturnSortedByCreatedAt() {
+    LocalDate now = LocalDate.now();
+    Request request1 =
+        new Request.RequestBuilder().studentId("STU001").type(RequestType.JOIN).build();
+    request1.setCreatedAt(now.minusDays(2));
+    Request request2 =
+        new Request.RequestBuilder().studentId("STU002").type(RequestType.SWAP).build();
+    request2.setCreatedAt(now.minusDays(1));
+    Request request3 =
+        new Request.RequestBuilder().studentId("STU003").type(RequestType.CANCELLATION).build();
+    request3.setCreatedAt(now);
+
+    List<Request> unsortedList = List.of(request3, request1, request2);
+    when(requestRepository.findAll()).thenReturn(unsortedList);
+
+    List<Request> result = requestService.fetchAllRequests();
+
+    assertEquals(3, result.size());
+    assertEquals(now.minusDays(2), result.get(0).getCreatedAt());
+    assertEquals(now.minusDays(1), result.get(1).getCreatedAt());
+    assertEquals(now, result.get(2).getCreatedAt());
+  }
+
+  @Test
+  void fetchAllRequests_ShouldHandleEmptyList() {
+    when(requestRepository.findAll()).thenReturn(List.of());
+
+    List<Request> result = requestService.fetchAllRequests();
+
+    assertNotNull(result);
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void fetchAllRequests_ShouldThrowBusinessException_WhenRepositoryFails() {
+    when(requestRepository.findAll()).thenThrow(new RuntimeException("Database error"));
+
+    assertThrows(BusinessException.class, () -> requestService.fetchAllRequests());
+  }
+
+  @Test
+  void fetchRequestsByFacultyName_ShouldReturnSortedByCreatedAtDescending() {
+    String facultyName = "Engineering";
+    LocalDate now = LocalDate.now();
+
+    Request request1 =
+        new Request.RequestBuilder().studentId("STU001").type(RequestType.JOIN).build();
+    request1.setCreatedAt(now.minusDays(2));
+    Request request2 =
+        new Request.RequestBuilder().studentId("STU002").type(RequestType.SWAP).build();
+    request2.setCreatedAt(now.minusDays(1));
+    Request request3 =
+        new Request.RequestBuilder().studentId("STU003").type(RequestType.CANCELLATION).build();
+    request3.setCreatedAt(now);
+
+    List<Request> allRequests = List.of(request1, request2, request3);
+
+    when(requestRepository.findAll()).thenReturn(allRequests);
+    when(studentService.getFacultyByStudentId("STU001")).thenReturn("Engineering");
+    when(studentService.getFacultyByStudentId("STU002")).thenReturn("Engineering");
+    when(studentService.getFacultyByStudentId("STU003")).thenReturn("Engineering");
+    doNothing().when(requestValidator).validateFacultyName(facultyName);
+
+    List<Request> result = requestService.fetchRequestsByFacultyName(facultyName);
+
+    assertEquals(3, result.size());
+    assertEquals(now, result.get(0).getCreatedAt());
+    assertEquals(now.minusDays(1), result.get(1).getCreatedAt());
+    assertEquals(now.minusDays(2), result.get(2).getCreatedAt());
+  }
+
+  @Test
+  void fetchRequestsByFacultyName_ShouldFilterByFacultyCorrectly() {
+    String facultyName = "Engineering";
+
+    Request engRequest1 =
+        new Request.RequestBuilder().studentId("STU001").type(RequestType.JOIN).build();
+    Request engRequest2 =
+        new Request.RequestBuilder().studentId("STU002").type(RequestType.SWAP).build();
+    Request medRequest =
+        new Request.RequestBuilder().studentId("STU003").type(RequestType.CANCELLATION).build();
+
+    List<Request> allRequests = List.of(engRequest1, engRequest2, medRequest);
+
+    when(requestRepository.findAll()).thenReturn(allRequests);
+    when(studentService.getFacultyByStudentId("STU001")).thenReturn("Engineering");
+    when(studentService.getFacultyByStudentId("STU002")).thenReturn("Engineering");
+    when(studentService.getFacultyByStudentId("STU003")).thenReturn("Medicine");
+    doNothing().when(requestValidator).validateFacultyName(facultyName);
+
+    List<Request> result = requestService.fetchRequestsByFacultyName(facultyName);
+
+    assertEquals(2, result.size());
+    assertTrue(
+        result.stream()
+            .allMatch(
+                req -> req.getStudentId().equals("STU001") || req.getStudentId().equals("STU002")));
+  }
+
+  @Test
+  void countByGroupCodesAndStatus_ShouldHandleEmptyGroupCodes() {
+    List<String> emptyGroupCodes = List.of();
+    RequestStatus status = RequestStatus.PENDING;
+
+    when(requestRepository.countByGroupCodesAndStatus(emptyGroupCodes, status)).thenReturn(0);
+
+    Integer result = requestService.countByGroupCodesAndStatus(emptyGroupCodes, status);
+
+    assertEquals(0, result);
+    verify(requestRepository).countByGroupCodesAndStatus(emptyGroupCodes, status);
+  }
+
+  @Test
+  void countByGroupCodesAndStatus_ShouldHandleAllStatusTypes() {
+    List<String> groupCodes = List.of("GROUP001", "GROUP002");
+
+    for (RequestStatus status : RequestStatus.values()) {
+      when(requestRepository.countByGroupCodesAndStatus(groupCodes, status))
+          .thenReturn(status.ordinal() + 1);
+
+      Integer result = requestService.countByGroupCodesAndStatus(groupCodes, status);
+
+      assertEquals(status.ordinal() + 1, result);
+      verify(requestRepository).countByGroupCodesAndStatus(groupCodes, status);
+
+      reset(requestRepository);
     }
+  }
 
-    @Test
-    void countByGroupCodes_ShouldThrowBusinessException_WhenRepositoryFails() {
-        List<String> groupCodes = List.of("GROUP001");
-        when(requestRepository.countByGroupCodes(groupCodes)).thenThrow(new RuntimeException("DB error"));
+  @Test
+  void countByGroupCodesAndType_ShouldHandleAllRequestTypes() {
+    List<String> groupCodes = List.of("GROUP001");
 
-        assertThrows(BusinessException.class, () -> requestService.countByGroupCodes(groupCodes));
+    for (RequestType type : RequestType.values()) {
+      when(requestRepository.countByGroupCodesAndType(groupCodes, type))
+          .thenReturn(type.ordinal() + 1);
+
+      Integer result = requestService.countByGroupCodesAndType(groupCodes, type);
+
+      assertEquals(type.ordinal() + 1, result);
+      verify(requestRepository).countByGroupCodesAndType(groupCodes, type);
+
+      reset(requestRepository);
     }
+  }
 
-    @Test
-    void getWaitingListOfGroup_ShouldReturnStudentIds() {
-        String groupCode = "GROUP001";
-        Request pendingRequest1 = new Request.RequestBuilder()
-                .studentId("STU001")
-                .type(RequestType.JOIN)
-                .destinationGroupId(groupCode)
-                .build();
-        pendingRequest1.setStatus(RequestStatus.PENDING);
+  @Test
+  void countByStatus_ShouldHandleAllStatusTypes() {
+    for (RequestStatus status : RequestStatus.values()) {
+      when(requestRepository.countByStatus(status)).thenReturn(status.ordinal() * 10);
 
-        Request pendingRequest2 = new Request.RequestBuilder()
-                .studentId("STU002")
-                .type(RequestType.JOIN)
-                .destinationGroupId(groupCode)
-                .build();
-        pendingRequest2.setStatus(RequestStatus.PENDING);
+      Integer result = requestService.countByStatus(status);
 
-        Request acceptedRequest = new Request.RequestBuilder()
-                .studentId("STU003")
-                .type(RequestType.JOIN)
-                .destinationGroupId(groupCode)
-                .build();
-        acceptedRequest.setStatus(RequestStatus.ACCEPTED);
+      assertEquals(status.ordinal() * 10, result);
+      verify(requestRepository).countByStatus(status);
 
-        when(requestRepository.getRequestByDestinationGroupId(groupCode))
-                .thenReturn(List.of(pendingRequest1, pendingRequest2, acceptedRequest));
-
-        List<String> result = requestService.getWaitingListOfGroup(groupCode);
-
-        assertEquals(2, result.size());
-        assertTrue(result.contains("STU001"));
-        assertTrue(result.contains("STU002"));
-        assertFalse(result.contains("STU003"));
+      reset(requestRepository);
     }
+  }
 
-    @Test
-    void getWaitingListOfGroup_ShouldThrowException_WhenNoRequestsFound() {
-        String groupCode = "NONEXISTENT";
-        when(requestRepository.getRequestByDestinationGroupId(groupCode)).thenReturn(null);
+  @Test
+  void countByType_ShouldHandleAllRequestTypes() {
+    for (RequestType type : RequestType.values()) {
+      when(requestRepository.countByType(type)).thenReturn(type.ordinal() * 5);
 
-        assertThrows(RuntimeException.class, () -> requestService.getWaitingListOfGroup(groupCode));
+      Integer result = requestService.countByType(type);
+
+      assertEquals(type.ordinal() * 5, result);
+      verify(requestRepository).countByType(type);
+
+      reset(requestRepository);
     }
+  }
 
-    @Test
-    void countByGroupCodesAndStatus_ShouldReturnCount() {
-        List<String> groupCodes = List.of("GROUP001", "GROUP002");
-        RequestStatus status = RequestStatus.PENDING;
-        when(requestRepository.countByGroupCodesAndStatus(groupCodes, status)).thenReturn(3);
+  @Test
+  void createRequest_ShouldHandleAllRequestTypesWithDifferentFieldCombinations() {
+    for (RequestType type : RequestType.values()) {
+      CreateRequestDto createDto;
 
-        Integer result = requestService.countByGroupCodesAndStatus(groupCodes, status);
+      switch (type) {
+        case JOIN:
+          createDto = new CreateRequestDto("STU001", type, "Join description", null, "GROUP001");
+          break;
+        case SWAP:
+          createDto =
+              new CreateRequestDto("STU001", type, "Swap description", "GROUP001", "GROUP002");
+          break;
+        case CANCELLATION:
+          createDto = new CreateRequestDto("STU001", type, "Cancel description", "GROUP001", null);
+          break;
+        default:
+          continue;
+      }
 
-        assertEquals(3, result);
-        verify(requestRepository).countByGroupCodesAndStatus(groupCodes, status);
+      when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
+      doNothing().when(requestValidator).validateCreateRequest(createDto);
+      when(requestRepository.save(any(Request.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      Request result = requestService.createRequest(createDto);
+
+      assertNotNull(result);
+      assertEquals(type, result.getType());
+      assertEquals("STU001", result.getStudentId());
+      assertEquals(RequestStatus.PENDING, result.getStatus());
+      assertNotNull(result.getRequestId());
+      assertNotNull(result.getCreatedAt());
+
+      reset(requestPeriodService, requestValidator, requestRepository);
     }
+  }
 
-    @Test
-    void countByGroupCodesAndType_ShouldReturnCount() {
-        List<String> groupCodes = List.of("GROUP001");
-        RequestType type = RequestType.JOIN;
-        when(requestRepository.countByGroupCodesAndType(groupCodes, type)).thenReturn(2);
+  private void injectMockStrategy(Role role, QueryStrategy mockStrategy) {
+    try {
+      Field strategyMapField = RequestService.class.getDeclaredField("strategyMap");
+      strategyMapField.setAccessible(true);
 
-        Integer result = requestService.countByGroupCodesAndType(groupCodes, type);
+      @SuppressWarnings("unchecked")
+      Map<Role, QueryStrategy> strategyMap =
+          (Map<Role, QueryStrategy>) strategyMapField.get(requestService);
 
-        assertEquals(2, result);
-        verify(requestRepository).countByGroupCodesAndType(groupCodes, type);
+      Map<Role, QueryStrategy> newStrategyMap = new HashMap<>(strategyMap);
+      newStrategyMap.put(role, mockStrategy);
+
+      strategyMapField.set(requestService, newStrategyMap);
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to inject mock strategy", e);
     }
+  }
 
-    @Test
-    void countByStatus_ShouldReturnCount() {
-        RequestStatus status = RequestStatus.ACCEPTED;
-        when(requestRepository.countByStatus(status)).thenReturn(25);
-
-        Integer result = requestService.countByStatus(status);
-
-        assertEquals(25, result);
-        verify(requestRepository).countByStatus(status);
+  private void invokePrivateMethod(Object object, String methodName, Object... args) {
+    try {
+      Method method = object.getClass().getDeclaredMethod(methodName, getParameterTypes(args));
+      method.setAccessible(true);
+      method.invoke(object, args);
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to invoke private method", e);
     }
+  }
 
-    @Test
-    void countByType_ShouldReturnCount() {
-        RequestType type = RequestType.SWAP;
-        when(requestRepository.countByType(type)).thenReturn(15);
-
-        Integer result = requestService.countByType(type);
-
-        assertEquals(15, result);
-        verify(requestRepository).countByType(type);
-    }
-
-    @Test
-    void countTotalRequests_ShouldReturnTotalCount() {
-        when(requestRepository.count()).thenReturn(150L);
-
-        Integer result = requestService.countTotalRequests();
-
-        assertEquals(150, result);
-        verify(requestRepository).count();
-    }
-
-    @Test
-    void countTotalRequests_ShouldThrowBusinessException_WhenCountFails() {
-        when(requestRepository.count()).thenThrow(new RuntimeException("Count failed"));
-
-        assertThrows(BusinessException.class, () -> requestService.countTotalRequests());
-    }
-
-    @Test
-    void requestAnswerReplicator_ShouldCallAnswerStrategy_WhenStatusAccepted() {
-        Request request = new Request.RequestBuilder()
-                .studentId("STU001")
-                .type(RequestType.SWAP)
-                .build();
-        request.setStatus(RequestStatus.ACCEPTED);
-
-        when(answerStrategyFactory.getStrategy(RequestType.SWAP)).thenReturn(answerStrategy);
-
-        // Usar reflection para llamar al método privado
-        invokePrivateMethod(requestService, "requestAnswerReplicator", request);
-
-        verify(answerStrategy).answerRequest(request);
-    }
-
-    @Test
-    void requestAnswerReplicator_ShouldNotCallAnswerStrategy_WhenStatusNotAccepted() {
-        Request request = new Request.RequestBuilder()
-                .studentId("STU001")
-                .type(RequestType.SWAP)
-                .build();
-        request.setStatus(RequestStatus.PENDING);
-
-        invokePrivateMethod(requestService, "requestAnswerReplicator", request);
-
-        verify(answerStrategyFactory, never()).getStrategy(any());
-        verify(answerStrategy, never()).answerRequest(any());
-    }
-
-    @Test
-    void updateRequest_ShouldHandleWaitingStatus() {
-        UpdateRequestDto waitingDto = new UpdateRequestDto("REQ001", RequestStatus.WAITING, "Need more info", "PROF001");
-        Request request = new Request.RequestBuilder()
-                .studentId("STU001")
-                .type(RequestType.JOIN)
-                .build();
-
-        when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
-        when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(request));
-        doNothing().when(requestValidator).validateUpdateRequest(anyString(), eq(request), eq(waitingDto));
-        when(requestRepository.save(any(Request.class))).thenReturn(request);
-
-        Request result = requestService.updateRequest("USER001", waitingDto);
-
-        assertNotNull(result);
-        assertEquals(RequestStatus.WAITING, result.getStatus());
-        verify(answerStrategyFactory, never()).getStrategy(any());
-    }
-
-    @Test
-    void updateRequest_ShouldHandleInReviewStatus() {
-        UpdateRequestDto inReviewDto = new UpdateRequestDto("REQ001", RequestStatus.IN_REVIEW, "Under review", "DEAN001");
-        Request request = new Request.RequestBuilder()
-                .studentId("STU001")
-                .type(RequestType.CANCELLATION)
-                .build();
-
-        when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
-        when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(request));
-        doNothing().when(requestValidator).validateUpdateRequest(anyString(), eq(request), eq(inReviewDto));
-        when(requestRepository.save(any(Request.class))).thenReturn(request);
-
-        Request result = requestService.updateRequest("USER001", inReviewDto);
-
-        assertNotNull(result);
-        assertEquals(RequestStatus.IN_REVIEW, result.getStatus());
-        verify(answerStrategyFactory, never()).getStrategy(any());
-    }
-
-    @Test
-    void createRequest_ShouldSetDefaultValuesCorrectly() {
-        CreateRequestDto createDto = new CreateRequestDto("STU001", RequestType.JOIN, "Test request", null, "GROUP001");
-
-        when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
-        doNothing().when(requestValidator).validateCreateRequest(createDto);
-        when(requestRepository.save(any(Request.class))).thenAnswer(invocation -> {
-            Request saved = invocation.getArgument(0);
-            assertEquals("STU001", saved.getStudentId());
-            assertEquals(RequestType.JOIN, saved.getType());
-            assertEquals("Test request", saved.getDescription());
-            assertEquals("GROUP001", saved.getDestinationGroupId());
-            assertNull(saved.getOriginGroupId());
-            assertEquals(RequestStatus.PENDING, saved.getStatus());
-            assertNotNull(saved.getRequestId());
-            assertNotNull(saved.getCreatedAt());
-            assertNotNull(saved.getUpdatedAt());
-            assertFalse(saved.getIsExceptional());
-            assertNull(saved.getGestedBy());
-            assertNull(saved.getAnswer());
-            return saved;
-        });
-
-        requestService.createRequest(createDto);
-    }
-
-
-    @Test
-    void updateRequest_ShouldHandleNullAnswerAndManagedBy() {
-        UpdateRequestDto updateDto = new UpdateRequestDto("REQ001", RequestStatus.PENDING, null, null);
-        Request request = new Request.RequestBuilder()
-                .studentId("STU001")
-                .type(RequestType.SWAP)
-                .build();
-
-        when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
-        when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(request));
-        doNothing().when(requestValidator).validateUpdateRequest(anyString(), eq(request), eq(updateDto));
-        when(requestRepository.save(any(Request.class))).thenReturn(request);
-
-        Request result = requestService.updateRequest("USER001", updateDto);
-
-        assertNotNull(result);
-        assertEquals(RequestStatus.PENDING, result.getStatus());
-        assertNull(result.getAnswer());
-        assertNull(result.getGestedBy());
-    }
-
-    @Test
-    void updateRequest_ShouldUpdateOnlyStatusWhenOtherFieldsNull() {
-        UpdateRequestDto updateDto = new UpdateRequestDto("REQ001", RequestStatus.REJECTED, null, null);
-        Request originalRequest = new Request.RequestBuilder()
-                .studentId("STU001")
-                .type(RequestType.CANCELLATION)
-                .build();
-        originalRequest.setAnswer("Original answer");
-        originalRequest.setGestedBy("Original user");
-
-        when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
-        when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(originalRequest));
-        doNothing().when(requestValidator).validateUpdateRequest(anyString(), eq(originalRequest), eq(updateDto));
-        when(requestRepository.save(any(Request.class))).thenReturn(originalRequest);
-
-        Request result = requestService.updateRequest("USER001", updateDto);
-
-        assertEquals(RequestStatus.REJECTED, result.getStatus());
-        assertEquals("Original answer", result.getAnswer());
-        assertEquals("Original user", result.getGestedBy());
-    }
-
-    @Test
-    void fetchAllRequests_ShouldReturnSortedByCreatedAt() {
-        LocalDate now = LocalDate.now();
-        Request request1 = new Request.RequestBuilder().studentId("STU001").type(RequestType.JOIN).build();
-        request1.setCreatedAt(now.minusDays(2));
-        Request request2 = new Request.RequestBuilder().studentId("STU002").type(RequestType.SWAP).build();
-        request2.setCreatedAt(now.minusDays(1));
-        Request request3 = new Request.RequestBuilder().studentId("STU003").type(RequestType.CANCELLATION).build();
-        request3.setCreatedAt(now);
-
-        List<Request> unsortedList = List.of(request3, request1, request2);
-        when(requestRepository.findAll()).thenReturn(unsortedList);
-
-        List<Request> result = requestService.fetchAllRequests();
-
-        assertEquals(3, result.size());
-        assertEquals(now.minusDays(2), result.get(0).getCreatedAt());
-        assertEquals(now.minusDays(1), result.get(1).getCreatedAt());
-        assertEquals(now, result.get(2).getCreatedAt());
-    }
-
-    @Test
-    void fetchAllRequests_ShouldHandleEmptyList() {
-        when(requestRepository.findAll()).thenReturn(List.of());
-
-        List<Request> result = requestService.fetchAllRequests();
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void fetchAllRequests_ShouldThrowBusinessException_WhenRepositoryFails() {
-        when(requestRepository.findAll()).thenThrow(new RuntimeException("Database error"));
-
-        assertThrows(BusinessException.class, () -> requestService.fetchAllRequests());
-    }
-
-    @Test
-    void fetchRequestsByFacultyName_ShouldReturnSortedByCreatedAtDescending() {
-        String facultyName = "Engineering";
-        LocalDate now = LocalDate.now();
-
-        Request request1 = new Request.RequestBuilder().studentId("STU001").type(RequestType.JOIN).build();
-        request1.setCreatedAt(now.minusDays(2));
-        Request request2 = new Request.RequestBuilder().studentId("STU002").type(RequestType.SWAP).build();
-        request2.setCreatedAt(now.minusDays(1));
-        Request request3 = new Request.RequestBuilder().studentId("STU003").type(RequestType.CANCELLATION).build();
-        request3.setCreatedAt(now);
-
-        List<Request> allRequests = List.of(request1, request2, request3);
-
-        when(requestRepository.findAll()).thenReturn(allRequests);
-        when(studentService.getFacultyByStudentId("STU001")).thenReturn("Engineering");
-        when(studentService.getFacultyByStudentId("STU002")).thenReturn("Engineering");
-        when(studentService.getFacultyByStudentId("STU003")).thenReturn("Engineering");
-        doNothing().when(requestValidator).validateFacultyName(facultyName);
-
-        List<Request> result = requestService.fetchRequestsByFacultyName(facultyName);
-
-        assertEquals(3, result.size());
-        assertEquals(now, result.get(0).getCreatedAt());
-        assertEquals(now.minusDays(1), result.get(1).getCreatedAt());
-        assertEquals(now.minusDays(2), result.get(2).getCreatedAt());
-    }
-
-    @Test
-    void fetchRequestsByFacultyName_ShouldFilterByFacultyCorrectly() {
-        String facultyName = "Engineering";
-
-        Request engRequest1 = new Request.RequestBuilder().studentId("STU001").type(RequestType.JOIN).build();
-        Request engRequest2 = new Request.RequestBuilder().studentId("STU002").type(RequestType.SWAP).build();
-        Request medRequest = new Request.RequestBuilder().studentId("STU003").type(RequestType.CANCELLATION).build();
-
-        List<Request> allRequests = List.of(engRequest1, engRequest2, medRequest);
-
-        when(requestRepository.findAll()).thenReturn(allRequests);
-        when(studentService.getFacultyByStudentId("STU001")).thenReturn("Engineering");
-        when(studentService.getFacultyByStudentId("STU002")).thenReturn("Engineering");
-        when(studentService.getFacultyByStudentId("STU003")).thenReturn("Medicine");
-        doNothing().when(requestValidator).validateFacultyName(facultyName);
-
-        List<Request> result = requestService.fetchRequestsByFacultyName(facultyName);
-
-        assertEquals(2, result.size());
-        assertTrue(result.stream().allMatch(req ->
-                req.getStudentId().equals("STU001") || req.getStudentId().equals("STU002")));
-    }
-
-
-
-    @Test
-    void countByGroupCodesAndStatus_ShouldHandleEmptyGroupCodes() {
-        List<String> emptyGroupCodes = List.of();
-        RequestStatus status = RequestStatus.PENDING;
-
-        when(requestRepository.countByGroupCodesAndStatus(emptyGroupCodes, status)).thenReturn(0);
-
-        Integer result = requestService.countByGroupCodesAndStatus(emptyGroupCodes, status);
-
-        assertEquals(0, result);
-        verify(requestRepository).countByGroupCodesAndStatus(emptyGroupCodes, status);
-    }
-
-    @Test
-    void countByGroupCodesAndStatus_ShouldHandleAllStatusTypes() {
-        List<String> groupCodes = List.of("GROUP001", "GROUP002");
-
-        for (RequestStatus status : RequestStatus.values()) {
-            when(requestRepository.countByGroupCodesAndStatus(groupCodes, status)).thenReturn(status.ordinal() + 1);
-
-            Integer result = requestService.countByGroupCodesAndStatus(groupCodes, status);
-
-            assertEquals(status.ordinal() + 1, result);
-            verify(requestRepository).countByGroupCodesAndStatus(groupCodes, status);
-
-            reset(requestRepository);
-        }
-    }
-
-    @Test
-    void countByGroupCodesAndType_ShouldHandleAllRequestTypes() {
-        List<String> groupCodes = List.of("GROUP001");
-
-        for (RequestType type : RequestType.values()) {
-            when(requestRepository.countByGroupCodesAndType(groupCodes, type)).thenReturn(type.ordinal() + 1);
-
-            Integer result = requestService.countByGroupCodesAndType(groupCodes, type);
-
-            assertEquals(type.ordinal() + 1, result);
-            verify(requestRepository).countByGroupCodesAndType(groupCodes, type);
-
-            reset(requestRepository);
-        }
-    }
-
-    @Test
-    void countByStatus_ShouldHandleAllStatusTypes() {
-        for (RequestStatus status : RequestStatus.values()) {
-            when(requestRepository.countByStatus(status)).thenReturn(status.ordinal() * 10);
-
-            Integer result = requestService.countByStatus(status);
-
-            assertEquals(status.ordinal() * 10, result);
-            verify(requestRepository).countByStatus(status);
-
-            reset(requestRepository);
-        }
-    }
+  private Class<?>[] getParameterTypes(Object... args) {
+    return Arrays.stream(args).map(Object::getClass).toArray(Class<?>[]::new);
+  }
 
-    @Test
-    void countByType_ShouldHandleAllRequestTypes() {
-        for (RequestType type : RequestType.values()) {
-            when(requestRepository.countByType(type)).thenReturn(type.ordinal() * 5);
+  @Test
+  void countByGroupCodesAndStatus_ShouldHandleNullGroupCodes() {
+    RequestStatus status = RequestStatus.PENDING;
 
-            Integer result = requestService.countByType(type);
+    when(requestRepository.countByGroupCodesAndStatus(null, status)).thenReturn(0);
 
-            assertEquals(type.ordinal() * 5, result);
-            verify(requestRepository).countByType(type);
+    Integer result = requestService.countByGroupCodesAndStatus(null, status);
 
-            reset(requestRepository);
-        }
-    }
+    assertEquals(0, result);
+  }
 
-    @Test
-    void createRequest_ShouldHandleAllRequestTypesWithDifferentFieldCombinations() {
-        for (RequestType type : RequestType.values()) {
-            CreateRequestDto createDto;
+  @Test
+  void countByGroupCodesAndType_ShouldHandleNullInputs() {
+    when(requestRepository.countByGroupCodesAndType(null, null)).thenReturn(0);
 
-            switch (type) {
-                case JOIN:
-                    createDto = new CreateRequestDto("STU001", type, "Join description", null, "GROUP001");
-                    break;
-                case SWAP:
-                    createDto = new CreateRequestDto("STU001", type, "Swap description", "GROUP001", "GROUP002");
-                    break;
-                case CANCELLATION:
-                    createDto = new CreateRequestDto("STU001", type, "Cancel description", "GROUP001", null);
-                    break;
-                default:
-                    continue;
-            }
+    Integer result = requestService.countByGroupCodesAndType(null, null);
 
-            when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
-            doNothing().when(requestValidator).validateCreateRequest(createDto);
-            when(requestRepository.save(any(Request.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    assertEquals(0, result);
+  }
 
-            Request result = requestService.createRequest(createDto);
+  @Test
+  void countByStatus_ShouldHandleNullStatus() {
+    when(requestRepository.countByStatus(null)).thenReturn(0);
 
-            assertNotNull(result);
-            assertEquals(type, result.getType());
-            assertEquals("STU001", result.getStudentId());
-            assertEquals(RequestStatus.PENDING, result.getStatus());
-            assertNotNull(result.getRequestId());
-            assertNotNull(result.getCreatedAt());
+    Integer result = requestService.countByStatus(null);
 
-            reset(requestPeriodService, requestValidator, requestRepository);
-        }
-    }
+    assertEquals(0, result);
+  }
 
+  @Test
+  void countByType_ShouldHandleNullType() {
+    when(requestRepository.countByType(null)).thenReturn(0);
 
+    Integer result = requestService.countByType(null);
 
+    assertEquals(0, result);
+  }
 
-    private void injectMockStrategy(Role role, QueryStrategy mockStrategy) {
-        try {
-            Field strategyMapField = RequestService.class.getDeclaredField("strategyMap");
-            strategyMapField.setAccessible(true);
+  @Test
+  void updateRequest_ShouldHandleActivePeriodException() {
+    when(requestPeriodService.getActivePeriod())
+        .thenThrow(new ResourceNotFoundException("No active period"));
 
-            @SuppressWarnings("unchecked")
-            Map<Role, QueryStrategy> strategyMap = (Map<Role, QueryStrategy>) strategyMapField.get(requestService);
+    assertThrows(
+        BusinessException.class, () -> requestService.updateRequest("USER001", updateRequestDto));
+  }
 
-            Map<Role, QueryStrategy> newStrategyMap = new HashMap<>(strategyMap);
-            newStrategyMap.put(role, mockStrategy);
+  @Test
+  void updateRequest_ShouldHandleValidatorExceptions() {
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
+    when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(mockRequest1));
+    doThrow(new BusinessException("Validation failed"))
+        .when(requestValidator)
+        .validateUpdateRequest(anyString(), eq(mockRequest1), eq(updateRequestDto));
 
-            strategyMapField.set(requestService, newStrategyMap);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to inject mock strategy", e);
-        }
-    }
+    assertThrows(
+        BusinessException.class, () -> requestService.updateRequest("USER001", updateRequestDto));
+  }
 
+  @Test
+  void fetchRequests_ShouldThrowBusinessException_WhenDeanStrategyFails() {
+    Role role = Role.DEAN;
+    String userId = "DEAN001";
 
-    private void invokePrivateMethod(Object object, String methodName, Object... args) {
-        try {
-            Method method = object.getClass().getDeclaredMethod(methodName, getParameterTypes(args));
-            method.setAccessible(true);
-            method.invoke(object, args);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to invoke private method", e);
-        }
-    }
+    QueryStrategy mockStrategy = mock(QueryStrategy.class);
+    when(mockStrategy.queryRequests(userId)).thenThrow(new RuntimeException("Dean service error"));
 
-    private Class<?>[] getParameterTypes(Object... args) {
-        return Arrays.stream(args)
-                .map(Object::getClass)
-                .toArray(Class<?>[]::new);
-    }
+    injectMockStrategy(role, mockStrategy);
 
+    assertThrows(RuntimeException.class, () -> requestService.fetchRequests(role, userId));
+  }
 
+  @Test
+  void fetchRequests_ShouldThrowBusinessException_WhenProfessorStrategyFails() {
+    Role role = Role.PROFESSOR;
+    String userId = "PROF001";
 
+    QueryStrategy mockStrategy = mock(QueryStrategy.class);
+    when(mockStrategy.queryRequests(userId))
+        .thenThrow(new RuntimeException("Professor service down"));
 
+    injectMockStrategy(role, mockStrategy);
 
-    @Test
-    void countByGroupCodesAndStatus_ShouldHandleNullGroupCodes() {
-        RequestStatus status = RequestStatus.PENDING;
+    assertThrows(RuntimeException.class, () -> requestService.fetchRequests(role, userId));
+  }
 
-        when(requestRepository.countByGroupCodesAndStatus(null, status)).thenReturn(0);
+  @Test
+  void fetchRequests_ShouldThrowBusinessException_WhenStrategyThrowsRuntimeException() {
+    Role role = Role.STUDENT;
+    String userId = "STU001";
 
-        Integer result = requestService.countByGroupCodesAndStatus(null, status);
+    QueryStrategy mockStrategy = mock(QueryStrategy.class);
+    when(mockStrategy.queryRequests(userId))
+        .thenThrow(new RuntimeException("Strategy execution failed"));
 
-        assertEquals(0, result);
-    }
-
-    @Test
-    void countByGroupCodesAndType_ShouldHandleNullInputs() {
-        when(requestRepository.countByGroupCodesAndType(null, null)).thenReturn(0);
-
-        Integer result = requestService.countByGroupCodesAndType(null, null);
-
-        assertEquals(0, result);
-    }
-
-    @Test
-    void countByStatus_ShouldHandleNullStatus() {
-        when(requestRepository.countByStatus(null)).thenReturn(0);
-
-        Integer result = requestService.countByStatus(null);
-
-        assertEquals(0, result);
-    }
-
-
-    @Test
-    void countByType_ShouldHandleNullType() {
-        when(requestRepository.countByType(null)).thenReturn(0);
-
-        Integer result = requestService.countByType(null);
-
-        assertEquals(0, result);
-    }
-
-    @Test
-    void updateRequest_ShouldHandleActivePeriodException() {
-        when(requestPeriodService.getActivePeriod())
-                .thenThrow(new ResourceNotFoundException("No active period"));
-
-        assertThrows(BusinessException.class, () -> requestService.updateRequest("USER001", updateRequestDto));
-    }
-
-    @Test
-    void updateRequest_ShouldHandleValidatorExceptions() {
-        when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
-        when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(mockRequest1));
-        doThrow(new BusinessException("Validation failed"))
-                .when(requestValidator).validateUpdateRequest(anyString(), eq(mockRequest1), eq(updateRequestDto));
-
-        assertThrows(BusinessException.class, () -> requestService.updateRequest("USER001", updateRequestDto));
-    }
-
-
-
-    @Test
-    void fetchRequests_ShouldThrowBusinessException_WhenDeanStrategyFails() {
-        Role role = Role.DEAN;
-        String userId = "DEAN001";
-
-        QueryStrategy mockStrategy = mock(QueryStrategy.class);
-        when(mockStrategy.queryRequests(userId))
-                .thenThrow(new RuntimeException("Dean service error"));
-
-        injectMockStrategy(role, mockStrategy);
-
-        assertThrows(RuntimeException.class,
-                () -> requestService.fetchRequests(role, userId));
-    }
-
-    @Test
-    void fetchRequests_ShouldThrowBusinessException_WhenProfessorStrategyFails() {
-        Role role = Role.PROFESSOR;
-        String userId = "PROF001";
-
-        QueryStrategy mockStrategy = mock(QueryStrategy.class);
-        when(mockStrategy.queryRequests(userId))
-                .thenThrow(new RuntimeException("Professor service down"));
-
-        injectMockStrategy(role, mockStrategy);
-
-        assertThrows(RuntimeException.class,
-                () -> requestService.fetchRequests(role, userId));
-    }
-
-    @Test
-    void fetchRequests_ShouldThrowBusinessException_WhenStrategyThrowsRuntimeException() {
-        Role role = Role.STUDENT;
-        String userId = "STU001";
-
-        QueryStrategy mockStrategy = mock(QueryStrategy.class);
-        when(mockStrategy.queryRequests(userId))
-                .thenThrow(new RuntimeException("Strategy execution failed"));
-
-        injectMockStrategy(role, mockStrategy);
-
-        assertThrows(RuntimeException.class,
-                () -> requestService.fetchRequests(role, userId));
-    }
-
-    @Test
-    void fetchRequests_ShouldThrowBusinessException_WhenStudentStrategyFails() {
-        Role role = Role.STUDENT;
-        String userId = "STU001";
-
-        QueryStrategy mockStrategy = mock(QueryStrategy.class);
-        when(mockStrategy.queryRequests(userId))
-                .thenThrow(new RuntimeException("Student service unavailable"));
-
-        injectMockStrategy(role, mockStrategy);
-
-        assertThrows(RuntimeException.class,
-                () -> requestService.fetchRequests(role, userId));
-    }
-
-    @Test
-    void getRequestStats_ShouldHandleRepositoryExceptions() {
-        when(requestRepository.count()).thenThrow(new RuntimeException("Count failed"));
-
-        assertThrows(RuntimeException.class, () -> requestService.getRequestStats());
-    }
-
-    @Test
-    void fetchRequestsByFacultyName_ShouldHandleRepositoryExceptions() {
-        String facultyName = "Engineering";
-
-        when(requestRepository.findAll()).thenThrow(new RuntimeException("Database error"));
-        doNothing().when(requestValidator).validateFacultyName(facultyName);
-
-        assertThrows(RuntimeException.class,
-                () -> requestService.fetchRequestsByFacultyName(facultyName));
-    }
-
-    @Test
-    void fetchRequestsByFacultyName_ShouldHandleNullFacultyFromStudentService() {
-        String facultyName = "Engineering";
-
-        when(requestRepository.findAll()).thenReturn(List.of(mockRequest1));
-        when(studentService.getFacultyByStudentId("STU001")).thenReturn("Engineering");
-        doNothing().when(requestValidator).validateFacultyName(facultyName);
-
-        List<Request> result = requestService.fetchRequestsByFacultyName(facultyName);
-
-        assertEquals(1, result.size());
-        assertEquals("STU001", result.get(0).getStudentId());
-    }
-
-    @Test
-    void updateRequest_ShouldHandleAnswerStrategyExceptions() {
-        when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
-        when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(mockRequest1));
-        doNothing().when(requestValidator).validateUpdateRequest(anyString(), eq(mockRequest1), eq(updateRequestDto));
-        when(answerStrategyFactory.getStrategy(RequestType.SWAP)).thenReturn(answerStrategy);
-        doThrow(new RuntimeException("Strategy failed")).when(answerStrategy).answerRequest(any(Request.class));
-
-        assertThrows(BusinessException.class, () -> requestService.updateRequest("USER001", updateRequestDto));
-    }
-
-    @Test
-    void updateRequest_ShouldThrowBusinessException_WhenAnswerStrategyFails() {
-        when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
-        when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(mockRequest1));
-        doNothing().when(requestValidator).validateUpdateRequest(anyString(), eq(mockRequest1), eq(updateRequestDto));
-        when(answerStrategyFactory.getStrategy(RequestType.SWAP)).thenReturn(answerStrategy);
-        doThrow(new RuntimeException("Strategy execution failed")).when(answerStrategy).answerRequest(any(Request.class));
-
-        assertThrows(BusinessException.class,
-                () -> requestService.updateRequest("USER001", updateRequestDto));
-    }
-
-    @Test
-    void countByGroupCodesAndStatus_ShouldHandleRepositoryExceptions() {
-        List<String> groupCodes = List.of("GROUP001");
-        RequestStatus status = RequestStatus.PENDING;
-
-        when(requestRepository.countByGroupCodesAndStatus(groupCodes, status))
-                .thenThrow(new RuntimeException("Query failed"));
-
-        assertThrows(BusinessException.class, () -> requestService.countByGroupCodesAndStatus(groupCodes, status));
-    }
-
-    @Test
-    void countByGroupCodesAndType_ShouldHandleRepositoryExceptions() {
-        List<String> groupCodes = List.of("GROUP001");
-        RequestType type = RequestType.JOIN;
-
-        when(requestRepository.countByGroupCodesAndType(groupCodes, type))
-                .thenThrow(new RuntimeException("Query failed"));
-
-        assertThrows(BusinessException.class, () -> requestService.countByGroupCodesAndType(groupCodes, type));
-    }
-
-    @Test
-    void createRequest_ShouldThrowBusinessException_WhenSaveFailsWithDataIntegrity() {
-        when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
-        doNothing().when(requestValidator).validateCreateRequest(createRequestDto);
-        when(requestRepository.save(any(Request.class)))
-                .thenThrow(new RuntimeException("Duplicate key violation"));
-
-        assertThrows(BusinessException.class,
-                () -> requestService.createRequest(createRequestDto));
-    }
-
-    @Test
-    void deleteRequestStatus_ShouldThrowBusinessException_WhenDeleteFailsWithConstraint() {
-        String requestId = "REQ001";
-        Request request = new Request.RequestBuilder()
-                .studentId("STU001")
-                .type(RequestType.JOIN)
-                .build();
-
-        when(requestRepository.findByRequestId(requestId)).thenReturn(Optional.of(request));
-        doThrow(new RuntimeException("Foreign key constraint violation"))
-                .when(requestRepository).delete(request);
-
-        assertThrows(BusinessException.class,
-                () -> requestService.deleteRequestStatus(requestId));
-    }
-
-    @Test
-    void countByStatus_ShouldHandleRepositoryExceptions() {
-        RequestStatus status = RequestStatus.PENDING;
-
-        when(requestRepository.countByStatus(status))
-                .thenThrow(new RuntimeException("Count failed"));
-
-        assertThrows(BusinessException.class, () -> requestService.countByStatus(status));
-    }
-
-    @Test
-    void countByType_ShouldHandleRepositoryExceptions() {
-        RequestType type = RequestType.JOIN;
-
-        when(requestRepository.countByType(type))
-                .thenThrow(new RuntimeException("Count failed"));
-
-        assertThrows(BusinessException.class, () -> requestService.countByType(type));
-    }
-
-    @Test
-    void countTotalRequests_ShouldHandleRepositoryExceptions() {
-        when(requestRepository.count()).thenThrow(new RuntimeException("Count failed"));
-
-        assertThrows(BusinessException.class, () -> requestService.countTotalRequests());
-    }
-
-    @Test
-    void countByGroupCodes_ShouldHandleRepositoryExceptions() {
-        List<String> groupCodes = List.of("GROUP001");
-
-        when(requestRepository.countByGroupCodes(groupCodes))
-                .thenThrow(new RuntimeException("Query failed"));
-
-        assertThrows(BusinessException.class, () -> requestService.countByGroupCodes(groupCodes));
-    }
-
-    @Test
-    void fetchAllRequests_ShouldHandleRepositoryExceptions() {
-        when(requestRepository.findAll()).thenThrow(new RuntimeException("Database error"));
-
-        assertThrows(BusinessException.class, () -> requestService.fetchAllRequests());
-    }
-
-    @Test
-    void getRequestStats_ShouldHandlePartialRepositoryFailures() {
-        when(requestRepository.count()).thenReturn(100L);
-        when(requestRepository.countByStatus(RequestStatus.PENDING)).thenReturn(30);
-        when(requestRepository.countByStatus(RequestStatus.ACCEPTED)).thenThrow(new RuntimeException("DB error"));
-
-        assertThrows(RuntimeException.class, () -> requestService.getRequestStats());
-    }
-
-    @Test
-    void getRequestStats_ShouldHandleRepositoryExceptionsInCount() {
-        when(requestRepository.count()).thenThrow(new RuntimeException("Count failed"));
-
-        assertThrows(RuntimeException.class, () -> requestService.getRequestStats());
-    }
-
+    injectMockStrategy(role, mockStrategy);
+
+    assertThrows(RuntimeException.class, () -> requestService.fetchRequests(role, userId));
+  }
+
+  @Test
+  void fetchRequests_ShouldThrowBusinessException_WhenStudentStrategyFails() {
+    Role role = Role.STUDENT;
+    String userId = "STU001";
+
+    QueryStrategy mockStrategy = mock(QueryStrategy.class);
+    when(mockStrategy.queryRequests(userId))
+        .thenThrow(new RuntimeException("Student service unavailable"));
+
+    injectMockStrategy(role, mockStrategy);
+
+    assertThrows(RuntimeException.class, () -> requestService.fetchRequests(role, userId));
+  }
+
+  @Test
+  void getRequestStats_ShouldHandleRepositoryExceptions() {
+    when(requestRepository.count()).thenThrow(new RuntimeException("Count failed"));
+
+    assertThrows(RuntimeException.class, () -> requestService.getRequestStats());
+  }
+
+  @Test
+  void fetchRequestsByFacultyName_ShouldHandleRepositoryExceptions() {
+    String facultyName = "Engineering";
+
+    when(requestRepository.findAll()).thenThrow(new RuntimeException("Database error"));
+    doNothing().when(requestValidator).validateFacultyName(facultyName);
+
+    assertThrows(
+        RuntimeException.class, () -> requestService.fetchRequestsByFacultyName(facultyName));
+  }
+
+  @Test
+  void fetchRequestsByFacultyName_ShouldHandleNullFacultyFromStudentService() {
+    String facultyName = "Engineering";
+
+    when(requestRepository.findAll()).thenReturn(List.of(mockRequest1));
+    when(studentService.getFacultyByStudentId("STU001")).thenReturn("Engineering");
+    doNothing().when(requestValidator).validateFacultyName(facultyName);
+
+    List<Request> result = requestService.fetchRequestsByFacultyName(facultyName);
+
+    assertEquals(1, result.size());
+    assertEquals("STU001", result.get(0).getStudentId());
+  }
+
+  @Test
+  void updateRequest_ShouldHandleAnswerStrategyExceptions() {
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
+    when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(mockRequest1));
+    doNothing()
+        .when(requestValidator)
+        .validateUpdateRequest(anyString(), eq(mockRequest1), eq(updateRequestDto));
+    when(answerStrategyFactory.getStrategy(RequestType.SWAP)).thenReturn(answerStrategy);
+    doThrow(new RuntimeException("Strategy failed"))
+        .when(answerStrategy)
+        .answerRequest(any(Request.class));
+
+    assertThrows(
+        BusinessException.class, () -> requestService.updateRequest("USER001", updateRequestDto));
+  }
+
+  @Test
+  void updateRequest_ShouldThrowBusinessException_WhenAnswerStrategyFails() {
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
+    when(requestRepository.findByRequestId("REQ001")).thenReturn(Optional.of(mockRequest1));
+    doNothing()
+        .when(requestValidator)
+        .validateUpdateRequest(anyString(), eq(mockRequest1), eq(updateRequestDto));
+    when(answerStrategyFactory.getStrategy(RequestType.SWAP)).thenReturn(answerStrategy);
+    doThrow(new RuntimeException("Strategy execution failed"))
+        .when(answerStrategy)
+        .answerRequest(any(Request.class));
+
+    assertThrows(
+        BusinessException.class, () -> requestService.updateRequest("USER001", updateRequestDto));
+  }
+
+  @Test
+  void countByGroupCodesAndStatus_ShouldHandleRepositoryExceptions() {
+    List<String> groupCodes = List.of("GROUP001");
+    RequestStatus status = RequestStatus.PENDING;
+
+    when(requestRepository.countByGroupCodesAndStatus(groupCodes, status))
+        .thenThrow(new RuntimeException("Query failed"));
+
+    assertThrows(
+        BusinessException.class,
+        () -> requestService.countByGroupCodesAndStatus(groupCodes, status));
+  }
+
+  @Test
+  void countByGroupCodesAndType_ShouldHandleRepositoryExceptions() {
+    List<String> groupCodes = List.of("GROUP001");
+    RequestType type = RequestType.JOIN;
+
+    when(requestRepository.countByGroupCodesAndType(groupCodes, type))
+        .thenThrow(new RuntimeException("Query failed"));
+
+    assertThrows(
+        BusinessException.class, () -> requestService.countByGroupCodesAndType(groupCodes, type));
+  }
+
+  @Test
+  void createRequest_ShouldThrowBusinessException_WhenSaveFailsWithDataIntegrity() {
+    when(requestPeriodService.getActivePeriod()).thenReturn(activePeriod);
+    doNothing().when(requestValidator).validateCreateRequest(createRequestDto);
+    when(requestRepository.save(any(Request.class)))
+        .thenThrow(new RuntimeException("Duplicate key violation"));
+
+    assertThrows(BusinessException.class, () -> requestService.createRequest(createRequestDto));
+  }
+
+  @Test
+  void deleteRequestStatus_ShouldThrowBusinessException_WhenDeleteFailsWithConstraint() {
+    String requestId = "REQ001";
+    Request request =
+        new Request.RequestBuilder().studentId("STU001").type(RequestType.JOIN).build();
+
+    when(requestRepository.findByRequestId(requestId)).thenReturn(Optional.of(request));
+    doThrow(new RuntimeException("Foreign key constraint violation"))
+        .when(requestRepository)
+        .delete(request);
+
+    assertThrows(BusinessException.class, () -> requestService.deleteRequestStatus(requestId));
+  }
+
+  @Test
+  void countByStatus_ShouldHandleRepositoryExceptions() {
+    RequestStatus status = RequestStatus.PENDING;
+
+    when(requestRepository.countByStatus(status)).thenThrow(new RuntimeException("Count failed"));
+
+    assertThrows(BusinessException.class, () -> requestService.countByStatus(status));
+  }
+
+  @Test
+  void countByType_ShouldHandleRepositoryExceptions() {
+    RequestType type = RequestType.JOIN;
+
+    when(requestRepository.countByType(type)).thenThrow(new RuntimeException("Count failed"));
+
+    assertThrows(BusinessException.class, () -> requestService.countByType(type));
+  }
+
+  @Test
+  void countTotalRequests_ShouldHandleRepositoryExceptions() {
+    when(requestRepository.count()).thenThrow(new RuntimeException("Count failed"));
+
+    assertThrows(BusinessException.class, () -> requestService.countTotalRequests());
+  }
+
+  @Test
+  void countByGroupCodes_ShouldHandleRepositoryExceptions() {
+    List<String> groupCodes = List.of("GROUP001");
+
+    when(requestRepository.countByGroupCodes(groupCodes))
+        .thenThrow(new RuntimeException("Query failed"));
+
+    assertThrows(BusinessException.class, () -> requestService.countByGroupCodes(groupCodes));
+  }
+
+  @Test
+  void fetchAllRequests_ShouldHandleRepositoryExceptions() {
+    when(requestRepository.findAll()).thenThrow(new RuntimeException("Database error"));
+
+    assertThrows(BusinessException.class, () -> requestService.fetchAllRequests());
+  }
+
+  @Test
+  void getRequestStats_ShouldHandlePartialRepositoryFailures() {
+    when(requestRepository.count()).thenReturn(100L);
+    when(requestRepository.countByStatus(RequestStatus.PENDING)).thenReturn(30);
+    when(requestRepository.countByStatus(RequestStatus.ACCEPTED))
+        .thenThrow(new RuntimeException("DB error"));
+
+    assertThrows(RuntimeException.class, () -> requestService.getRequestStats());
+  }
+
+  @Test
+  void getRequestStats_ShouldHandleRepositoryExceptionsInCount() {
+    when(requestRepository.count()).thenThrow(new RuntimeException("Count failed"));
+
+    assertThrows(RuntimeException.class, () -> requestService.getRequestStats());
+  }
 }

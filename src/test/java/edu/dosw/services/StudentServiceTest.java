@@ -196,119 +196,113 @@ class StudentServiceTest {
     verify(studentRepository, times(1)).findByUserId(STUDENT_ID);
   }
 
-    @Test
-    void deleteStudent_WhenStudentNotFound_ShouldThrowResourceNotFoundException() {
-        when(studentRepository.findByUserId(STUDENT_ID)).thenReturn(Optional.empty());
+  @Test
+  void deleteStudent_WhenStudentNotFound_ShouldThrowResourceNotFoundException() {
+    when(studentRepository.findByUserId(STUDENT_ID)).thenReturn(Optional.empty());
 
-        ResourceNotFoundException exception = assertThrows(
-                ResourceNotFoundException.class,
-                () -> studentService.deleteStudent(STUDENT_ID)
-        );
+    ResourceNotFoundException exception =
+        assertThrows(
+            ResourceNotFoundException.class, () -> studentService.deleteStudent(STUDENT_ID));
 
-        assertEquals("Student not found", exception.getMessage());
-        verify(studentRepository, times(1)).findByUserId(STUDENT_ID);
-        verify(authenticationService, never()).deleteAuthentication(any(Student.class));
-        verify(studentRepository, never()).delete(any(Student.class));
-    }
-    @Test
-    void updateStudent_WithAllFields_ShouldUpdateAllFieldsSuccessfully() {
+    assertEquals("Student not found", exception.getMessage());
+    verify(studentRepository, times(1)).findByUserId(STUDENT_ID);
+    verify(authenticationService, never()).deleteAuthentication(any(Student.class));
+    verify(studentRepository, never()).delete(any(Student.class));
+  }
 
-        when(studentRepository.findByUserId(STUDENT_ID)).thenReturn(Optional.of(existingStudent));
-        when(studentRepository.save(any(Student.class))).thenReturn(existingStudent);
+  @Test
+  void updateStudent_WithAllFields_ShouldUpdateAllFieldsSuccessfully() {
 
-        StudentDto updateRequest = new StudentDto(
-                "87654321",
-                "Juan Carlos Perez Rodriguez",
-                "Updated Software Engineering",
-                "Computer Science",
-                AcademicGrade.GRADUATED,
-                5
-        );
+    when(studentRepository.findByUserId(STUDENT_ID)).thenReturn(Optional.of(existingStudent));
+    when(studentRepository.save(any(Student.class))).thenReturn(existingStudent);
 
-        // Act
-        Student result = studentService.updateStudent(STUDENT_ID, updateRequest);
+    StudentDto updateRequest =
+        new StudentDto(
+            "87654321",
+            "Juan Carlos Perez Rodriguez",
+            "Updated Software Engineering",
+            "Computer Science",
+            AcademicGrade.GRADUATED,
+            5);
 
-        assertNotNull(result);
-        assertEquals("Juan Carlos Perez Rodriguez", existingStudent.getFullName());
-        assertEquals("87654321", existingStudent.getIdentityDocument());
-        assertEquals("Computer Science", existingStudent.getFacultyName());
-        assertEquals("Updated Software Engineering", existingStudent.getPlan());
-        assertEquals(AcademicGrade.GRADUATED, existingStudent.getAcademicGrade());
-        assertEquals(Integer.valueOf(5), existingStudent.getSemester());
-        verify(studentRepository, times(1)).findByUserId(STUDENT_ID);
-        verify(studentRepository, times(1)).save(existingStudent);
-    }
+    // Act
+    Student result = studentService.updateStudent(STUDENT_ID, updateRequest);
 
+    assertNotNull(result);
+    assertEquals("Juan Carlos Perez Rodriguez", existingStudent.getFullName());
+    assertEquals("87654321", existingStudent.getIdentityDocument());
+    assertEquals("Computer Science", existingStudent.getFacultyName());
+    assertEquals("Updated Software Engineering", existingStudent.getPlan());
+    assertEquals(AcademicGrade.GRADUATED, existingStudent.getAcademicGrade());
+    assertEquals(Integer.valueOf(5), existingStudent.getSemester());
+    verify(studentRepository, times(1)).findByUserId(STUDENT_ID);
+    verify(studentRepository, times(1)).save(existingStudent);
+  }
 
+  @Test
+  void updateStudent_WhenStudentNotFound_ShouldThrowResourceNotFoundException() {
 
-    @Test
-    void updateStudent_WhenStudentNotFound_ShouldThrowResourceNotFoundException() {
+    when(studentRepository.findByUserId(STUDENT_ID)).thenReturn(Optional.empty());
 
-        when(studentRepository.findByUserId(STUDENT_ID)).thenReturn(Optional.empty());
+    StudentDto updateRequest =
+        new StudentDto(
+            "87654321", "Nombre Actualizado", PLAN, FACULTY_NAME, AcademicGrade.UNDERGRADUATE, 2);
 
-        StudentDto updateRequest = new StudentDto(
-                "87654321",
-                "Nombre Actualizado",
-                PLAN,
-                FACULTY_NAME,
-                AcademicGrade.UNDERGRADUATE,
-                2
-        );
+    ResourceNotFoundException exception =
+        assertThrows(
+            ResourceNotFoundException.class,
+            () -> studentService.updateStudent(STUDENT_ID, updateRequest));
 
-        ResourceNotFoundException exception = assertThrows(
-                ResourceNotFoundException.class,
-                () -> studentService.updateStudent(STUDENT_ID, updateRequest)
-        );
+    assertEquals("Student not found", exception.getMessage());
+    verify(studentRepository, times(1)).findByUserId(STUDENT_ID);
+    verify(studentRepository, never()).save(any(Student.class));
+  }
 
-        assertEquals("Student not found", exception.getMessage());
-        verify(studentRepository, times(1)).findByUserId(STUDENT_ID);
-        verify(studentRepository, never()).save(any(Student.class));
-    }
+  @Test
+  void createStudent_WithValidData_ShouldCreateStudentSuccessfully() {
 
-    @Test
-    void createStudent_WithValidData_ShouldCreateStudentSuccessfully() {
+    when(idGenerator.generateUniqueId()).thenReturn(GENERATED_ID);
+    doNothing().when(authenticationService).createAuthentication(any(UserInfoDto.class));
 
-        when(idGenerator.generateUniqueId()).thenReturn(GENERATED_ID);
-        doNothing().when(authenticationService).createAuthentication(any(UserInfoDto.class));
+    Student expectedStudent =
+        new Student.StudentBuilder()
+            .userId(GENERATED_ID)
+            .fullName(validStudentDto.fullName())
+            .email("juan.perez-g@mail.escuelaing.edu.co")
+            .generalAverage(0)
+            .academicGrade(validStudentDto.academicGrade())
+            .identityDocument(validStudentDto.identityDocument())
+            .plan(validStudentDto.plan())
+            .semester(validStudentDto.semester())
+            .facultyName(validStudentDto.facultyName())
+            .build();
 
-        Student expectedStudent = new Student.StudentBuilder()
-                .userId(GENERATED_ID)
-                .fullName(validStudentDto.fullName())
-                .email("juan.perez-g@mail.escuelaing.edu.co")
-                .generalAverage(0)
-                .academicGrade(validStudentDto.academicGrade())
-                .identityDocument(validStudentDto.identityDocument())
-                .plan(validStudentDto.plan())
-                .semester(validStudentDto.semester())
-                .facultyName(validStudentDto.facultyName())
-                .build();
+    when(studentRepository.save(any(Student.class))).thenReturn(expectedStudent);
 
-        when(studentRepository.save(any(Student.class))).thenReturn(expectedStudent);
+    Student result = studentService.createStudent(validStudentDto);
 
-        Student result = studentService.createStudent(validStudentDto);
+    assertNotNull(result);
+    assertEquals(GENERATED_ID, result.getUserId());
+    assertEquals(validStudentDto.fullName(), result.getFullName());
+    assertEquals("juan.perez-g@mail.escuelaing.edu.co", result.getEmail());
+    assertEquals(validStudentDto.identityDocument(), result.getIdentityDocument());
+    assertEquals(validStudentDto.plan(), result.getPlan());
+    assertEquals(validStudentDto.facultyName(), result.getFacultyName());
+    assertEquals(validStudentDto.academicGrade(), result.getAcademicGrade());
+    assertEquals(validStudentDto.semester(), result.getSemester());
+    assertEquals(0, result.getGeneralAverage());
 
-        assertNotNull(result);
-        assertEquals(GENERATED_ID, result.getUserId());
-        assertEquals(validStudentDto.fullName(), result.getFullName());
-        assertEquals("juan.perez-g@mail.escuelaing.edu.co", result.getEmail());
-        assertEquals(validStudentDto.identityDocument(), result.getIdentityDocument());
-        assertEquals(validStudentDto.plan(), result.getPlan());
-        assertEquals(validStudentDto.facultyName(), result.getFacultyName());
-        assertEquals(validStudentDto.academicGrade(), result.getAcademicGrade());
-        assertEquals(validStudentDto.semester(), result.getSemester());
-        assertEquals(0, result.getGeneralAverage());
+    verify(idGenerator, times(1)).generateUniqueId();
+    verify(authenticationService, times(1)).createAuthentication(any(UserInfoDto.class));
+    verify(studentRepository, times(1)).save(any(Student.class));
 
-        verify(idGenerator, times(1)).generateUniqueId();
-        verify(authenticationService, times(1)).createAuthentication(any(UserInfoDto.class));
-        verify(studentRepository, times(1)).save(any(Student.class));
+    ArgumentCaptor<UserInfoDto> userInfoCaptor = ArgumentCaptor.forClass(UserInfoDto.class);
+    verify(authenticationService).createAuthentication(userInfoCaptor.capture());
 
-        ArgumentCaptor<UserInfoDto> userInfoCaptor = ArgumentCaptor.forClass(UserInfoDto.class);
-        verify(authenticationService).createAuthentication(userInfoCaptor.capture());
-
-        UserInfoDto capturedUserInfo = userInfoCaptor.getValue();
-        assertEquals(GENERATED_ID, capturedUserInfo.userId());
-        assertEquals("juan.perez-g@mail.escuelaing.edu.co", capturedUserInfo.email());
-        assertEquals(Role.STUDENT, capturedUserInfo.role());
-        assertEquals("pfpURL", capturedUserInfo.pfpURL());
-    }
+    UserInfoDto capturedUserInfo = userInfoCaptor.getValue();
+    assertEquals(GENERATED_ID, capturedUserInfo.userId());
+    assertEquals("juan.perez-g@mail.escuelaing.edu.co", capturedUserInfo.email());
+    assertEquals(Role.STUDENT, capturedUserInfo.role());
+    assertEquals("pfpURL", capturedUserInfo.pfpURL());
+  }
 }

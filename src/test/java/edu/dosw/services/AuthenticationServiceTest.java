@@ -13,8 +13,6 @@ import edu.dosw.model.User;
 import edu.dosw.model.enums.Role;
 import edu.dosw.repositories.UserCredentialsRepository;
 import java.util.Optional;
-
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -178,195 +176,224 @@ class AuthenticationServiceTest {
     verify(userCredentialsRepository, never()).delete(any());
   }
 
-    @Test
-    void canAccessStudentData_StudentAccessingOwnData_ShouldReturnTrue() {
-        org.springframework.security.core.Authentication authentication = mock(org.springframework.security.core.Authentication.class);
-        when(authentication.getName()).thenReturn("student@mail.escuelaing.edu.co");
+  @Test
+  void canAccessStudentData_StudentAccessingOwnData_ShouldReturnTrue() {
+    org.springframework.security.core.Authentication authentication =
+        mock(org.springframework.security.core.Authentication.class);
+    when(authentication.getName()).thenReturn("student@mail.escuelaing.edu.co");
 
-        UserCredentialsDto userCredentials = new UserCredentialsDto(
-                "id123", "student123", "student@mail.escuelaing.edu.co", "password", Role.STUDENT, "");
+    UserCredentialsDto userCredentials =
+        new UserCredentialsDto(
+            "id123", "student123", "student@mail.escuelaing.edu.co", "password", Role.STUDENT, "");
 
-        when(userCredentialsRepository.findByEmail("student@mail.escuelaing.edu.co"))
-                .thenReturn(Optional.of(userCredentials));
+    when(userCredentialsRepository.findByEmail("student@mail.escuelaing.edu.co"))
+        .thenReturn(Optional.of(userCredentials));
 
-        boolean result = authenticationService.canAccessStudentData(authentication, "student123");
+    boolean result = authenticationService.canAccessStudentData(authentication, "student123");
 
-        assertTrue(result);
-    }
+    assertTrue(result);
+  }
 
-    @Test
-    void canAccessStudentData_StudentAccessingOtherData_ShouldReturnFalse() {
-        org.springframework.security.core.Authentication authentication = mock(org.springframework.security.core.Authentication.class);
-        when(authentication.getName()).thenReturn("student@mail.escuelaing.edu.co");
+  @Test
+  void canAccessStudentData_StudentAccessingOtherData_ShouldReturnFalse() {
+    org.springframework.security.core.Authentication authentication =
+        mock(org.springframework.security.core.Authentication.class);
+    when(authentication.getName()).thenReturn("student@mail.escuelaing.edu.co");
 
-        UserCredentialsDto userCredentials = new UserCredentialsDto(
-                "id123", "student123", "student@mail.escuelaing.edu.co", "password", Role.STUDENT, "");
+    UserCredentialsDto userCredentials =
+        new UserCredentialsDto(
+            "id123", "student123", "student@mail.escuelaing.edu.co", "password", Role.STUDENT, "");
 
-        when(userCredentialsRepository.findByEmail("student@mail.escuelaing.edu.co"))
-                .thenReturn(Optional.of(userCredentials));
+    when(userCredentialsRepository.findByEmail("student@mail.escuelaing.edu.co"))
+        .thenReturn(Optional.of(userCredentials));
 
-        boolean result = authenticationService.canAccessStudentData(authentication, "otherStudent123");
+    boolean result = authenticationService.canAccessStudentData(authentication, "otherStudent123");
 
-        assertFalse(result);
-    }
+    assertFalse(result);
+  }
 
-    @Test
-    void canAccessStudentData_ProfessorAccessingAnyData_ShouldReturnTrue() {
-        org.springframework.security.core.Authentication authentication = mock(org.springframework.security.core.Authentication.class);
-        when(authentication.getName()).thenReturn("professor@mail.escuelaing.edu.co");
+  @Test
+  void canAccessStudentData_ProfessorAccessingAnyData_ShouldReturnTrue() {
+    org.springframework.security.core.Authentication authentication =
+        mock(org.springframework.security.core.Authentication.class);
+    when(authentication.getName()).thenReturn("professor@mail.escuelaing.edu.co");
 
-        UserCredentialsDto userCredentials = new UserCredentialsDto(
-                "id123", "prof123", "professor@mail.escuelaing.edu.co", "password", Role.PROFESSOR, "");
+    UserCredentialsDto userCredentials =
+        new UserCredentialsDto(
+            "id123", "prof123", "professor@mail.escuelaing.edu.co", "password", Role.PROFESSOR, "");
 
-        when(userCredentialsRepository.findByEmail("professor@mail.escuelaing.edu.co"))
-                .thenReturn(Optional.of(userCredentials));
+    when(userCredentialsRepository.findByEmail("professor@mail.escuelaing.edu.co"))
+        .thenReturn(Optional.of(userCredentials));
 
-        boolean result = authenticationService.canAccessStudentData(authentication, "anyStudentId");
+    boolean result = authenticationService.canAccessStudentData(authentication, "anyStudentId");
 
-        assertTrue(result);
-    }
+    assertTrue(result);
+  }
 
-    @Test
-    void canAccessUserData_StudentAccessingOwnData_ShouldReturnTrue() {
-        org.springframework.security.core.Authentication authentication = mock(org.springframework.security.core.Authentication.class);
-        when(authentication.getName()).thenReturn("student@mail.escuelaing.edu.co");
+  @Test
+  void canAccessUserData_StudentAccessingOwnData_ShouldReturnTrue() {
+    org.springframework.security.core.Authentication authentication =
+        mock(org.springframework.security.core.Authentication.class);
+    when(authentication.getName()).thenReturn("student@mail.escuelaing.edu.co");
 
-        UserCredentialsDto userCredentials = new UserCredentialsDto(
-                "id123", "student123", "student@mail.escuelaing.edu.co", "password", Role.STUDENT, "");
+    UserCredentialsDto userCredentials =
+        new UserCredentialsDto(
+            "id123", "student123", "student@mail.escuelaing.edu.co", "password", Role.STUDENT, "");
 
-        when(userCredentialsRepository.findByEmail("student@mail.escuelaing.edu.co"))
-                .thenReturn(Optional.of(userCredentials));
+    when(userCredentialsRepository.findByEmail("student@mail.escuelaing.edu.co"))
+        .thenReturn(Optional.of(userCredentials));
 
-        boolean result = authenticationService.canAccessUserData(authentication, "student123");
+    boolean result = authenticationService.canAccessUserData(authentication, "student123");
 
-        assertTrue(result);
-    }
+    assertTrue(result);
+  }
 
-    @Test
-    void canAccessUserData_StudentAccessingOtherData_ShouldReturnFalse() {
-        org.springframework.security.core.Authentication authentication = mock(org.springframework.security.core.Authentication.class);
-        when(authentication.getName()).thenReturn("student@mail.escuelaing.edu.co");
+  @Test
+  void canAccessUserData_StudentAccessingOtherData_ShouldReturnFalse() {
+    org.springframework.security.core.Authentication authentication =
+        mock(org.springframework.security.core.Authentication.class);
+    when(authentication.getName()).thenReturn("student@mail.escuelaing.edu.co");
 
-        UserCredentialsDto userCredentials = new UserCredentialsDto(
-                "id123", "student123", "student@mail.escuelaing.edu.co", "password", Role.STUDENT, "");
+    UserCredentialsDto userCredentials =
+        new UserCredentialsDto(
+            "id123", "student123", "student@mail.escuelaing.edu.co", "password", Role.STUDENT, "");
 
-        when(userCredentialsRepository.findByEmail("student@mail.escuelaing.edu.co"))
-                .thenReturn(Optional.of(userCredentials));
+    when(userCredentialsRepository.findByEmail("student@mail.escuelaing.edu.co"))
+        .thenReturn(Optional.of(userCredentials));
 
-        boolean result = authenticationService.canAccessUserData(authentication, "otherUser123");
+    boolean result = authenticationService.canAccessUserData(authentication, "otherUser123");
 
-        assertFalse(result);
-    }
+    assertFalse(result);
+  }
 
-    @Test
-    void canAccessUserData_ProfessorAccessingOwnData_ShouldReturnTrue() {
-        org.springframework.security.core.Authentication authentication = mock(org.springframework.security.core.Authentication.class);
-        when(authentication.getName()).thenReturn("professor@mail.escuelaing.edu.co");
+  @Test
+  void canAccessUserData_ProfessorAccessingOwnData_ShouldReturnTrue() {
+    org.springframework.security.core.Authentication authentication =
+        mock(org.springframework.security.core.Authentication.class);
+    when(authentication.getName()).thenReturn("professor@mail.escuelaing.edu.co");
 
-        UserCredentialsDto userCredentials = new UserCredentialsDto(
-                "id123", "prof123", "professor@mail.escuelaing.edu.co", "password", Role.PROFESSOR, "");
+    UserCredentialsDto userCredentials =
+        new UserCredentialsDto(
+            "id123", "prof123", "professor@mail.escuelaing.edu.co", "password", Role.PROFESSOR, "");
 
-        when(userCredentialsRepository.findByEmail("professor@mail.escuelaing.edu.co"))
-                .thenReturn(Optional.of(userCredentials));
+    when(userCredentialsRepository.findByEmail("professor@mail.escuelaing.edu.co"))
+        .thenReturn(Optional.of(userCredentials));
 
-        boolean result = authenticationService.canAccessUserData(authentication, "prof123");
+    boolean result = authenticationService.canAccessUserData(authentication, "prof123");
 
-        assertTrue(result);
-    }
+    assertTrue(result);
+  }
 
-    @Test
-    void canAccessUserData_ProfessorAccessingOtherData_ShouldReturnFalse() {
-        org.springframework.security.core.Authentication authentication = mock(org.springframework.security.core.Authentication.class);
-        when(authentication.getName()).thenReturn("professor@mail.escuelaing.edu.co");
+  @Test
+  void canAccessUserData_ProfessorAccessingOtherData_ShouldReturnFalse() {
+    org.springframework.security.core.Authentication authentication =
+        mock(org.springframework.security.core.Authentication.class);
+    when(authentication.getName()).thenReturn("professor@mail.escuelaing.edu.co");
 
-        UserCredentialsDto userCredentials = new UserCredentialsDto(
-                "id123", "prof123", "professor@mail.escuelaing.edu.co", "password", Role.PROFESSOR, "");
+    UserCredentialsDto userCredentials =
+        new UserCredentialsDto(
+            "id123", "prof123", "professor@mail.escuelaing.edu.co", "password", Role.PROFESSOR, "");
 
-        when(userCredentialsRepository.findByEmail("professor@mail.escuelaing.edu.co"))
-                .thenReturn(Optional.of(userCredentials));
+    when(userCredentialsRepository.findByEmail("professor@mail.escuelaing.edu.co"))
+        .thenReturn(Optional.of(userCredentials));
 
-        boolean result = authenticationService.canAccessUserData(authentication, "otherUser123");
+    boolean result = authenticationService.canAccessUserData(authentication, "otherUser123");
 
-        assertFalse(result);
-    }
+    assertFalse(result);
+  }
 
-    @Test
-    void canAccessUserData_AdminAccessingAnyData_ShouldReturnTrue() {
-        org.springframework.security.core.Authentication authentication = mock(org.springframework.security.core.Authentication.class);
-        when(authentication.getName()).thenReturn("admin@mail.escuelaing.edu.co");
+  @Test
+  void canAccessUserData_AdminAccessingAnyData_ShouldReturnTrue() {
+    org.springframework.security.core.Authentication authentication =
+        mock(org.springframework.security.core.Authentication.class);
+    when(authentication.getName()).thenReturn("admin@mail.escuelaing.edu.co");
 
-        UserCredentialsDto userCredentials = new UserCredentialsDto(
-                "id123", "admin123", "admin@mail.escuelaing.edu.co", "password", Role.ADMINISTRATOR, "");
+    UserCredentialsDto userCredentials =
+        new UserCredentialsDto(
+            "id123",
+            "admin123",
+            "admin@mail.escuelaing.edu.co",
+            "password",
+            Role.ADMINISTRATOR,
+            "");
 
-        when(userCredentialsRepository.findByEmail("admin@mail.escuelaing.edu.co"))
-                .thenReturn(Optional.of(userCredentials));
+    when(userCredentialsRepository.findByEmail("admin@mail.escuelaing.edu.co"))
+        .thenReturn(Optional.of(userCredentials));
 
-        boolean result = authenticationService.canAccessUserData(authentication, "anyUserId");
+    boolean result = authenticationService.canAccessUserData(authentication, "anyUserId");
 
-        assertTrue(result);
-    }
+    assertTrue(result);
+  }
 
-    @Test
-    void canAccessUserRequest_Student_ShouldReturnTrue() {
-        org.springframework.security.core.Authentication authentication = mock(org.springframework.security.core.Authentication.class);
-        when(authentication.getName()).thenReturn("student@mail.escuelaing.edu.co");
+  @Test
+  void canAccessUserRequest_Student_ShouldReturnTrue() {
+    org.springframework.security.core.Authentication authentication =
+        mock(org.springframework.security.core.Authentication.class);
+    when(authentication.getName()).thenReturn("student@mail.escuelaing.edu.co");
 
-        UserCredentialsDto userCredentials = new UserCredentialsDto(
-                "id123", "student123", "student@mail.escuelaing.edu.co", "password", Role.STUDENT, "");
+    UserCredentialsDto userCredentials =
+        new UserCredentialsDto(
+            "id123", "student123", "student@mail.escuelaing.edu.co", "password", Role.STUDENT, "");
 
-        when(userCredentialsRepository.findByEmail("student@mail.escuelaing.edu.co"))
-                .thenReturn(Optional.of(userCredentials));
+    when(userCredentialsRepository.findByEmail("student@mail.escuelaing.edu.co"))
+        .thenReturn(Optional.of(userCredentials));
 
-        boolean result = authenticationService.canAccessUserRequest(authentication, "request123");
+    boolean result = authenticationService.canAccessUserRequest(authentication, "request123");
 
-        assertTrue(result);
-    }
+    assertTrue(result);
+  }
 
-    @Test
-    void canAccessUserRequest_Professor_ShouldReturnTrue() {
-        org.springframework.security.core.Authentication authentication = mock(org.springframework.security.core.Authentication.class);
-        when(authentication.getName()).thenReturn("professor@mail.escuelaing.edu.co");
+  @Test
+  void canAccessUserRequest_Professor_ShouldReturnTrue() {
+    org.springframework.security.core.Authentication authentication =
+        mock(org.springframework.security.core.Authentication.class);
+    when(authentication.getName()).thenReturn("professor@mail.escuelaing.edu.co");
 
-        UserCredentialsDto userCredentials = new UserCredentialsDto(
-                "id123", "prof123", "professor@mail.escuelaing.edu.co", "password", Role.PROFESSOR, "");
+    UserCredentialsDto userCredentials =
+        new UserCredentialsDto(
+            "id123", "prof123", "professor@mail.escuelaing.edu.co", "password", Role.PROFESSOR, "");
 
-        when(userCredentialsRepository.findByEmail("professor@mail.escuelaing.edu.co"))
-                .thenReturn(Optional.of(userCredentials));
+    when(userCredentialsRepository.findByEmail("professor@mail.escuelaing.edu.co"))
+        .thenReturn(Optional.of(userCredentials));
 
-        boolean result = authenticationService.canAccessUserRequest(authentication, "request123");
+    boolean result = authenticationService.canAccessUserRequest(authentication, "request123");
 
-        assertTrue(result);
-    }
+    assertTrue(result);
+  }
 
-    @Test
-    void getCurrentUserId_ShouldReturnUserId() {
-        org.springframework.security.core.Authentication authentication = mock(org.springframework.security.core.Authentication.class);
-        when(authentication.getName()).thenReturn("user@mail.escuelaing.edu.co");
+  @Test
+  void getCurrentUserId_ShouldReturnUserId() {
+    org.springframework.security.core.Authentication authentication =
+        mock(org.springframework.security.core.Authentication.class);
+    when(authentication.getName()).thenReturn("user@mail.escuelaing.edu.co");
 
-        UserCredentialsDto userCredentials = new UserCredentialsDto(
-                "id123", "user123", "user@mail.escuelaing.edu.co", "password", Role.STUDENT, "");
+    UserCredentialsDto userCredentials =
+        new UserCredentialsDto(
+            "id123", "user123", "user@mail.escuelaing.edu.co", "password", Role.STUDENT, "");
 
-        when(userCredentialsRepository.findByEmail("user@mail.escuelaing.edu.co"))
-                .thenReturn(Optional.of(userCredentials));
+    when(userCredentialsRepository.findByEmail("user@mail.escuelaing.edu.co"))
+        .thenReturn(Optional.of(userCredentials));
 
-        String result = authenticationService.getCurrentUserId(authentication);
+    String result = authenticationService.getCurrentUserId(authentication);
 
-        assertEquals("user123", result);
-    }
+    assertEquals("user123", result);
+  }
 
-    @Test
-    void getCurrentUserRole_ShouldReturnUserRole() {
-        org.springframework.security.core.Authentication authentication = mock(org.springframework.security.core.Authentication.class);
-        when(authentication.getName()).thenReturn("professor@mail.escuelaing.edu.co");
+  @Test
+  void getCurrentUserRole_ShouldReturnUserRole() {
+    org.springframework.security.core.Authentication authentication =
+        mock(org.springframework.security.core.Authentication.class);
+    when(authentication.getName()).thenReturn("professor@mail.escuelaing.edu.co");
 
-        UserCredentialsDto userCredentials = new UserCredentialsDto(
-                "id123", "prof123", "professor@mail.escuelaing.edu.co", "password", Role.PROFESSOR, "");
+    UserCredentialsDto userCredentials =
+        new UserCredentialsDto(
+            "id123", "prof123", "professor@mail.escuelaing.edu.co", "password", Role.PROFESSOR, "");
 
-        when(userCredentialsRepository.findByEmail("professor@mail.escuelaing.edu.co"))
-                .thenReturn(Optional.of(userCredentials));
+    when(userCredentialsRepository.findByEmail("professor@mail.escuelaing.edu.co"))
+        .thenReturn(Optional.of(userCredentials));
 
-        Role result = authenticationService.getCurrentUserRole(authentication);
+    Role result = authenticationService.getCurrentUserRole(authentication);
 
-        assertEquals(Role.PROFESSOR, result);
-    }
+    assertEquals(Role.PROFESSOR, result);
+  }
 }
