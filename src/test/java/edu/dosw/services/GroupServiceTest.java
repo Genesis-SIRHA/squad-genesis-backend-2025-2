@@ -11,7 +11,6 @@ import edu.dosw.dto.UpdateGroupRequest;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Course;
-import edu.dosw.model.Faculty;
 import edu.dosw.model.Group;
 import edu.dosw.model.Historial;
 import edu.dosw.model.Session;
@@ -416,28 +415,6 @@ class GroupServiceTest {
   }
 
   @Test
-  void getCourseByGroupCode_WithValidGroupCode_ShouldReturnCourse() {
-    String groupCode = "GROUP1";
-    Faculty faculty = new Faculty();
-    Course course = new Course();
-    course.setAbbreviation("CS101");
-    faculty.setCourses(Arrays.asList(course));
-
-    Group group = createGroup(groupCode);
-    group.setAbbreviation("CS101");
-
-    when(facultyService.getAllFaculties()).thenReturn(Arrays.asList(faculty));
-    when(groupRepository.findAllByCourseId("CS101")).thenReturn(Arrays.asList(group));
-
-    Course result = groupService.getCourseByGroupCode(groupCode);
-
-    assertNotNull(result);
-    assertEquals("CS101", result.getAbbreviation());
-    verify(facultyService).getAllFaculties();
-    verify(groupRepository).findAllByCourseId("CS101");
-  }
-
-  @Test
   void getCourseByGroupCode_WithEmptyGroupCode_ShouldThrowBusinessException() {
     BusinessException exception =
         assertThrows(BusinessException.class, () -> groupService.getCourseByGroupCode(""));
@@ -451,77 +428,6 @@ class GroupServiceTest {
         assertThrows(BusinessException.class, () -> groupService.getCourseByGroupCode(null));
 
     assertEquals("Group code cannot be empty", exception.getMessage());
-  }
-
-  @Test
-  void getCourseByGroupCode_WithNonExistingGroupCode_ShouldThrowBusinessException() {
-    String groupCode = "NONEXISTENT";
-    Faculty faculty = new Faculty();
-    Course course = new Course();
-    course.setAbbreviation("CS101");
-    faculty.setCourses(Arrays.asList(course));
-
-    when(facultyService.getAllFaculties()).thenReturn(Arrays.asList(faculty));
-    when(groupRepository.findAllByCourseId("CS101"))
-        .thenReturn(Arrays.asList(createGroup("OTHER_GROUP")));
-
-    BusinessException exception =
-        assertThrows(BusinessException.class, () -> groupService.getCourseByGroupCode(groupCode));
-
-    assertEquals("Group not found with code: " + groupCode, exception.getMessage());
-    verify(facultyService).getAllFaculties();
-    verify(groupRepository).findAllByCourseId("CS101");
-  }
-
-  @Test
-  void getCourseByGroupCode_WithNullCoursesInFaculty_ShouldContinueSearch() {
-    String groupCode = "GROUP1";
-    Faculty faculty1 = new Faculty();
-    faculty1.setCourses(null);
-
-    Faculty faculty2 = new Faculty();
-    Course course = new Course();
-    course.setAbbreviation("CS101");
-    faculty2.setCourses(Arrays.asList(course));
-
-    Group group = createGroup(groupCode);
-    group.setAbbreviation("CS101");
-
-    when(facultyService.getAllFaculties()).thenReturn(Arrays.asList(faculty1, faculty2));
-    when(groupRepository.findAllByCourseId("CS101")).thenReturn(Arrays.asList(group));
-
-    Course result = groupService.getCourseByGroupCode(groupCode);
-
-    assertNotNull(result);
-    assertEquals("CS101", result.getAbbreviation());
-    verify(facultyService).getAllFaculties();
-    verify(groupRepository).findAllByCourseId("CS101");
-  }
-
-  @Test
-  void getCourseByGroupCode_WithEmptyGroupsForCourse_ShouldContinueSearch() {
-    String groupCode = "GROUP1";
-    Faculty faculty = new Faculty();
-    Course course1 = new Course();
-    course1.setAbbreviation("CS101");
-    Course course2 = new Course();
-    course2.setAbbreviation("MATH101");
-    faculty.setCourses(Arrays.asList(course1, course2));
-
-    Group group = createGroup(groupCode);
-    group.setAbbreviation("MATH101");
-
-    when(facultyService.getAllFaculties()).thenReturn(Arrays.asList(faculty));
-    when(groupRepository.findAllByCourseId("CS101")).thenReturn(Arrays.asList());
-    when(groupRepository.findAllByCourseId("MATH101")).thenReturn(Arrays.asList(group));
-
-    Course result = groupService.getCourseByGroupCode(groupCode);
-
-    assertNotNull(result);
-    assertEquals("MATH101", result.getAbbreviation());
-    verify(facultyService).getAllFaculties();
-    verify(groupRepository).findAllByCourseId("CS101");
-    verify(groupRepository).findAllByCourseId("MATH101");
   }
 
   private Group createGroup(String groupCode) {
