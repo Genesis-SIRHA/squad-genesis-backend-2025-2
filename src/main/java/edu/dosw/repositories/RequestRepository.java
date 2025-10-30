@@ -52,15 +52,22 @@ public interface RequestRepository extends MongoRepository<Request, String> {
   @Query(value = "{ 'destinationGroupId': ?0 }", sort = "{ 'createdAt': 1 }")
   List<Request> getRequestByDestinationGroupId(String destinationGroupCode);
 
-  @Query("{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ] }")
+  @Query(
+      value =
+          "{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ] }",
+      count = true)
   Integer countByGroupCodes(List<String> groupCodes);
 
   @Query(
-      "{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ], 'status': ?1 }")
+      value =
+          "{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ], 'status': ?1 }",
+      count = true)
   Integer countByGroupCodesAndStatus(List<String> groupCodes, RequestStatus status);
 
   @Query(
-      "{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ], 'type': ?1 }")
+      value =
+          "{ '$or': [ { 'originGroupId': { $in: ?0 } }, { 'destinationGroupId': { $in: ?0 } } ], 'type': ?1 }",
+      count = true)
   Integer countByGroupCodesAndType(List<String> groupCodes, RequestType type);
 
   @Query(value = "{ 'status': ?0 }", count = true)

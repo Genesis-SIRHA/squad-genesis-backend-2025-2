@@ -31,7 +31,7 @@ public class StatsService {
     List<Group> groups = groupService.getAllGroupsByCourseAbbreviation(courseAbbreviation);
 
     if (groups.isEmpty()) {
-        return new ReportDTO(0, 0, 0, 0, 0, 0, 0);
+      return new ReportDTO(0, 0, 0, 0, 0, 0, 0);
     }
 
     List<String> groupCodes = groups.stream().map(Group::getGroupCode).collect(Collectors.toList());
