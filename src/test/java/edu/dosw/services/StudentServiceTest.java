@@ -4,10 +4,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import edu.dosw.dto.StudentDto;
+import edu.dosw.dto.UserInfoDto;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.exception.ResourceNotFoundException;
 import edu.dosw.model.Student;
 import edu.dosw.model.enums.AcademicGrade;
+import edu.dosw.model.enums.Role;
 import edu.dosw.repositories.StudentRepository;
 import edu.dosw.services.UserServices.StudentService;
 import edu.dosw.utils.IdGenerator;
@@ -16,6 +18,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -191,5 +194,115 @@ class StudentServiceTest {
 
     assertEquals("Student not found", exception.getMessage());
     verify(studentRepository, times(1)).findByUserId(STUDENT_ID);
+  }
+
+  @Test
+  void deleteStudent_WhenStudentNotFound_ShouldThrowResourceNotFoundException() {
+    when(studentRepository.findByUserId(STUDENT_ID)).thenReturn(Optional.empty());
+
+    ResourceNotFoundException exception =
+        assertThrows(
+            ResourceNotFoundException.class, () -> studentService.deleteStudent(STUDENT_ID));
+
+    assertEquals("Student not found", exception.getMessage());
+    verify(studentRepository, times(1)).findByUserId(STUDENT_ID);
+    verify(authenticationService, never()).deleteAuthentication(any(Student.class));
+    verify(studentRepository, never()).delete(any(Student.class));
+  }
+
+  @Test
+  void updateStudent_WithAllFields_ShouldUpdateAllFieldsSuccessfully() {
+
+    when(studentRepository.findByUserId(STUDENT_ID)).thenReturn(Optional.of(existingStudent));
+    when(studentRepository.save(any(Student.class))).thenReturn(existingStudent);
+
+    StudentDto updateRequest =
+        new StudentDto(
+            "87654321",
+            "Juan Carlos Perez Rodriguez",
+            "Updated Software Engineering",
+            "Computer Science",
+            AcademicGrade.GRADUATED,
+            5);
+
+    // Act
+    Student result = studentService.updateStudent(STUDENT_ID, updateRequest);
+
+    assertNotNull(result);
+    assertEquals("Juan Carlos Perez Rodriguez", existingStudent.getFullName());
+    assertEquals("87654321", existingStudent.getIdentityDocument());
+    assertEquals("Computer Science", existingStudent.getFacultyName());
+    assertEquals("Updated Software Engineering", existingStudent.getPlan());
+    assertEquals(AcademicGrade.GRADUATED, existingStudent.getAcademicGrade());
+    assertEquals(Integer.valueOf(5), existingStudent.getSemester());
+    verify(studentRepository, times(1)).findByUserId(STUDENT_ID);
+    verify(studentRepository, times(1)).save(existingStudent);
+  }
+
+  @Test
+  void updateStudent_WhenStudentNotFound_ShouldThrowResourceNotFoundException() {
+
+    when(studentRepository.findByUserId(STUDENT_ID)).thenReturn(Optional.empty());
+
+    StudentDto updateRequest =
+        new StudentDto(
+            "87654321", "Nombre Actualizado", PLAN, FACULTY_NAME, AcademicGrade.UNDERGRADUATE, 2);
+
+    ResourceNotFoundException exception =
+        assertThrows(
+            ResourceNotFoundException.class,
+            () -> studentService.updateStudent(STUDENT_ID, updateRequest));
+
+    assertEquals("Student not found", exception.getMessage());
+    verify(studentRepository, times(1)).findByUserId(STUDENT_ID);
+    verify(studentRepository, never()).save(any(Student.class));
+  }
+
+  @Test
+  void createStudent_WithValidData_ShouldCreateStudentSuccessfully() {
+
+    when(idGenerator.generateUniqueId()).thenReturn(GENERATED_ID);
+    doNothing().when(authenticationService).createAuthentication(any(UserInfoDto.class));
+
+    Student expectedStudent =
+        new Student.StudentBuilder()
+            .userId(GENERATED_ID)
+            .fullName(validStudentDto.fullName())
+            .email("juan.perez-g@mail.escuelaing.edu.co")
+            .generalAverage(0)
+            .academicGrade(validStudentDto.academicGrade())
+            .identityDocument(validStudentDto.identityDocument())
+            .plan(validStudentDto.plan())
+            .semester(validStudentDto.semester())
+            .facultyName(validStudentDto.facultyName())
+            .build();
+
+    when(studentRepository.save(any(Student.class))).thenReturn(expectedStudent);
+
+    Student result = studentService.createStudent(validStudentDto);
+
+    assertNotNull(result);
+    assertEquals(GENERATED_ID, result.getUserId());
+    assertEquals(validStudentDto.fullName(), result.getFullName());
+    assertEquals("juan.perez-g@mail.escuelaing.edu.co", result.getEmail());
+    assertEquals(validStudentDto.identityDocument(), result.getIdentityDocument());
+    assertEquals(validStudentDto.plan(), result.getPlan());
+    assertEquals(validStudentDto.facultyName(), result.getFacultyName());
+    assertEquals(validStudentDto.academicGrade(), result.getAcademicGrade());
+    assertEquals(validStudentDto.semester(), result.getSemester());
+    assertEquals(0, result.getGeneralAverage());
+
+    verify(idGenerator, times(1)).generateUniqueId();
+    verify(authenticationService, times(1)).createAuthentication(any(UserInfoDto.class));
+    verify(studentRepository, times(1)).save(any(Student.class));
+
+    ArgumentCaptor<UserInfoDto> userInfoCaptor = ArgumentCaptor.forClass(UserInfoDto.class);
+    verify(authenticationService).createAuthentication(userInfoCaptor.capture());
+
+    UserInfoDto capturedUserInfo = userInfoCaptor.getValue();
+    assertEquals(GENERATED_ID, capturedUserInfo.userId());
+    assertEquals("juan.perez-g@mail.escuelaing.edu.co", capturedUserInfo.email());
+    assertEquals(Role.STUDENT, capturedUserInfo.role());
+    assertEquals("pfpURL", capturedUserInfo.pfpURL());
   }
 }

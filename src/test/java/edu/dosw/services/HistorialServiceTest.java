@@ -3,8 +3,10 @@ package edu.dosw.services;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import edu.dosw.dto.HistorialDTO;
 import edu.dosw.exception.BusinessException;
 import edu.dosw.exception.ResourceNotFoundException;
+import edu.dosw.model.Course;
 import edu.dosw.model.Historial;
 import edu.dosw.model.enums.HistorialStatus;
 import edu.dosw.repositories.HistorialRepository;
@@ -216,5 +218,281 @@ class HistorialServiceTest {
         .year(year)
         .period(period)
         .build();
+  }
+
+  @Test
+  void addHistorial_WithValidData_ShouldCreateNewHistorial() {
+    HistorialDTO dto = new HistorialDTO("student123", "GROUP101", HistorialStatus.ON_GOING);
+
+    when(periodService.getYear()).thenReturn("2024");
+    when(periodService.getPeriod()).thenReturn("1");
+    when(historialRepository.findByStudentIdAndGroupCode("student123", "GROUP101"))
+        .thenReturn(null);
+    when(historialRepository.save(any(Historial.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Historial result = historialService.addHistorial(dto);
+
+    assertNotNull(result);
+    assertEquals("student123", result.getStudentId());
+    assertEquals("GROUP101", result.getGroupCode());
+    assertEquals(HistorialStatus.ON_GOING, result.getStatus());
+    assertEquals("2024", result.getYear());
+    assertEquals("1", result.getPeriod());
+
+    verify(historialValidator).validateHistorialCreation(dto);
+    verify(historialRepository).findByStudentIdAndGroupCode("student123", "GROUP101");
+    verify(historialRepository).save(any(Historial.class));
+  }
+
+  @Test
+  void addHistorial_WithExistingHistorial_ShouldThrowBusinessException() {
+    HistorialDTO dto = new HistorialDTO("student123", "GROUP101", HistorialStatus.ON_GOING);
+    Historial existingHistorial = createHistorial("GROUP101", "student123", "2024", "1");
+
+    when(historialRepository.findByStudentIdAndGroupCode("student123", "GROUP101"))
+        .thenReturn(existingHistorial);
+
+    BusinessException exception =
+        assertThrows(BusinessException.class, () -> historialService.addHistorial(dto));
+
+    assertEquals(
+        "Ya existe un historial para el estudiante student123 y el grupo GROUP101",
+        exception.getMessage());
+
+    verify(historialValidator).validateHistorialCreation(dto);
+    verify(historialRepository).findByStudentIdAndGroupCode("student123", "GROUP101");
+    verify(historialRepository, never()).save(any(Historial.class));
+  }
+
+  @Test
+  void addHistorial_WhenSaveFails_ShouldThrowBusinessException() {
+    HistorialDTO dto = new HistorialDTO("student123", "GROUP101", HistorialStatus.ON_GOING);
+
+    when(periodService.getYear()).thenReturn("2024");
+    when(periodService.getPeriod()).thenReturn("1");
+    when(historialRepository.findByStudentIdAndGroupCode("student123", "GROUP101"))
+        .thenReturn(null);
+    when(historialRepository.save(any(Historial.class)))
+        .thenThrow(new RuntimeException("Database error"));
+
+    BusinessException exception =
+        assertThrows(BusinessException.class, () -> historialService.addHistorial(dto));
+
+    assertEquals("Error al guardar el historial", exception.getMessage());
+    assertNotNull(exception.getCause());
+
+    verify(historialValidator).validateHistorialCreation(dto);
+    verify(historialRepository).findByStudentIdAndGroupCode("student123", "GROUP101");
+    verify(historialRepository).save(any(Historial.class));
+  }
+
+  @Test
+  void getSessionsByCourses_WithMatchingCourses_ShouldReturnLastHistorial() {
+    String studentId = "student123";
+
+    Course course1 = new Course();
+    course1.setAbbreviation("MAT101");
+
+    Course course2 = new Course();
+    course2.setAbbreviation("FIS201");
+
+    List<Course> courses = Arrays.asList(course1, course2);
+
+    Historial historial1v1 = createHistorial("MAT101", studentId, "2023", "1");
+    Historial historial1v2 = createHistorial("MAT101", studentId, "2023", "2");
+    Historial historial2 = createHistorial("FIS201", studentId, "2024", "1");
+    Historial historial3 = createHistorial("QUI301", studentId, "2024", "1");
+
+    ArrayList<Historial> completeHistorial =
+        new ArrayList<>(Arrays.asList(historial1v1, historial1v2, historial2, historial3));
+
+    when(historialRepository.findByStudentId(studentId)).thenReturn(completeHistorial);
+
+    List<Historial> result = historialService.getSessionsByCourses(studentId, courses);
+
+    assertNotNull(result);
+    assertEquals(2, result.size());
+    assertTrue(
+        result.stream()
+            .anyMatch(h -> h.getGroupCode().equals("MAT101") && h.getPeriod().equals("2")));
+    assertTrue(result.stream().anyMatch(h -> h.getGroupCode().equals("FIS201")));
+    assertFalse(result.stream().anyMatch(h -> h.getGroupCode().equals("QUI301")));
+
+    verify(historialRepository).findByStudentId(studentId);
+  }
+
+  @Test
+  void getSessionsByCourses_WithNoMatchingCourses_ShouldReturnEmptyList() {
+    String studentId = "student123";
+
+    Course course1 = new Course();
+    course1.setAbbreviation("BIO401");
+
+    List<Course> courses = Arrays.asList(course1);
+
+    Historial historial1 = createHistorial("MAT101", studentId, "2024", "1");
+    Historial historial2 = createHistorial("FIS201", studentId, "2024", "1");
+
+    ArrayList<Historial> completeHistorial = new ArrayList<>(Arrays.asList(historial1, historial2));
+
+    when(historialRepository.findByStudentId(studentId)).thenReturn(completeHistorial);
+
+    List<Historial> result = historialService.getSessionsByCourses(studentId, courses);
+
+    assertNotNull(result);
+    assertTrue(result.isEmpty());
+    verify(historialRepository).findByStudentId(studentId);
+  }
+
+  @Test
+  void getSessionsByCourses_WithEmptyCourses_ShouldReturnEmptyList() {
+    String studentId = "student123";
+    List<Course> courses = new ArrayList<>();
+
+    Historial historial1 = createHistorial("MAT101", studentId, "2024", "1");
+
+    ArrayList<Historial> completeHistorial = new ArrayList<>(Arrays.asList(historial1));
+
+    when(historialRepository.findByStudentId(studentId)).thenReturn(completeHistorial);
+
+    List<Historial> result = historialService.getSessionsByCourses(studentId, courses);
+
+    assertNotNull(result);
+    assertTrue(result.isEmpty());
+    verify(historialRepository).findByStudentId(studentId);
+  }
+
+  @Test
+  void getSessionsByCourses_WithNoHistorial_ShouldReturnEmptyList() {
+    String studentId = "student123";
+
+    Course course1 = new Course();
+    course1.setAbbreviation("MAT101");
+
+    List<Course> courses = Arrays.asList(course1);
+
+    when(historialRepository.findByStudentId(studentId)).thenReturn(new ArrayList<>());
+
+    List<Historial> result = historialService.getSessionsByCourses(studentId, courses);
+
+    assertNotNull(result);
+    assertTrue(result.isEmpty());
+    verify(historialRepository).findByStudentId(studentId);
+  }
+
+  @Test
+  void getHistorialByStudentId_WithExistingHistorials_ShouldReturnHistorials() {
+    String studentId = "student123";
+    ArrayList<Historial> expectedHistorials =
+        new ArrayList<>(
+            Arrays.asList(
+                createHistorial("MAT101", studentId, "2024", "1"),
+                createHistorial("FIS201", studentId, "2024", "1")));
+
+    when(historialRepository.findByStudentId(studentId)).thenReturn(expectedHistorials);
+
+    List<Historial> result = historialService.getHistorialByStudentId(studentId);
+
+    assertNotNull(result);
+    assertEquals(2, result.size());
+    assertEquals(expectedHistorials, result);
+    verify(historialRepository).findByStudentId(studentId);
+  }
+
+  @Test
+  void getHistorialByStudentId_WithNoHistorials_ShouldThrowBusinessException() {
+    String studentId = "student123";
+
+    when(historialRepository.findByStudentId(studentId)).thenReturn(new ArrayList<>());
+
+    BusinessException exception =
+        assertThrows(
+            BusinessException.class, () -> historialService.getHistorialByStudentId(studentId));
+
+    assertEquals(
+        "Error al obtener los historiales del estudiante " + studentId, exception.getMessage());
+    verify(historialRepository).findByStudentId(studentId);
+  }
+
+  @Test
+  void getHistorialByStudentId_WhenRepositoryReturnsNull_ShouldThrowBusinessException() {
+    String studentId = "student123";
+
+    when(historialRepository.findByStudentId(studentId)).thenReturn(null);
+
+    BusinessException exception =
+        assertThrows(
+            BusinessException.class, () -> historialService.getHistorialByStudentId(studentId));
+
+    assertEquals(
+        "Error al obtener los historiales del estudiante " + studentId, exception.getMessage());
+    verify(historialRepository).findByStudentId(studentId);
+  }
+
+  @Test
+  void getHistorialByStudentIdAndStatus_WithMatchingHistorials_ShouldReturnFilteredHistorials() {
+    String studentId = "student123";
+    HistorialStatus status = HistorialStatus.ON_GOING;
+
+    Historial historial1 = createHistorial("MAT101", studentId, "2024", "1");
+    historial1.setStatus(HistorialStatus.ON_GOING);
+
+    ArrayList<Historial> expectedHistorials = new ArrayList<>(Arrays.asList(historial1));
+
+    when(historialRepository.findByStudentIdAndStatus(studentId, status))
+        .thenReturn(expectedHistorials);
+
+    List<Historial> result = historialService.getHistorialByStudentIdAndStatus(studentId, status);
+
+    assertNotNull(result);
+    assertEquals(1, result.size());
+    assertEquals(HistorialStatus.ON_GOING, result.get(0).getStatus());
+    verify(historialRepository).findByStudentIdAndStatus(studentId, status);
+  }
+
+  @Test
+  void getHistorialByStudentIdAndStatus_WithNoMatchingHistorials_ShouldReturnEmptyList() {
+    String studentId = "student123";
+    HistorialStatus status = HistorialStatus.CANCELLED;
+
+    when(historialRepository.findByStudentIdAndStatus(studentId, status))
+        .thenReturn(new ArrayList<>());
+
+    List<Historial> result = historialService.getHistorialByStudentIdAndStatus(studentId, status);
+
+    assertNotNull(result);
+    assertTrue(result.isEmpty());
+    verify(historialRepository).findByStudentIdAndStatus(studentId, status);
+  }
+
+  @Test
+  void updateHistorial_WhenValidatorThrowsException_ShouldThrowBusinessException() {
+    String studentId = "student123";
+    String groupCode = "GROUP101";
+    HistorialStatus newStatus = HistorialStatus.CANCELLED;
+
+    Historial existingHistorial = createHistorial(groupCode, studentId, "2024", "1");
+    existingHistorial.setStatus(HistorialStatus.ON_GOING);
+
+    when(historialRepository.findByStudentIdAndGroupCode(studentId, groupCode))
+        .thenReturn(existingHistorial);
+    doThrow(new BusinessException("Transición no permitida"))
+        .when(historialValidator)
+        .historialUpdateValidator(existingHistorial.getStatus(), newStatus);
+
+    BusinessException exception =
+        assertThrows(
+            BusinessException.class,
+            () -> historialService.updateHistorial(studentId, groupCode, newStatus));
+
+    assertEquals(
+        "Error al actualizar el historial del estudiante student123 en el grupo GROUP101",
+        exception.getMessage());
+    assertNotNull(exception.getCause());
+
+    verify(historialRepository).findByStudentIdAndGroupCode(studentId, groupCode);
+    verify(historialValidator).historialUpdateValidator(HistorialStatus.ON_GOING, newStatus);
+    verify(historialRepository, never()).save(any(Historial.class));
   }
 }

@@ -106,7 +106,7 @@ public class PemsumService {
    * @param coursesList list of courses with their status
    * @return The sum of credits for all approved courses
    */
-  private int getApprovedCredits(List<CourseStatus> coursesList) {
+  int getApprovedCredits(List<CourseStatus> coursesList) {
     int approvedCredits = 0;
     for (CourseStatus course : coursesList) {
       if (HistorialStatus.FINISHED.toString().equals(course.getStatus())) {
@@ -123,7 +123,7 @@ public class PemsumService {
    * @param historials List of the student's academic history records
    * @return A map of courses with their current status
    */
-  private List<CourseStatus> getCoursesList(List<Course> courses, List<Historial> historials) {
+  List<CourseStatus> getCoursesList(List<Course> courses, List<Historial> historials) {
     List<CourseStatus> coursesList = new ArrayList<>();
     for (Course course : courses) {
       String status =
