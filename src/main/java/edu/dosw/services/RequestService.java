@@ -280,30 +280,75 @@ public class RequestService {
     }
   }
 
-  public List<Double> getRequestStatsByStudent(String studentId) {
+  public List<Double> getRequestStatsByUserId(String userId, Role role) {
+    if (role == Role.ADMINISTRATOR) {
+      logger.error("Administrator does no have specific stats for requests");
+      throw new BusinessException("Administrator does no have specific stats for requests");
+    }
     List<Double> percentages = new ArrayList<>();
     try {
-      Integer totalRequests = requestRepository.countByStudentId(studentId);
+      Integer totalRequests;
 
-      if (totalRequests == 0) {
-        return Arrays.asList(0.0, 0.0, 0.0, 0.0);
+      if (role == Role.STUDENT) {
+        totalRequests = requestRepository.countByStudentId(userId);
+
+        if (totalRequests == 0) {
+          return Arrays.asList(0.0, 0.0, 0.0, 0.0);
+        }
+        Integer pendingRequests =
+            requestRepository.countByStudentIdAndStatus(userId, RequestStatus.PENDING);
+        Integer acceptedRequests =
+            requestRepository.countByStudentIdAndStatus(userId, RequestStatus.ACCEPTED);
+        Integer rejectedRequests =
+            requestRepository.countByStudentIdAndStatus(userId, RequestStatus.REJECTED);
+        Integer waitingRequests =
+            requestRepository.countByStudentIdAndStatus(userId, RequestStatus.WAITING);
+        Integer inReviewRequests =
+            requestRepository.countByStudentIdAndStatus(userId, RequestStatus.IN_REVIEW);
+        Integer joinRequests = requestRepository.countByStudentIdAndType(userId, RequestType.JOIN);
+        Integer swapRequests = requestRepository.countByStudentIdAndType(userId, RequestType.SWAP);
+        Integer cancellationRequests =
+            requestRepository.countByStudentIdAndType(userId, RequestType.CANCELLATION);
+        percentages.add((double) pendingRequests / totalRequests * 100);
+        percentages.add((double) acceptedRequests / totalRequests * 100);
+        percentages.add((double) rejectedRequests / totalRequests * 100);
+        percentages.add((double) waitingRequests / totalRequests * 100);
+        percentages.add((double) inReviewRequests / totalRequests * 100);
+        percentages.add((double) joinRequests / totalRequests * 100);
+        percentages.add((double) swapRequests / totalRequests * 100);
+        percentages.add((double) cancellationRequests / totalRequests * 100);
       }
+      if (role == Role.PROFESSOR || role == Role.DEAN) {
+        totalRequests = requestRepository.countByGestedBy(userId);
 
-      Integer pendingRequests =
-          requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.PENDING);
-      Integer acceptedRequests =
-          requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.ACCEPTED);
-      Integer rejectedRequests =
-          requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.REJECTED);
-      Integer waitingRequests =
-          requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.WAITING);
-      Integer inReviewRequests =
-          requestRepository.countByStudentIdAndStatus(studentId, RequestStatus.IN_REVIEW);
-
-      percentages.add((double) acceptedRequests / totalRequests);
-      percentages.add((double) (pendingRequests) / totalRequests);
-      percentages.add((double) (waitingRequests + inReviewRequests) / totalRequests);
-      percentages.add((double) rejectedRequests / totalRequests);
+        if (totalRequests == 0) {
+          return Arrays.asList(0.0, 0.0, 0.0, 0.0);
+        }
+        Integer gestedByPendingRequests =
+            requestRepository.countByGestedByAndRequestStatus(userId, RequestStatus.PENDING);
+        Integer gestedByAcceptedRequests =
+            requestRepository.countByGestedByAndRequestStatus(userId, RequestStatus.ACCEPTED);
+        Integer gestedByRejectedRequests =
+            requestRepository.countByGestedByAndRequestStatus(userId, RequestStatus.REJECTED);
+        Integer gestedByWaitingRequests =
+            requestRepository.countByGestedByAndRequestStatus(userId, RequestStatus.WAITING);
+        Integer gestedByInReviewRequests =
+            requestRepository.countByGestedByAndRequestStatus(userId, RequestStatus.IN_REVIEW);
+        Integer gestedByJoinRequests =
+            requestRepository.countByGestedByAndType(userId, RequestType.JOIN);
+        Integer gestedBySwapRequests =
+            requestRepository.countByGestedByAndType(userId, RequestType.SWAP);
+        Integer gestedByCancellationRequests =
+            requestRepository.countByGestedByAndType(userId, RequestType.CANCELLATION);
+        percentages.add((double) gestedByPendingRequests / totalRequests * 100);
+        percentages.add((double) gestedByAcceptedRequests / totalRequests * 100);
+        percentages.add((double) gestedByRejectedRequests / totalRequests * 100);
+        percentages.add((double) gestedByWaitingRequests / totalRequests * 100);
+        percentages.add((double) gestedByInReviewRequests / totalRequests * 100);
+        percentages.add((double) gestedByJoinRequests / totalRequests * 100);
+        percentages.add((double) gestedBySwapRequests / totalRequests * 100);
+        percentages.add((double) gestedByCancellationRequests / totalRequests * 100);
+      }
 
       return percentages;
     } catch (Exception e) {

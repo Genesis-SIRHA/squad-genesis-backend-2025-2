@@ -98,13 +98,14 @@ public class RequestController {
     return ResponseEntity.ok(requestService.getRequestStats());
   }
 
-  @GetMapping("/{studentId}/stats")
-  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'STUDENT')")
+  @GetMapping("{role}/{userId}/stats")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'DEAN', 'PROFESSOR', 'STUDENT')")
   @Operation(
-      summary = "Get request percentages by studentId",
-      description = "Retrieves percentages about requests by studentId")
-  public ResponseEntity<List<Double>> getRequestStatsByStudent(@PathVariable String studentId) {
-    return ResponseEntity.ok(requestService.getRequestStatsByStudent(studentId));
+      summary = "Get request percentages by userId",
+      description = "Retrieves percentages about requests by userId")
+  public ResponseEntity<List<Double>> getRequestStatsByUserId(
+      @PathVariable Role role, @PathVariable String userId) {
+    return ResponseEntity.ok(requestService.getRequestStatsByUserId(userId, role));
   }
 
   @PatchMapping("/status/{userId}")
